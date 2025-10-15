@@ -8,9 +8,13 @@ My minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works
 - **Snacks.nvim**: Dashboard on startup, plus a file picker that can preview images, PDFs, Mermaid diagrams, and LaTeX right in the terminal (if you're using Kitty)
 - **Treesitter**: Better syntax highlighting and code navigation for 20+ languages
 - **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, HTML/CSS/JSON out of the box)
-- **Telescope**: Fuzzy finder for files, text, buffers - works alongside Snacks
+- **Telescope**: Fuzzy finder for live grep, buffers, help tags, and more
 - **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, toggleterm, lualine status bar, Catppuccin theme
+
+### Snacks picker with inline image preview
 <img width="1900" height="1142" alt="251015_02h18m53s_screenshot" src="https://github.com/user-attachments/assets/55d7978b-c973-4f96-983c-e0c43f060ca3" />
+
+### Editing with LSP, Treesitter syntax highlighting, and Catppuccin theme
 <img width="1900" height="1142" alt="251015_02h20m12s_screenshot" src="https://github.com/user-attachments/assets/fed4fdb5-94d5-4adf-a0c5-7b18f6459434" />
 
 ## Quick Install
@@ -88,8 +92,48 @@ Run `:checkhealth` after setup to see what's working.
    :checkhealth
    ```
 
+## Keybindings
+
+Leader key is Space. Most important ones:
+
+**Files & Navigation:**
+- `Space + e` - Toggle file tree
+- `Space + fg` - Search in files (live grep)
+- `Space + fb` - Switch between open buffers
+- `Shift + h/l` - Move between buffers
+- `Ctrl + \` - Toggle terminal
+
+**LSP stuff:**
+- `gd` - Jump to definition
+- `gr` - Find references
+- `K` - Show docs for whatever's under cursor
+- `Space + rn` - Rename
+- `Space + ca` - Code actions
+
+**Git:**
+- `]h / [h` - Jump between changes
+- `Space + hs` - Stage hunk
+- `Space + hp` - Preview changes
+- `Space + hb` - Git blame
+
+**Other:**
+- `Space + cf` - Format file
+- `gcc` - Comment/uncomment line
+- `Space + xx` - Show diagnostics
+
+Full keybind list is in the config if you want to dig deeper.
+
 ## Known Issues
 
 There's some weird LSP shit happening on Ubuntu/Pop!_OS that I'm still tracking down. Everything still works, just might throw some error messages on startup. Working on it tho - I am but one nana-man so please be patient lol. Still learning this stuff.
 
 If anyone actually ends up using this and run into problems, feel free to open an issue.
+
+## Credits
+
+Built with these awesome plugins:
+- [lazy.nvim](https://github.com/folke/lazy.nvim) - Plugin manager
+- [snacks.nvim](https://github.com/folke/snacks.nvim) - Dashboard & utilities
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Fuzzy finder
+- [catppuccin](https://github.com/catppuccin/nvim) - Theme
+- And many more listed in the config
