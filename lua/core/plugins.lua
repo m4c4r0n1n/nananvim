@@ -302,7 +302,6 @@ require("lazy").setup({
 
   {
     "hrsh7th/nvim-cmp",
-    version = false,
     event = "InsertEnter",
     dependencies = {
       "hrsh7th/cmp-nvim-lsp",
@@ -380,7 +379,7 @@ require("lazy").setup({
       -- LSP server configuration
       local servers = {
         "lua_ls",
-        "pyright",
+        "pyright", 
         "ts_ls",
         "html",
         "cssls",
@@ -435,12 +434,12 @@ require("lazy").setup({
         local config = {
           capabilities = capabilities,
         }
-
+        
         -- Merge server-specific config if it exists
         if server_configs[server_name] then
           config = vim.tbl_deep_extend("force", config, server_configs[server_name])
         end
-
+        
         return config
       end
 
@@ -453,7 +452,7 @@ require("lazy").setup({
       else
         -- Use traditional lspconfig API (older Neovim versions)
         local lspconfig = require("lspconfig")
-
+        
         for _, server in ipairs(servers) do
           local config = setup_server(server)
           lspconfig[server].setup(config)
@@ -542,7 +541,6 @@ require("lazy").setup({
   {
     "nvim-telescope/telescope.nvim",
     cmd = "Telescope",
-    version = false,
     dependencies = {
       "nvim-lua/plenary.nvim",
       "nvim-tree/nvim-web-devicons",
@@ -686,7 +684,6 @@ require("lazy").setup({
     name = "catppuccin",
     priority = 1000,
     config = function()
-      vim.opt.termguicolors = true
       require("catppuccin").setup({
         flavour = "mocha",
         integrations = {
@@ -726,6 +723,25 @@ require("lazy").setup({
         },
       })
       vim.cmd.colorscheme("catppuccin")
+    end,
+  },
+
+  -- Ensure external tools (formatters/linters) are installed
+  {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("mason-tool-installer").setup({
+        ensure_installed = {
+          "stylua",
+          "prettierd",
+          "prettier",
+          "black",
+          "isort",
+        },
+        auto_update = false,
+        run_on_start = true,
+      })
     end,
   },
 })
