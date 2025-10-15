@@ -1,4 +1,5 @@
 # nananvim
+<img width="1705" height="1382" alt="251015_00h43m46s_screenshot" src="https://github.com/user-attachments/assets/65724b1f-8441-4040-9b97-80902e5282a6" />
 
 My minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works on most Linux distros.
 
@@ -9,6 +10,8 @@ My minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works
 - **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, HTML/CSS/JSON out of the box)
 - **Telescope**: Fuzzy finder for files, text, buffers - works alongside Snacks
 - **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, toggleterm, lualine status bar, Catppuccin theme
+<img width="1900" height="1142" alt="251015_02h18m53s_screenshot" src="https://github.com/user-attachments/assets/55d7978b-c973-4f96-983c-e0c43f060ca3" />
+<img width="1900" height="1142" alt="251015_02h20m12s_screenshot" src="https://github.com/user-attachments/assets/fed4fdb5-94d5-4adf-a0c5-7b18f6459434" />
 
 ## Quick Install
 
