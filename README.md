@@ -24,6 +24,20 @@ sudo apt update && sudo apt install -y git ripgrep fd-find imagemagick kitty nod
 
 *Note: This uses the Neovim AppImage to get v0.10.2+. If you have an existing config, back it up first: `mv ~/.config/nvim ~/.config/nvim.bak`*
 
+## Windows Users
+
+This config is primarily built for Linux. If you want to use it on Windows, you have two options:
+
+1. **WSL2 (Recommended)**: Install Ubuntu through WSL2 and follow the Ubuntu install instructions. You'll get the full experience including image previews if you use a terminal that supports it.
+
+2. **Native Windows**: The config *should* work but you'll need to:
+   - Install Neovim from the official Windows installer
+   - Clone to `~/AppData/Local/nvim` instead
+   - Manually install dependencies via Chocolatey/Scoop
+   - Image previews won't work (no Kitty support)
+   
+Honestly just use WSL2 lol, it's way easier.
+
 ## What you'll need
 
 The basics (config will work without these, but you'll miss features):
@@ -75,4 +89,4 @@ Run `:checkhealth` after setup to see what's working.
 
 There's some weird LSP shit happening on Ubuntu/Pop!_OS that I'm still tracking down. Everything still works, just might throw some error messages on startup. Working on it tho - I am but one nana-man so please be patient lol. Still learning this stuff.
 
-If you actually end up using this and run into problems, feel free to open an issue.
+If anyone actually ends up using this and run into problems, feel free to open an issue.
