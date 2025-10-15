@@ -546,7 +546,6 @@ require("lazy").setup({
       "nvim-tree/nvim-web-devicons",
     },
     keys = {
-      -- Removed find_files since Snacks picker handles it better
       { "<leader>fg", "<cmd>Telescope live_grep<cr>",       desc = "Live grep" },
       { "<leader>fb", "<cmd>Telescope buffers<cr>",         desc = "Buffers" },
       { "<leader>fh", "<cmd>Telescope help_tags<cr>",       desc = "Help tags" },
@@ -737,6 +736,28 @@ require("lazy").setup({
         },
         auto_update = false,
         run_on_start = true,
+      })
+    end,
+  },
+
+  -- GitHub Copilot
+  {
+    "zbirenbaum/copilot.lua",
+    cmd = "Copilot",
+    event = "InsertEnter",
+    config = function()
+      require("copilot").setup({
+        suggestion = {
+          enabled = true,
+          auto_trigger = true,
+          keymap = {
+            accept = "<C-y>",
+            next = "<M-]>",
+            prev = "<M-[>",
+            dismiss = "<C-]>",
+          },
+        },
+        panel = { enabled = false },
       })
     end,
   },
