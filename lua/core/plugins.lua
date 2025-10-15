@@ -379,7 +379,7 @@ require("lazy").setup({
       -- LSP server configuration
       local servers = {
         "lua_ls",
-        "pyright", 
+        "pyright",
         "ts_ls",
         "html",
         "cssls",
@@ -434,12 +434,12 @@ require("lazy").setup({
         local config = {
           capabilities = capabilities,
         }
-        
+
         -- Merge server-specific config if it exists
         if server_configs[server_name] then
           config = vim.tbl_deep_extend("force", config, server_configs[server_name])
         end
-        
+
         return config
       end
 
@@ -452,7 +452,7 @@ require("lazy").setup({
       else
         -- Use traditional lspconfig API (older Neovim versions)
         local lspconfig = require("lspconfig")
-        
+
         for _, server in ipairs(servers) do
           local config = setup_server(server)
           lspconfig[server].setup(config)
@@ -546,7 +546,7 @@ require("lazy").setup({
       "nvim-tree/nvim-web-devicons",
     },
     keys = {
-      { "<leader>ff", "<cmd>Telescope find_files<cr>",      desc = "Find files" },
+      -- Removed find_files since Snacks picker handles it better
       { "<leader>fg", "<cmd>Telescope live_grep<cr>",       desc = "Live grep" },
       { "<leader>fb", "<cmd>Telescope buffers<cr>",         desc = "Buffers" },
       { "<leader>fh", "<cmd>Telescope help_tags<cr>",       desc = "Help tags" },
@@ -619,10 +619,6 @@ require("lazy").setup({
           },
         },
         pickers = {
-          find_files = {
-            hidden = true,
-            find_command = { "rg", "--files", "--hidden", "--glob", "!**/.git/*" },
-          },
           buffers = {
             initial_mode = "normal",
             mappings = {
