@@ -377,17 +377,39 @@ require("lazy").setup({
       "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
+      -- LSP server configuration
+      local servers = {
+        "lua_ls",
+        "pyright",
+        "ts_ls",
+        "html",
+        "cssls",
+        "tailwindcss",
+        "jsonls",
+      }
+
+      -- Server-specific configurations
+      local server_configs = {
+        lua_ls = {
+          settings = {
+            Lua = {
+              diagnostics = { globals = { "vim" } },
+              workspace = {
+                library = vim.api.nvim_get_runtime_file("", true),
+                checkThirdParty = false,
+              },
+              telemetry = { enable = false },
+            },
+          },
+        },
+        -- Add more server-specific configs here as needed
+        -- pyright = { settings = { ... } },
+        -- ts_ls = { settings = { ... } },
+      }
+
       require("mason").setup()
       require("mason-lspconfig").setup({
-        ensure_installed = {
-          "lua_ls",
-          "pyright",
-          "ts_ls",
-          "html",
-          "cssls",
-          "tailwindcss",
-          "jsonls",
-        },
+        ensure_installed = servers,
         automatic_installation = true,
       })
 
@@ -408,48 +430,34 @@ require("lazy").setup({
 
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      local servers = {
-        "lua_ls",
-        "pyright",
-        "ts_ls",
-        "html",
-        "cssls",
-        "tailwindcss",
-        "jsonls",
-      }
+      -- Dynamic server setup function
+      local function setup_server(server_name)
+        local config = {
+          capabilities = capabilities,
+        }
+
+        -- Merge server-specific config if it exists
+        if server_configs[server_name] then
+          config = vim.tbl_deep_extend("force", config, server_configs[server_name])
+        end
+
+        return config
+      end
 
       -- Check if vim.lsp.config exists (Neovim 0.11+)
       if vim.lsp.config then
-        -- Use new API (Arch with newer Neovim)
+        -- Use new API (Neovim 0.11+)
         for _, server in ipairs(servers) do
-          vim.lsp.config(server, {
-            capabilities = capabilities,
-          })
+          vim.lsp.config(server, setup_server(server))
         end
       else
         -- Use traditional lspconfig API (older Neovim versions)
         local lspconfig = require("lspconfig")
 
-        lspconfig.lua_ls.setup({
-          capabilities = capabilities,
-          settings = {
-            Lua = {
-              diagnostics = { globals = { "vim" } },
-              workspace = {
-                library = vim.api.nvim_get_runtime_file("", true),
-                checkThirdParty = false,
-              },
-              telemetry = { enable = false },
-            },
-          },
-        })
-
-        lspconfig.pyright.setup({ capabilities = capabilities })
-        lspconfig.ts_ls.setup({ capabilities = capabilities })
-        lspconfig.html.setup({ capabilities = capabilities })
-        lspconfig.cssls.setup({ capabilities = capabilities })
-        lspconfig.tailwindcss.setup({ capabilities = capabilities })
-        lspconfig.jsonls.setup({ capabilities = capabilities })
+        for _, server in ipairs(servers) do
+          local config = setup_server(server)
+          lspconfig[server].setup(config)
+        end
       end
     end,
   },
