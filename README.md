@@ -1,14 +1,16 @@
 # nananvim
-A minimal, lazy.nvim-powered Neovim configuration focused on productivity with inline image previews (via snacks.nvim), Treesitter highlighting, LSP support, and Telescope-style fuzzy finding. Built for Arch Linux but portable to most Unix-like systems.
 
-## Features
-- **Snacks.nvim**: Dashboard, file picker/grep with Kitty inline image/PDF/Mermaid/LaTeX previews.
-- **Treesitter**: Syntax highlighting, indentation, and incremental selection for 20+ languages.
-- **LSP**: Auto-setup for Lua, Python, TypeScript, HTML/CSS/JSON via Mason.
-- **Telescope**: Enhanced with Snacks for image-aware previews.
-- **Other goodies**: Bufferline tabs, gitsigns, trouble diagnostics, todo-comments, autopairs, surround, conform formatting, toggleterm, lualine, Catppuccin theme.
+My minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works on most Linux distros.
 
-## Quick Install (One-Shot)
+## What's in it?
+
+- **Snacks.nvim**: Dashboard on startup, plus a file picker that can preview images, PDFs, Mermaid diagrams, and LaTeX right in the terminal (if you're using Kitty)
+- **Treesitter**: Better syntax highlighting and code navigation for 20+ languages
+- **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, HTML/CSS/JSON out of the box)
+- **Telescope**: Fuzzy finder for files, text, buffers - works alongside Snacks
+- **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, toggleterm, lualine status bar, Catppuccin theme
+
+## Quick Install
 
 **Arch Linux:**
 ```bash
@@ -17,40 +19,60 @@ sudo pacman -S git ripgrep fd imagemagick kitty nodejs npm python && curl -LO ht
 
 **Ubuntu/Pop!_OS/Debian:**
 ```bash
-sudo apt update && sudo apt install -y git ripgrep fd-find imagemagick kitty nodejs npm python3 python3-pip curl && curl -LO https://github.com/neovim/neovim/releases/download/v0.10.2/nvim.appimage && chmod u+x nvim.appimage && sudo mv nvim.appimage /usr/local/bin/nvim && git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim && nvim
+sudo apt update && sudo apt install -y git ripgrep fd-find imagemagick kitty nodejs npm python3 python3-pip curl build-essential unzip && mkdir -p ~/.local/bin && ln -s $(which fdfind) ~/.local/bin/fd && curl -LO https://github.com/neovim/neovim/releases/download/v0.10.2/nvim.appimage && chmod u+x nvim.appimage && sudo mv nvim.appimage /usr/local/bin/nvim && git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim && nvim
 ```
 
-*Note: Uses Neovim AppImage for reliable v0.10.2+ installation. Back up existing config first if needed: `mv ~/.config/nvim ~/.config/nvim.bak`*
+*Note: This uses the Neovim AppImage to get v0.10.2+. If you have an existing config, back it up first: `mv ~/.config/nvim ~/.config/nvim.bak`*
 
-## Prerequisites
-Before cloning and setting up, ensure you have these installed (most are optional; the config will work without them but with reduced features):
-- **Neovim 0.9.5+**: Core editor. Install via your package manager (e.g., `sudo pacman -S neovim` on Arch, `brew install neovim` on macOS).
-- **Git**: For lazy.nvim bootstrap. (e.g., `sudo pacman -S git`).
-- **Ripgrep (rg) & fd**: For fast file/grep searching in Telescope/Snacks. (e.g., `sudo pacman -S ripgrep fd`).
-- **ImageMagick**: For inline image processing in Snacks (required for previews). (e.g., `sudo pacman -S imagemagick`).
-- **Kitty Terminal**: Recommended for inline image support (Snacks uses Kitty Graphics Protocol). (e.g., `sudo pacman -S kitty`). Alternatives like WezTerm may work with tweaks.
-- **Optional for LSP/Formatters**:
-  - Node.js (v18+): For ts_ls, prettier, etc. (e.g., via nvm or `sudo pacman -S nodejs npm`).
-  - Python 3.10+: For pyright, black, isort. (e.g., `sudo pacman -S python`).
-- **Optional for Snacks Extras**:
-  - Tectonic: LaTeX rendering. (e.g., `yay -S tectonic` on Arch AUR).
-  - Mermaid CLI (mmdc): Diagram previews. (e.g., `npm install -g @mermaid-js/mermaid-cli`).
-  - Ghostscript (gs): PDF handling. (e.g., `sudo pacman -S ghostscript`).
+## What you'll need
 
-Run `:checkhealth` in Neovim after setup to verify.
+The basics (config will work without these, but you'll miss features):
 
-## Installation
-1. **Backup your config** (if any): `mv ~/.config/nvim ~/.config/nvim.bak`.
-2. **Clone the repo**:
+- **Neovim 0.9.5+**: The editor itself
+- **Git**: For lazy.nvim to work
+- **Ripgrep & fd**: Makes file searching fast (`sudo pacman -S ripgrep fd`)
+- **ImageMagick**: Required if you want inline image previews
+- **Kitty**: Terminal emulator that supports inline images (alternatives like WezTerm might work with tweaks)
+
+For language servers and formatters:
+
+- **Node.js 18+**: For TypeScript/JavaScript LSP and prettier
+- **Python 3.10+**: For pyright, black, isort
+
+Bonus stuff for Snacks previews:
+
+- **Tectonic**: For LaTeX rendering (`yay -S tectonic` on Arch)
+- **Mermaid CLI**: For diagram previews (`npm install -g @mermaid-js/mermaid-cli`)
+- **Ghostscript**: For PDF handling
+
+Run `:checkhealth` after setup to see what's working.
+
+## Manual Install
+
+1. Backup your existing config if you have one:
+   ```bash
+   mv ~/.config/nvim ~/.config/nvim.bak
+   ```
+
+2. Clone this repo:
    ```bash
    git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim
    ```
-3. **Launch Neovim**: 
+
+3. Start Neovim:
    ```bash
    nvim
    ```
-   lazy.nvim will bootstrap automatically and install all plugins on first launch.
-4. **Run health check**: Once plugins are installed, run `:checkhealth` to verify everything is working correctly!
+   
+   lazy.nvim will automatically install all plugins on first launch.
 
+4. Check everything's working:
+   ```
+   :checkhealth
+   ```
 
-⚠️ **Known Issue on Ubuntu/Pop!_OS**: Working on a resolution, everything still functions and shouldn't be an issue until I figure it out, still learning so if anyone ever even uses this then please be patient, though hopefully it'll be resolved by then. I am but one nana-man.
+## Known Issues
+
+There's some weird LSP shit happening on Ubuntu/Pop!_OS that I'm still tracking down. Everything still works, just might throw some error messages on startup. Working on it tho - I am but one nana-man so please be patient lol. Still learning this stuff.
+
+If you actually end up using this and run into problems, feel free to open an issue.
