@@ -26,6 +26,7 @@ vim.opt.clipboard = "unnamedplus"
 vim.opt.undofile = true
 vim.opt.swapfile = false
 vim.opt.backup = false
+vim.opt.guifont = "JetBrainsMono Nerd Font:h12"
 
 -- Load additional config if it exists
 pcall(require, "core.options")
