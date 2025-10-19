@@ -30,7 +30,7 @@ vim.opt.guifont = "JetBrainsMono Nerd Font:h12"
 
 -- Load additional config if it exists
 pcall(require, "core.options")
-
+require("core.appearance")
 -- Load plugin configuration
 require("core.plugins")
 
