@@ -227,7 +227,7 @@ For more keybinds, check `lua/config/keymaps.lua` and the individual plugin file
 
 ## Known Issues & Bugs
 
-There's probably some stuff I'm forgetting to tweak or haven't discovered yet. I know it, you know it, but it escapes my mind right now lol. If you find something broken or weird:
+There's a problem with Mason I'm working on and probably some stuff I'm forgetting to tweak or haven't discovered yet. I know it, you know it, but it escapes my mind right now lol. If you find something broken or weird:
 
 1. First, run `:checkhealth` to see if it's a missing dependency
 2. Check if it's an LSP issue (some servers are finicky on certain distros)
