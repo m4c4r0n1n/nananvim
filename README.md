@@ -17,6 +17,7 @@ My minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works
 
 
 ### Editing with LSP, Treesitter syntax highlighting, and Rose Pine theme
+<img width="838" height="1368" alt="image" src="https://github.com/user-attachments/assets/3880e06e-9f3e-4fc5-a547-2b8a552ffd07" />
 
 
 
