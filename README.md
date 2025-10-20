@@ -98,10 +98,10 @@ mv ~/.config/nvim ~/.config/nvim.bak
 
 ## Windows Users
 
-Yo, real talk - this config is built for Linux. If you're on Windows, here are your options:
+This config is built primarily for Linux. If you're on Windows, here are your options:
 
 ### Option 1: WSL2 (Recommended - Just Do This)
-Install Ubuntu through WSL2 and follow the Ubuntu install instructions above. You'll get the full experience including image previews if you use Windows Terminal or another WSL-compatible terminal. This is seriously the easiest way, I promise.
+Install Ubuntu through WSL2 and follow the Ubuntu install instructions above. You'll get the full experience including image previews if you use Windows Terminal or another WSL-compatible terminal.
 
 ### Option 2: Native Windows (Not Recommended But Possible)
 The config *should* work natively on Windows, but you'll need to:
@@ -111,7 +111,7 @@ The config *should* work natively on Windows, but you'll need to:
 - Image previews won't work (no Kitty/proper terminal support)
 - Some plugins might be janky
 
-Honestly just use WSL2 lol, you'll thank me later.
+Honestly just use WSL2 lol, it's much easier.
 
 ## What You'll Need
 
@@ -120,7 +120,7 @@ Honestly just use WSL2 lol, you'll thank me later.
 - **Neovim 0.10+**: The editor itself (earlier versions might work but no promises)
 - **Git**: For lazy.nvim to work
 - **Ripgrep & fd**: Makes file searching blazingly fast
-- **A Nerd Font**: For icons to display properly (I use JetBrainsMono Nerd Font)
+- **A Nerd Font**: For icons to display properly
 
 **For the full experience:**
 
