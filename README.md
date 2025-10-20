@@ -267,8 +267,6 @@ This config wouldn't exist without these amazing projects:
 - [mason.nvim](https://github.com/williamboman/mason.nvim) - LSP installer
 - And many more listed in the plugin files
 
-Special shoutout to ThePrimeagen, TJ DeVries, and the Neovim community for inspiring this setup.
-
 ## License
 
 MIT - Do whatever you want with this config. No attribution needed but appreciated if you fork it or build something cool with it!
