@@ -1,7 +1,8 @@
 # nananvim
-<img width="1705" height="1382" alt="251015_00h43m46s_screenshot" src="https://github.com/user-attachments/assets/65724b1f-8441-4040-9b97-80902e5282a6" />
+
 
 My minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works on most Linux distros.
+<img width="1699" height="1376" alt="251020_01h14m26s_screenshot" src="https://github.com/user-attachments/assets/6d8cd604-2968-4d00-b2c2-bd9b06dd62fa" />
 
 ## What's in it?
 
@@ -12,10 +13,12 @@ My minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works
 - **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, toggleterm, lualine status bar, Catppuccin theme
 
 ### Snacks picker with inline image preview
-<img width="1900" height="1142" alt="251015_02h18m53s_screenshot" src="https://github.com/user-attachments/assets/55d7978b-c973-4f96-983c-e0c43f060ca3" />
+<img width="1699" height="1376" alt="251020_01h25m18s_screenshot" src="https://github.com/user-attachments/assets/ff2e835c-9f98-4c97-8e02-49f8aeab12bc" />
 
-### Editing with LSP, Treesitter syntax highlighting, and Catppuccin theme
-<img width="1900" height="1142" alt="251015_02h20m12s_screenshot" src="https://github.com/user-attachments/assets/fed4fdb5-94d5-4adf-a0c5-7b18f6459434" />
+
+### Editing with LSP, Treesitter syntax highlighting, and Rose Pine theme
+<img width="1699" height="1376" alt="251020_01h27m05s_screenshot" src="https://github.com/user-attachments/assets/67e3b214-a038-4cc6-9998-670f99eb97ee" />
+
 
 ## Quick Install
 
