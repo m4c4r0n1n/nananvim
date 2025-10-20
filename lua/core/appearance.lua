@@ -54,13 +54,6 @@ vim.api.nvim_create_autocmd("ColorScheme", {
       vim.api.nvim_set_hl(0, group, { bg = "#000000" })
     end
 
-    -- Dashboard text colors
-    vim.api.nvim_set_hl(0, "SnacksDashboardHeader", { fg = "#88C0D0", bg = "#000000", bold = true })
-    vim.api.nvim_set_hl(0, "SnacksDashboardFooter", { fg = "#5E81AC", bg = "#000000" })
-    vim.api.nvim_set_hl(0, "SnacksDashboardDesc", { fg = "#D8DEE9", bg = "#000000" })
-    vim.api.nvim_set_hl(0, "SnacksDashboardKey", { fg = "#A3BE8C", bg = "#000000" })
-    vim.api.nvim_set_hl(0, "SnacksDashboardIcon", { fg = "#81A1C1", bg = "#000000" })
-
     -- Make EndOfBuffer invisible
     vim.api.nvim_set_hl(0, "EndOfBuffer", { fg = "#000000", bg = "#000000" })
 
