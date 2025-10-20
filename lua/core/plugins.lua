@@ -673,15 +673,18 @@ require("lazy").setup({
   -- Auto-detect indentation
   { "tpope/vim-sleuth" },
 
-  -- Nord theme
+  -- Rose-pine-moon theme
   {
-    "shaunsingh/nord.nvim",
+    "rose-pine/neovim",
+    name = "rose-pine",
     priority = 1000,
     config = function()
-      vim.g.nord_contrast = false
-      vim.g.nord_borders = false
-      vim.g.nord_disable_background = true -- This lets us set our own background
-      require("nord").set()
+      require("rose-pine").setup({
+        disable_background = true,
+        disable_float_background = true,
+        disable_italics = true,
+      })
+      vim.cmd("colorscheme rose-pine")
     end,
   },
 
