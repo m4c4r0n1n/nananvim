@@ -1,6 +1,13 @@
 -- Save as ~/.config/nvim/lua/core/appearance.lua
 -- Then add require("core.appearance") to your init.lua AFTER the colorscheme loads
-
+-- Highlight yanked text
+vim.api.nvim_create_autocmd("TextYankPost", {
+  desc = "Highlight when yanking text",
+  group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
+  callback = function()
+    vim.highlight.on_yank()
+  end,
+})
 -- Disable cursor line highlighting
 vim.opt.cursorline = false
 vim.opt.cursorcolumn = false
