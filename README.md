@@ -62,12 +62,12 @@ mv ~/.config/nvim ~/.config/nvim.bak
 
    For Arch:
 ```bash
-   sudo pacman -S git ripgrep fd imagemagick kitty nodejs npm python
+   sudo pacman -S git ripgrep fd imagemagick kitty nodejs npm python clang
 ```
 
    For Ubuntu/Debian:
 ```bash
-   sudo apt install git ripgrep fd-find imagemagick kitty nodejs npm python3
+   sudo apt install git ripgrep fd-find imagemagick kitty nodejs npm python3 clang
    # fd-find is called fdfind on Ubuntu, so we symlink it:
    ln -s $(which fdfind) ~/.local/bin/fd
 ```
