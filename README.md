@@ -31,12 +31,12 @@ Just copy and paste ONE of these commands based on your distro:
 
 **Arch Linux (btw):**
 ```bash
-sudo pacman -S git ripgrep fd imagemagick kitty nodejs npm python && curl -LO https://github.com/neovim/neovim/releases/download/v0.10.2/nvim.appimage && chmod u+x nvim.appimage && sudo mv nvim.appimage /usr/local/bin/nvim && git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim && nvim
+sudo pacman -S git ripgrep fd imagemagick kitty nodejs npm python clang && curl -LO https://github.com/neovim/neovim/releases/download/v0.10.2/nvim.appimage && chmod u+x nvim.appimage && sudo mv nvim.appimage /usr/local/bin/nvim && git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim && nvim
 ```
 
 **Ubuntu/Pop!_OS/Debian:**
 ```bash
-sudo apt update && sudo apt install -y git ripgrep fd-find imagemagick kitty nodejs npm python3 python3-pip curl build-essential unzip && mkdir -p ~/.local/bin && ln -s $(which fdfind) ~/.local/bin/fd && curl -LO https://github.com/neovim/neovim/releases/download/v0.10.2/nvim.appimage && chmod u+x nvim.appimage && sudo mv nvim.appimage /usr/local/bin/nvim && git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim && nvim
+sudo apt update && sudo apt install -y git ripgrep fd-find imagemagick kitty nodejs npm python3 python3-pip clang curl build-essential unzip && mkdir -p ~/.local/bin && ln -s $(which fdfind) ~/.local/bin/fd && curl -LO https://github.com/neovim/neovim/releases/download/v0.10.2/nvim.appimage && chmod u+x nvim.appimage && sudo mv nvim.appimage /usr/local/bin/nvim && git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim && nvim
 ```
 
 **What this does:**
