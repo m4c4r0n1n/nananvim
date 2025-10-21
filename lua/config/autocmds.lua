@@ -1,11 +1,13 @@
--- ~/.config/nvim/lua/core/appearance.lua
+-- ~/.config/nvim/lua/core/autocmd.lua
 
 vim.api.nvim_create_autocmd("TextYankPost", {
   desc = "Highlight when yanking text",
   group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
   callback = function()
-    vim.highlight.on_yank()
+    vim.hl.on_yank()
   end,
+
+
 })
 -- Disable cursor line highlighting
 vim.opt.cursorline = false
@@ -15,7 +17,6 @@ vim.opt.cursorcolumn = false
 vim.api.nvim_create_autocmd("ColorScheme", {
   pattern = "*",
   callback = function()
-    -- Core backgrounds
     local black_groups = {
       "Normal",
       "NormalFloat",
@@ -82,7 +83,7 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "PmenuSel", { bg = "#1a1a1a" })
     vim.api.nvim_set_hl(0, "PmenuThumb", { bg = "#1a1a1a" })
 
-    -- Tone down those annoying diagnostic squigglies
+    -- Tone down annoying diagnostic squigglies
     vim.api.nvim_set_hl(0, "DiagnosticUnderlineError", { sp = "#3B4252", undercurl = true })
     vim.api.nvim_set_hl(0, "DiagnosticUnderlineWarn", { sp = "#3B4252", undercurl = true })
     vim.api.nvim_set_hl(0, "DiagnosticUnderlineInfo", { sp = "#3B4252", undercurl = true })
