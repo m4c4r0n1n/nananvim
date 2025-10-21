@@ -1,25 +1,26 @@
 return {
-  {
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
-    event = { "BufReadPost", "BufNewFile" },
-    dependencies = {
-      "nvim-treesitter/nvim-treesitter-textobjects",
-    },
-    opts = {
-      auto_install = false,
+  "nvim-treesitter/nvim-treesitter",
+  build = ":TSUpdate",
+  lazy = false,
+
+  dependencies = {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+  },
+  config = function()
+    require("nvim-treesitter.configs").setup({
+      ensure_installed = {
+        "c", "lua", "vim", "vimdoc", "query",
+        "python", "javascript", "typescript", "html", "css",
+        "json", "yaml", "toml", "bash", "markdown",
+      },
+
+      -- Enable syntax highlighting
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
       },
-      indent = { enable = true },
-      ensure_installed = {
-        "latex", "bash", "c", "css", "html", "javascript",
-        "json", "lua", "luadoc", "luap", "markdown",
-        "markdown_inline", "norg", "python", "query",
-        "regex", "scss", "svelte", "tsx", "typescript",
-        "typst", "vim", "vimdoc", "vue", "yaml",
-      },
+
+      -- Enable incremental selection
       incremental_selection = {
         enable = true,
         keymaps = {
@@ -29,9 +30,14 @@ return {
           node_decremental = "<bs>",
         },
       },
-    },
-    config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
-    end,
-  },
+
+      -- Enable indentation
+      indent = {
+        enable = true,
+      },
+
+      -- Auto-install missing parsers
+      auto_install = true,
+    })
+  end,
 }
