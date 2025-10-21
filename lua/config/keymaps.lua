@@ -16,15 +16,15 @@ keymap("n", "<C-Down>", ":resize +2<CR>", { desc = "Increase window height" })
 keymap("n", "<C-Left>", ":vertical resize -2<CR>", { desc = "Decrease window width" })
 keymap("n", "<C-Right>", ":vertical resize +2<CR>", { desc = "Increase window width" })
 
+-- Better indenting
+keymap("v", "<", "<gv", { desc = "Indent left" })
+keymap("v", ">", ">gv", { desc = "Indent right" })
+
 -- Move lines
 keymap("n", "<A-j>", ":m .+1<CR>==", { desc = "Move line down" })
 keymap("n", "<A-k>", ":m .-2<CR>==", { desc = "Move line up" })
 keymap("v", "<A-j>", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
 keymap("v", "<A-k>", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
-
--- Better indenting
-keymap("v", "<", "<gv", { desc = "Indent left" })
-keymap("v", ">", ">gv", { desc = "Indent right" })
 
 -- Clear search highlight
 keymap("n", "<Esc>", "<cmd>nohlsearch<CR>", { desc = "Clear search highlight" })
