@@ -3,7 +3,7 @@
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
 
-My minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works on most Linux distros. I'm just one nana-man trying to make a clean config, so bear with me if something's janky lol.
+A minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works on most Linux distros. I'm just one nana-man trying to make a clean config, so bear with me if something's janky.
 
 ## What's in it?
 
@@ -228,14 +228,14 @@ For more keybinds, check `lua/config/keymaps.lua` and the individual plugin file
 
 ## Known Issues & Bugs
 
-There's a problem with Mason I'm working on and probably some stuff I'm forgetting to tweak or haven't discovered yet. I know it, you know it, but it escapes my mind right now lol. If you find something broken or weird:
+There's probably some stuff I'm forgetting to tweak or haven't discovered yet. I know it, you know it, but it escapes my mind right now lol. If you find something broken or weird:
 
 1. First, run `:checkhealth` to see if it's a missing dependency
 2. Check if it's an LSP issue (some servers are finicky on certain distros)
 3. If it's actually broken, please open an issue! Seriously, I'm just one nana-man learning this stuff, so any feedback helps
 
 Some known quirks:
-- LSP might throw some errors on first startup (especially on Ubuntu/Pop!_OS) - they usually go away after Mason finishes installing everything
+- LSP might throw some errors on first startup (on Ubuntu/Pop!_OS) - they usually go away after Mason finishes installing everything
 - Image previews only work in Kitty (or terminals with image protocol support)
 - On some systems, fd might be called `fdfind` - the Ubuntu install command handles this but if you install manually you might need to symlink it
 
@@ -262,7 +262,7 @@ This config wouldn't exist without these amazing projects:
 - [lazy.nvim](https://github.com/folke/lazy.nvim) - Plugin manager by folke
 - [snacks.nvim](https://github.com/folke/snacks.nvim) - Dashboard & utilities
 - [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Fuzzy finder
-- [rose-pine](https://github.com/rose-pine/neovim) - Beautiful theme
+- [rose-pine](https://github.com/rose-pine/neovim) - Theme
 - [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) - Syntax highlighting
 - [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) - LSP configs
 - [mason.nvim](https://github.com/williamboman/mason.nvim) - LSP installer
