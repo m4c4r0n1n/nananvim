@@ -1,6 +1,7 @@
 # nananvim
 
-<img width="1699" height="1376" alt="251020_01h14m26s_screenshot" src="https://github.com/user-attachments/assets/ba400f69-68de-46a3-811d-5b4f17ccc271" />
+<img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
+
 
 My minimal Neovim setup powered by lazy.nvim. Built primarily for Arch but works on most Linux distros. I'm just one nana-man trying to make a clean config, so bear with me if something's janky lol.
 
