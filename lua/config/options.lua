@@ -1,5 +1,3 @@
--- ~/.config/nvim/lua/core/options.lua
-
 local opt = vim.opt
 
 -- Line numbers
