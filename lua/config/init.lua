@@ -7,3 +7,4 @@ vim.api.nvim_create_autocmd("VimEnter", {
 require("config.options")
 require("config.keymaps")
 require("config.autocmds")
+require("config.commands")
