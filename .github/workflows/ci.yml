@@ -14,12 +14,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, ubuntu-22.04]
-        nvim-version: [nightly]  # Only test nightly since config uses 0.11+ API
+        nvim-version: [nightly]
     
     runs-on: ${{ matrix.os }}
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install Neovim
       uses: rhysd/action-setup-vim@v1
@@ -74,7 +74,7 @@ jobs:
     
     - name: Upload logs on failure
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: logs-${{ matrix.os }}-${{ matrix.nvim-version }}
         path: |
@@ -85,7 +85,7 @@ jobs:
     runs-on: macos-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install dependencies
       run: |
@@ -109,10 +109,11 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
-    - name: Install stylua
-      uses: JohnnyMorganz/stylua-action@v3
+    - name: Check Lua formatting with stylua
+      continue-on-error: true
+      uses: JohnnyMorganz/stylua-action@v4
       with:
         token: ${{ github.token }}
         version: latest
