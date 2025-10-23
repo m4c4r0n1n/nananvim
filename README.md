@@ -28,6 +28,24 @@ This isn't your typical "I copied NvChad" config. It's a from-scratch setup that
 
 ## Installation
 
+## Quick Install
+
+The easiest way to install nananvim is with the automated installer:
+```bash
+curl -fsSL https://raw.githubusercontent.com/m4c4r0n1n/nananvim/main/install.sh | bash
+```
+
+The installer will:
+- Detect your distro (Arch, Ubuntu, Fedora, Gentoo, MacOS)
+- Install all required dependencies
+- Download Neovim 0.10.2+ if needed
+- Clone this config to `~/.config/nvim`
+- Backup your existing config if present
+
+**Note:** Review the [install.sh](install.sh) script before running if you want to see what it does.
+
+**Or run distro-specific commands** (if you don't want to use the installer)
+
 ### Quick Install (Just Works™)
 
 Pick your distro and paste one command:
