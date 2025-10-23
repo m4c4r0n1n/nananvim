@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Test weekly to catch upstream breaking changes
+    - cron: '0 0 * * 0'
+
+jobs:
+  test-linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04]
+        nvim-version: [stable, v0.10.0, nightly]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install Neovim
+      uses: rhysd/action-setup-vim@v1
+      with:
+        neovim: true
+        version: ${{ matrix.nvim-version }}
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          ripgrep \
+          fd-find \
+          python3 \
+          python3-pip \
+          nodejs \
+          npm \
+          imagemagick \
+          clang \
+          build-essential
+        
+        # Fix fd name on Ubuntu
+        mkdir -p ~/.local/bin
+        ln -sf $(which fdfind) ~/.local/bin/fd
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Setup config
+      run: |
+        mkdir -p ~/.config
+        ln -s $GITHUB_WORKSPACE ~/.config/nvim
+    
+    - name: Install plugins
+      timeout-minutes: 10
+      run: |
+        nvim --headless "+Lazy! sync" +qa
+        nvim --headless "+TSUpdateSync" +qa
+    
+    - name: Run health check
+      run: |
+        nvim --headless "+checkhealth" "+w! health.log" +qa
+        cat health.log
+    
+    - name: Test basic operations
+      run: |
+        # Test that Neovim starts without errors
+        nvim --headless "+qa" 2>&1 | tee startup.log
+        if grep -q "Error" startup.log; then
+          echo "Errors found during startup!"
+          exit 1
+        fi
+        
+        # Test file operations
+        echo "test content" > test.txt
+        nvim --headless test.txt "+w" "+qa"
+        
+        # Test LSP setup
+        echo "print('hello')" > test.py
+        nvim --headless test.py "+LspInfo" "+qa" 2>&1 | tee lsp.log
+    
+    - name: Upload logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: logs-${{ matrix.os }}-${{ matrix.nvim-version }}
+        path: |
+          health.log
+          startup.log
+          lsp.log
+
+  test-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install dependencies
+      run: |
+        brew install neovim ripgrep fd node python3 imagemagick llvm
+    
+    - name: Setup config
+      run: |
+        mkdir -p ~/.config
+        ln -s $GITHUB_WORKSPACE ~/.config/nvim
+    
+    - name: Install plugins
+      timeout-minutes: 10
+      run: |
+        nvim --headless "+Lazy! sync" +qa
+    
+    - name: Run basic test
+      run: |
+        nvim --headless "+qa" 2>&1 | tee startup.log
+        if grep -q "Error" startup.log; then
+          echo "Errors found!"
+          exit 1
+        fi
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Install luacheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lua5.1 luarocks
+        sudo luarocks install luacheck
+    
+    - name: Lint Lua files
+      run: |
+        find lua -name "*.lua" -exec luacheck {} \; || true
+    
+    - name: Check formatting with stylua
+      uses: JohnnyMorganz/stylua-action@v3
+      with:
+        token: ${{ github.token }}
+        version: latest
+        args: --check lua/
