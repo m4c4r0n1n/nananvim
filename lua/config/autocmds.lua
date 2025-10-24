@@ -4,8 +4,6 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   callback = function()
     vim.hl.on_yank()
   end,
-
-
 })
 -- Disable cursor line highlighting
 vim.opt.cursorline = false

@@ -17,7 +17,7 @@ return {
     },
     keys = {
       { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Toggle file explorer" },
-      { "<leader>o", "<cmd>Neotree focus<cr>",  desc = "Focus file explorer" },
+      { "<leader>o", "<cmd>Neotree focus<cr>", desc = "Focus file explorer" },
     },
     opts = {
       close_if_last_window = true,
@@ -44,14 +44,14 @@ return {
       "nvim-tree/nvim-web-devicons",
     },
     keys = {
-      { "f",          "<cmd>Telescope find_files<cr>",      desc = "Find files" },
-      { "<leader>fg", "<cmd>Telescope live_grep<cr>",       desc = "Live grep" },
-      { "<leader>fb", "<cmd>Telescope buffers<cr>",         desc = "Buffers" },
-      { "<leader>fh", "<cmd>Telescope help_tags<cr>",       desc = "Help tags" },
-      { "<leader>fo", "<cmd>Telescope oldfiles<cr>",        desc = "Recent files" },
-      { "<leader>fc", "<cmd>Telescope colorscheme<cr>",     desc = "Colorschemes" },
-      { "<leader>fr", "<cmd>Telescope resume<cr>",          desc = "Resume" },
-      { "<leader>:",  "<cmd>Telescope command_history<cr>", desc = "Command History" },
+      { "f", "<cmd>Telescope find_files<cr>", desc = "Find files" },
+      { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
+      { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
+      { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
+      { "<leader>fo", "<cmd>Telescope oldfiles<cr>", desc = "Recent files" },
+      { "<leader>fc", "<cmd>Telescope colorscheme<cr>", desc = "Colorschemes" },
+      { "<leader>fr", "<cmd>Telescope resume<cr>", desc = "Resume" },
+      { "<leader>:", "<cmd>Telescope command_history<cr>", desc = "Command History" },
     },
     opts = function()
       local actions = require("telescope.actions")

@@ -9,9 +9,21 @@ return {
   config = function()
     require("nvim-treesitter.configs").setup({
       ensure_installed = {
-        "c", "lua", "vim", "vimdoc", "query",
-        "python", "javascript", "typescript", "html", "css",
-        "json", "yaml", "toml", "bash", "markdown",
+        "c",
+        "lua",
+        "vim",
+        "vimdoc",
+        "query",
+        "python",
+        "javascript",
+        "typescript",
+        "html",
+        "css",
+        "json",
+        "yaml",
+        "toml",
+        "bash",
+        "markdown",
       },
 
       -- Enable syntax highlighting
