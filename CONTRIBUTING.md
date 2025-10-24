@@ -217,7 +217,6 @@ Follow conventional commits:
 Contributors get:
 - Credit in README
 - Good karma
-- The satisfaction of making Neovim better
 
 ## License
 
