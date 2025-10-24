@@ -44,13 +44,13 @@ return {
     "akinsho/bufferline.nvim",
     event = "VeryLazy",
     keys = {
-      { "<leader>bp", "<Cmd>BufferLineTogglePin<CR>",            desc = "Toggle pin" },
+      { "<leader>bp", "<Cmd>BufferLineTogglePin<CR>", desc = "Toggle pin" },
       { "<leader>bP", "<Cmd>BufferLineGroupClose ungrouped<CR>", desc = "Delete non-pinned buffers" },
-      { "<leader>bo", "<Cmd>BufferLineCloseOthers<CR>",          desc = "Delete other buffers" },
-      { "<S-h>",      "<cmd>BufferLineCyclePrev<cr>",            desc = "Prev buffer" },
-      { "<S-l>",      "<cmd>BufferLineCycleNext<cr>",            desc = "Next buffer" },
-      { "[b",         "<cmd>BufferLineCyclePrev<cr>",            desc = "Prev buffer" },
-      { "]b",         "<cmd>BufferLineCycleNext<cr>",            desc = "Next buffer" },
+      { "<leader>bo", "<Cmd>BufferLineCloseOthers<CR>", desc = "Delete other buffers" },
+      { "<S-h>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer" },
+      { "<S-l>", "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer" },
+      { "[b", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer" },
+      { "]b", "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer" },
     },
     opts = {
       options = {
@@ -106,8 +106,8 @@ return {
         lualine_b = { "branch" },
         lualine_c = {
           { "diagnostics" },
-          { "filetype",   icon_only = true, separator = "", padding = { left = 1, right = 0 } },
-          { "filename",   path = 1 },
+          { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+          { "filename", path = 1 },
         },
         lualine_x = {
           {
