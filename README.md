@@ -2,7 +2,7 @@
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
-A minimal Neovim config that actually works. Built primarily for Arch but works on most Linux distros and MacOS. I'm just one nana-man trying to make a decent config, so bear with me if something's janky or whatever. I built this for fun and to make a small config that's a bit beefier without bloat all while keeping it customizable. Should you trust a solo dude's configs for nvim? Yes.
+A minimal Neovim config that actually works. Built primarily for Arch but works on most Linux distros and MacOS. I'm just one nana-man trying to make a decent config, so bear with me if something's janky or whatever. I built this for fun and to make a small config that's a bit beefier without bloat all while keeping it easy to customize. Should you trust a solo dude's configs for nvim? Hell yes.
 
 ## What's in it?
 
