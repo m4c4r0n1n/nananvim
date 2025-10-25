@@ -3,18 +3,10 @@ return {
     "folke/snacks.nvim",
     priority = 1000,
     lazy = false,
-    opts = {
-      bigfile = { enabled = true },
-      notifier = { enabled = true },
-      quickfile = { enabled = true },
-      statuscolumn = { enabled = true },
-      words = { enabled = true },
-      image = { enabled = true },
-      picker = { enabled = true },
-      dashboard = {
-        enabled = true,
-        preset = {
-          header = [[
+    opts = function()
+      -- Try to load custom dashboard
+      local ok, custom = pcall(require, "config.dashboard")
+      local header = [[
 ⠀⠀⠀⠀⠀⢀⣤⣴⣦⣶⣴⣤⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣀⣀⣀⡀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠚⠋⠉⠀⠀⠀⠀⠈⠙⢷⣦⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⠾⠛⠛⠉⠉⠛⠛⠷⠄⠀⠀
 ⠀⠀⠀⠀⢀⣀⣤⣤⣄⣀⠀⠀⠀⠀⠘⠷⠀⠀⠀⠀⠀⠀⣰⠞⠁⠀⠀⠀⠀⢀⣀⡀⠀⠀⠀⠀
@@ -34,10 +26,29 @@ return {
 .-----.---.-.-----.---.-.-----.--.--.|__|.--------.
 |     |  _  |     |  _  |     |  |  ||  ||        |
 |__|__|___._|__|__|___._|__|__|\___/ |__||__|__|__|
-          ]],
+      ]]
+
+      -- change to whatever you want :)
+      if ok and custom.header then
+        header = custom.header
+      end
+
+      return {
+        bigfile = { enabled = true },
+        notifier = { enabled = true },
+        quickfile = { enabled = true },
+        statuscolumn = { enabled = true },
+        words = { enabled = true },
+        image = { enabled = true },
+        picker = { enabled = true },
+        dashboard = {
+          enabled = true,
+          preset = {
+            header = header,
+          },
         },
-      },
-    },
+      }
+    end,
   },
   { "nvim-tree/nvim-web-devicons", lazy = true },
   {

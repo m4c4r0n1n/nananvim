@@ -1,0 +1,44 @@
+# Lazy.nvim plugin directory
+lazy-lock.json
+
+# Backup files
+*.backup
+*.bak
+*~
+
+# Swap files
+*.swp
+*.swo
+
+# Undo history
+*.un~
+
+# API keys (just in case someone puts them here)
+.env
+*.key
+*secret*
+
+# Personal config overrides
+local.lua
+personal.lua
+
+# Log files
+*.log
+
+# macOS
+.DS_Store
+
+# Linux
+.directory
+
+# Session files
+Session.vim
+.session
+
+# Avante cache
+avante/
+
+# Personal overrides - NOT committed
+lua/config/local.lua
+lua/config/local.lua
+lua/config/local.lua
