@@ -13,7 +13,7 @@ lazy-lock.json
 # Undo history
 *.un~
 
-# API keys (just in case someone puts them here)
+# API keys
 .env
 *.key
 *secret*
@@ -38,7 +38,7 @@ Session.vim
 # Avante cache
 avante/
 
-# Personal overrides - NOT committed
+# Personal overrides
 lua/config/local.lua
 lua/config/local.lua
 lua/config/local.lua
