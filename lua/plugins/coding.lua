@@ -12,6 +12,7 @@ return {
     config = function()
       local cmp = require("cmp")
       local luasnip = require("luasnip")
+
       cmp.setup({
         snippet = {
           expand = function(args)
@@ -24,12 +25,11 @@ return {
           ["<C-d>"] = cmp.mapping.scroll_docs(-4),
           ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<C-Space>"] = cmp.mapping.complete(),
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),
+          ["<CR>"] = cmp.mapping.confirm({ select = false }),
+          ["<C-y>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-              luasnip.expand_or_jump()
             else
               fallback()
             end
@@ -37,8 +37,6 @@ return {
           ["<S-Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
-              luasnip.jump(-1)
             else
               fallback()
             end
@@ -85,31 +83,133 @@ return {
     event = "VeryLazy",
     opts = {},
   },
+
+  -- Codeium.vim (AI suggestions)
   {
-    "zbirenbaum/copilot.lua",
-    cmd = "Copilot",
+    "Exafunction/codeium.vim",
     event = "InsertEnter",
-    opts = {
-      suggestion = {
-        enabled = true,
-        auto_trigger = true,
-        keymap = {
-          accept = "<C-y>",
-          next = "<M-]>",
-          prev = "<M-[>",
-          dismiss = "<C-]>",
-        },
-      },
-      panel = { enabled = false },
-    },
+    config = function()
+      vim.g.codeium_disable_bindings = 1
+
+      vim.keymap.set("i", "<Tab>", function()
+        return vim.fn["codeium#Accept"]()
+      end, { expr = true, silent = true })
+
+      vim.keymap.set("i", "<C-]>", function()
+        return vim.fn["codeium#Clear"]()
+      end, { expr = true, silent = true })
+
+      vim.keymap.set("i", "<M-]>", function()
+        return vim.fn["codeium#CycleCompletions"](1)
+      end, { expr = true, silent = true })
+
+      vim.keymap.set("i", "<M-[>", function()
+        return vim.fn["codeium#CycleCompletions"](-1)
+      end, { expr = true, silent = true })
+    end,
   },
+
+  -- Avante (AI chat - OPTIONAL)
+  -- To enable: create lua/config/local.lua and add your provider config
   {
-    "CopilotC-Nvim/CopilotChat.nvim",
+    "yetone/avante.nvim",
     event = "VeryLazy",
+    lazy = false,
+    version = false,
+    enabled = vim.fn.filereadable(vim.fn.stdpath("config") .. "/lua/config/local.lua") == 1,
+    opts = function()
+      -- Try to load personal config, otherwise use defaults
+      local ok, local_config = pcall(require, "config.local")
+      if ok and local_config.avante then
+        return local_config.avante
+      end
+
+      -- Default fallback (you have to configure)
+      return {
+        provider = "claude",
+        providers = {
+          claude = {
+            endpoint = "https://api.anthropic.com",
+            model = "claude-sonnet-4-20250514",
+            extra_request_body = {
+              temperature = 0,
+              max_tokens = 4096,
+            },
+          },
+        },
+        behaviour = {
+          auto_suggestions = false,
+          auto_set_highlight_group = true,
+          auto_set_keymaps = true,
+          auto_apply_diff_after_generation = false,
+          support_paste_from_clipboard = false,
+        },
+        hints = { enabled = false },
+        windows = {
+          position = "right",
+          wrap = true,
+          width = 30,
+          sidebar_header = {
+            align = "center",
+            rounded = true,
+          },
+        },
+        highlights = {
+          diff = {
+            current = "DiffText",
+            incoming = "DiffAdd",
+          },
+        },
+        diff = {
+          autojump = true,
+          list_opener = "copen",
+        },
+      }
+    end,
+
+    build = "make",
     dependencies = {
-      "zbirenbaum/copilot.lua",
+      "nvim-treesitter/nvim-treesitter",
+      "stevearc/dressing.nvim",
       "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-tree/nvim-web-devicons",
+      {
+        "MeanderingProgrammer/render-markdown.nvim",
+        opts = {
+          file_types = { "markdown", "Avante" },
+        },
+        ft = { "markdown", "Avante" },
+      },
     },
-    opts = {},
+
+    keys = {
+      {
+        "<leader>aa",
+        function()
+          require("avante.api").ask()
+        end,
+        desc = "Avante: Ask",
+        mode = { "n", "v" },
+      },
+      {
+        "<leader>ar",
+        function()
+          require("avante.api").refresh()
+        end,
+        desc = "Avante: Refresh",
+      },
+      {
+        "<leader>ae",
+        function()
+          require("avante.api").edit()
+        end,
+        desc = "Avante: Edit",
+        mode = "v",
+      },
+      { "<leader>at", "<cmd>AvanteToggle<cr>", desc = "Avante: Toggle" },
+      { "<leader>ac", "<cmd>AvanteChat<cr>", desc = "Avante: Chat" },
+      { "<leader>af", "<cmd>AvanteFocus<cr>", desc = "Avante: Focus" },
+    },
   },
 }

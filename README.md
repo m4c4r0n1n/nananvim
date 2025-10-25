@@ -2,7 +2,7 @@
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
-A minimal Neovim config that actually works. No bloat, no bullshit, just a clean setup powered by lazy.nvim that gets you coding fast. Built primarily for Arch but works on most Linux distros and MacOS. I'm just one nana-man trying to make a clean config, so bear with me if something's janky.
+A minimal Neovim config that actually works. Built primarily for Arch but works on most Linux distros and MacOS. I'm just one nana-man trying to make a clean config, so bear with me if something's janky. I built this for fun and to make a small config that's a bit beefier while keeping it customizable. Should you trust a solo dude's configs for nvim? Yes.
 
 ## What's in it?
 
@@ -84,7 +84,7 @@ git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim
 nvim
 ```
 
-Lazy.nvim will automatically install all plugins on first launch. Just wait for it to finish.
+Lazy.nvim will(should) automatically install all plugins on first launch. Just wait for it to finish.
 
 ### 6. Check everything's working
 
@@ -94,7 +94,7 @@ Lazy.nvim will automatically install all plugins on first launch. Just wait for 
 
 ## Windows Users
 
-This config is built primarily for Linux. If you're on Windows, here are your options:
+This config is built primarily for Linux. If you're on Windows, you have some options but hella limited:
 
 ### Option 1: WSL2 (Recommended - Just Do This)
 
@@ -139,6 +139,83 @@ Honestly just use WSL2 lol, it's much easier.
 
 After setup, run `:checkhealth` to see what's working and what's missing.
 
+## AI Chat Setup (Optional)
+
+nananvim includes **free Codeium** for inline code suggestions, but if you don't want to risk mush-brain you can disable it.
+
+For AI chat (like ChatGPT in nvim), you'll need to configure a provider:
+
+### Option 1: FREE - Groq (Recommended)
+
+1. Get a free API key: https://console.groq.com
+2. Add to your shell:
+```bash
+   echo 'export GROQ_API_KEY="your-key"' >> ~/.zshrc
+   source ~/.zshrc
+```
+3. Create config override:
+```bash
+   mkdir -p ~/.config/nvim/lua/config
+   nvim ~/.config/nvim/lua/config/local.lua
+```
+4. Add this:
+```lua
+   return {
+     avante = {
+       provider = "openai",
+       providers = {
+         openai = {
+           endpoint = "https://api.groq.com/openai/v1",
+           model = "llama-3.3-70b-versatile",
+           extra_request_body = {
+             temperature = 0,
+             max_tokens = 4096,
+           },
+         },
+       },
+     },
+   }
+```
+
+### Option 2: Claude (Best Quality, Costs Money)
+
+1. Get API key: https://console.anthropic.com
+2. Add to shell:
+```bash
+   echo 'export ANTHROPIC_API_KEY="your-key"' >> ~/.zshrc
+   source ~/.zshrc
+```
+3. Create `~/.config/nvim/lua/config/local.lua`:
+```lua
+   return {
+     avante = {
+       provider = "claude",
+       providers = {
+         claude = {
+           endpoint = "https://api.anthropic.com",
+           model = "claude-sonnet-4-20250514",
+           extra_request_body = {
+             temperature = 0,
+             max_tokens = 4096,
+           },
+         },
+       },
+     },
+   }
+```
+
+### Option 3: Skip AI Chat
+
+Just don't create `local.lua` - you'll still get:
+- ✅ Free Codeium suggestions
+- ✅ LSP autocomplete  
+- ✅ All other features
+
+**AI chat keybindings** (only if configured):
+- `<leader>aa` - Ask AI
+- `<leader>ae` - Edit code with AI (visual mode)
+- `<leader>ac` - Open chat window
+
 ## Config Structure
 
 If you want to understand how this is organized or modify it:
@@ -177,7 +254,7 @@ If you want to understand how this is organized or modify it:
 └── lazy-lock.json         # Plugin versions
 ```
 
-All plugin files in `lua/plugins/` are automatically loaded by Lazy - you don't need to require them manually. That's the magic!
+All plugin files in `lua/plugins/` are automatically loaded by Lazy - you don't need to require them manually.
 
 ## Keybindings
 
@@ -244,7 +321,7 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 - `<leader>Q` - Quit all
 - `<Esc>` - Clear search highlight
 
-For more keybinds, check `lua/config/keymaps.lua` and the individual plugin files, or view the [complete keybinding reference](KEYBINDINGS.md).
+For more keybinds, check `lua/config/keymaps.lua` and the individual plugin files, or check out the [complete keybinding reference](KEYBINDINGS.md).
 
 ## Documentation
 
@@ -255,11 +332,11 @@ For more keybinds, check `lua/config/keymaps.lua` and the individual plugin file
 
 ## Known Issues & Bugs
 
-There's probably some stuff I'm forgetting to tweak or haven't discovered yet. I know it, you know it, but it escapes my mind right now lol. If you find something broken or weird:
+There's probably some stuff I'm forgetting to tweak or haven't discovered yet. I know it, you know it, but it escapes my mind right now. If you find something broken or weird:
 
 1. First, run `:checkhealth` to see if it's a missing dependency
 2. Check if it's an LSP issue (some servers are finicky on certain distros)
-3. If it's actually broken, please open an issue! Seriously, I'm just one nana-man learning this stuff, so any feedback helps
+3. If it's actually broken, please open an issue!
 
 Some known quirks:
 
