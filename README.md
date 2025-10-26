@@ -235,6 +235,8 @@ Just don't create `local.lua` - you'll still get:
 
 ## Debugging with DAP
 
+<img width="939" height="560" alt="251026_01h02m58s_screenshot" src="https://github.com/user-attachments/assets/ebf115c9-a363-4c4e-8073-629113305e19" />
+
 nananvim includes full debugging support via nvim-dap. Debug adapters are auto-installed through Mason.
 
 ### Quick Start
