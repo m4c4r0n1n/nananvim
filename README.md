@@ -2,16 +2,18 @@
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
-A minimal Neovim config that actually works. Built primarily for Arch but works on most Linux distros and MacOS. I'm just one nana-man trying to make a decent config, so bear with me if something's janky or whatever. I built this for fun and to make a small config that's a bit beefier without bloat all while keeping it easy to customize. Should you trust a solo dude's configs for nvim? Hell yes.
+A minimal Neovim config that actually works. Built primarily for Arch but works on most Linux distros and MacOS. I'm just one nana-man trying to make a decent config, so bear with me if something's janky or whatever. I built this for fun and to make a small config that's a bit beefier with useful shit without bloat all while keeping it easy to customize. The idea is to have the most over-glorified nvim config dots possible that are easily customizable should someone else ever decide to give them a shot. Pretty minimal, easy for those who don't want to spend all day configuring neovim to act like an IDE. Should you trust a solo dude's configs for nvim? Hell yes.
 
 ## What's in it?
 
-- **Snacks.nvim**: Dashboard on startup, plus a file picker that can preview images, PDFs, Mermaid diagrams, and LaTeX right in your terminal (if you're using Kitty)
+- **Snacks.nvim**: Dashboard on startup, plus a file picker that can preview images, PDFs, and more right in your terminal (if you're using Kitty)
 - **Treesitter**: Better syntax highlighting and code navigation for 20+ languages
 - **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, C/C++, HTML/CSS/JSON out of the box)
 - **Telescope**: Fuzzy finder for live grep, buffers, help tags, and more
 - **Rose Pine Moon**: Beautiful theme with pure black background for that clean aesthetic
-- **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, toggleterm, lualine status bar, and GitHub Copilot for AI pair programming
+- **Codeium**: Free AI code suggestions as you type
+- **Avante.nvim**: AI chat for code (optional, requires API key setup)
+- **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, toggleterm, lualine status bar
 
 ## Screenshots
 
@@ -84,7 +86,7 @@ git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim
 nvim
 ```
 
-Lazy.nvim will(should) automatically install all plugins on first launch. Just wait for it to finish.
+Lazy.nvim will (should) automatically install all plugins on first launch. Just wait for it to finish.
 
 ### 6. Check everything's working
 
@@ -94,7 +96,7 @@ Lazy.nvim will(should) automatically install all plugins on first launch. Just w
 
 ## Windows Users
 
-This config is built primarily for Linux. If you're on Windows, you have some options but hella limited:
+This config is built primarily for Linux. If you're on Windows, you have some options...:
 
 ### Option 1: WSL2 (Recommended - Just Do This)
 
@@ -117,7 +119,7 @@ Honestly just use WSL2 lol, it's much easier.
 
 - **Neovim 0.10+**: The editor itself (earlier versions might work but no promises)
 - **Git**: For lazy.nvim to work
-- **Ripgrep & fd**: Makes file searching blazingly fast
+- **Ripgrep & fd**: Makes file searching pretty fast
 - **A Nerd Font**: For icons to display properly
 
 **For the full experience:**
@@ -131,21 +133,25 @@ Honestly just use WSL2 lol, it's much easier.
 - **Python 3.10+**: For pyright, black, isort
 - **clang**: For C/C++ LSP
 
-**Bonus stuff for advanced Snacks previews:**
-
-- **Tectonic**: For LaTeX rendering (`yay -S tectonic` on Arch)
-- **Mermaid CLI**: For diagram previews (`npm install -g @mermaid-js/mermaid-cli`)
-- **Ghostscript**: For PDF handling
-
 After setup, run `:checkhealth` to see what's working and what's missing.
 
-## AI Chat Setup (Optional)
+## AI Features Setup
 
-nananvim includes **free Codeium** for inline code suggestions, but if you don't want to risk mush-brain you can disable it.
+nananvim includes **free Codeium** for inline code suggestions - no setup required. If you don't want AI suggestions, you can disable Codeium by removing it from `lua/plugins/coding.lua`.
+
+### Codeium (Inline Suggestions)
+
+**Keybindings:**
+- `<Tab>` - Accept suggestion
+- `<M-]>` - Next suggestion
+- `<M-[>` - Previous suggestion
+- `<C-]>` - Dismiss suggestion
+
+### Avante (AI Chat) - Optional
 
 For AI chat (like ChatGPT in nvim), you'll need to configure a provider:
 
-### Option 1: FREE - Groq (Recommended)
+#### Option 1: FREE - Groq (Recommended)
 
 1. Get a free API key: https://console.groq.com
 2. Add to your shell:
@@ -177,7 +183,7 @@ For AI chat (like ChatGPT in nvim), you'll need to configure a provider:
    }
 ```
 
-### Option 2: Claude (Best Quality, Costs Money)
+#### Option 2: Claude (Best Quality, Costs Money)
 
 1. Get API key: https://console.anthropic.com
 2. Add to shell:
@@ -204,17 +210,20 @@ For AI chat (like ChatGPT in nvim), you'll need to configure a provider:
    }
 ```
 
-### Option 3: Skip AI Chat
+#### Option 3: Skip AI Chat
 
 Just don't create `local.lua` - you'll still get:
 - ✅ Free Codeium suggestions
 - ✅ LSP autocomplete  
 - ✅ All other features
 
-**AI chat keybindings** (only if configured):
+**Avante keybindings** (only if configured):
 - `<leader>aa` - Ask AI
 - `<leader>ae` - Edit code with AI (visual mode)
+- `<leader>ar` - Refresh
+- `<leader>at` - Toggle Avante window
 - `<leader>ac` - Open chat window
+- `<leader>af` - Focus Avante window
 
 ## Config Structure
 
@@ -241,7 +250,7 @@ If you want to understand how this is organized or modify it:
 │       ├── colorscheme.lua    # Rose Pine Moon theme
 │       ├── ui.lua             # Snacks, bufferline, lualine
 │       ├── editor.lua         # Telescope, neo-tree, which-key
-│       ├── coding.lua         # Completion, autopairs, copilot
+│       ├── coding.lua         # Completion, autopairs, Codeium, Avante
 │       ├── lsp.lua            # LSP servers, Mason, formatters
 │       ├── treesitter.lua     # Syntax highlighting
 │       ├── git.lua            # Gitsigns
@@ -281,6 +290,7 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 - `<leader>ca` - Code actions (quick fixes)
 - `<leader>rn` - Rename symbol
 - `<leader>cf` - Format current buffer
+- `<leader>th` - Toggle inlay hints
 
 ### Git
 
@@ -311,6 +321,19 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 ### Terminal
 
 - `<C-\>` - Toggle floating terminal
+
+### AI Features
+
+**Codeium (always active):**
+- `<Tab>` - Accept suggestion
+- `<M-]>` - Next suggestion
+- `<M-[>` - Previous suggestion
+- `<C-]>` - Dismiss
+
+**Avante (if configured):**
+- `<leader>aa` - Ask AI
+- `<leader>ae` - Edit with AI (visual)
+- `<leader>ac` - Open chat
 
 ### Other Useful Stuff
 
@@ -369,6 +392,8 @@ This config wouldn't exist without these amazing projects:
 - [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) - Syntax highlighting
 - [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) - LSP configs
 - [mason.nvim](https://github.com/williamboman/mason.nvim) - LSP installer
+- [codeium.vim](https://github.com/Exafunction/codeium.vim) - Free AI suggestions
+- [avante.nvim](https://github.com/yetone/avante.nvim) - AI chat
 - And many more listed in the plugin files
 
 ## License
@@ -377,4 +402,4 @@ MIT - Do whatever you want with this config. No attribution needed but appreciat
 
 ---
 
-Made with ❤️ (and way too much caffeine) by one nana-man who's still figuring this stuff out
+Made with ❤️ (and way too much caffeine).

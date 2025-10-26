@@ -1,6 +1,6 @@
 # nananvim Keybindings Reference
 
-Complete keybinding reference for nananvim. Leader key is `<Space>`.
+Leader key is `<Space>`.
 
 ## Navigation
 
@@ -34,7 +34,6 @@ Complete keybinding reference for nananvim. Leader key is `<Space>`.
 | `<S-l>` | Next buffer | Normal | Cycle to next buffer |
 | `[b` | Previous buffer | Normal | Alternative prev buffer |
 | `]b` | Next buffer | Normal | Alternative next buffer |
-| `<leader>bd` | Delete buffer | Normal | Close current buffer |
 | `<leader>bp` | Pin buffer | Normal | Pin/unpin buffer |
 | `<leader>bP` | Delete non-pinned | Normal | Close all unpinned buffers |
 | `<leader>bo` | Delete others | Normal | Close all other buffers |
@@ -90,7 +89,6 @@ Complete keybinding reference for nananvim. Leader key is `<Space>`.
 | `<leader>hp` | Preview hunk | Normal | Preview changes in hunk |
 | `<leader>hb` | Blame line | Normal | Show git blame for line |
 | `<leader>hd` | Diff this | Normal | Show diff view |
-| `<leader>gg` | Open Lazygit | Normal | Open Lazygit interface |
 
 ## Completion & Snippets
 
@@ -102,20 +100,32 @@ Complete keybinding reference for nananvim. Leader key is `<Space>`.
 | `<C-d>` | Scroll docs down | Insert | Scroll completion docs down |
 | `<C-f>` | Scroll docs up | Insert | Scroll completion docs up |
 | `<CR>` | Confirm | Insert | Accept selected completion |
-| `<Tab>` | Next/Expand | Insert | Next item or expand snippet |
+| `<C-y>` | Confirm | Insert | Accept selected completion (alt) |
+| `<Tab>` | Next item | Insert | Next completion item |
 | `<S-Tab>` | Previous | Insert | Previous completion item |
 | `<C-e>` | Close | Insert | Close completion menu |
 
-## GitHub Copilot
+## AI Features
 
+### Codeium (Free Inline Suggestions)
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<C-y>` | Accept suggestion | Insert | Accept Copilot suggestion |
+| `<Tab>` | Accept suggestion | Insert | Accept Codeium suggestion |
 | `<M-]>` | Next suggestion | Insert | Show next suggestion |
 | `<M-[>` | Previous suggestion | Insert | Show previous suggestion |
 | `<C-]>` | Dismiss | Insert | Dismiss suggestion |
-| `<leader>cp` | Copilot panel | Normal | Open Copilot panel |
-| `<leader>cc` | Copilot chat | Normal | Open Copilot chat |
+
+### Avante (AI Chat - Optional)
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<leader>aa` | Ask AI | Normal/Visual | Ask Avante a question |
+| `<leader>ae` | Edit with AI | Visual | Edit selection with AI |
+| `<leader>ar` | Refresh | Normal | Refresh Avante response |
+| `<leader>at` | Toggle window | Normal | Toggle Avante sidebar |
+| `<leader>ac` | Open chat | Normal | Open Avante chat |
+| `<leader>af` | Focus window | Normal | Focus Avante window |
+
+**Note:** Avante only works if you've configured an AI provider in `lua/config/local.lua`
 
 ## Code Editing
 
@@ -208,7 +218,9 @@ Complete keybinding reference for nananvim. Leader key is `<Space>`.
 | `:LspInfo` | Show LSP status for current buffer |
 | `:TSInstallInfo` | Show Treesitter parser info |
 | `:checkhealth` | Run health checks |
-| `:Copilot setup` | Setup GitHub Copilot |
+| `:TokenCount` | Count tokens in current buffer |
+| `:AvanteToggle` | Toggle Avante window (if configured) |
+| `:AvanteChat` | Open Avante chat (if configured) |
 | `:TodoTrouble` | Show all project TODOs |
 | `:Neotree reveal` | Reveal current file in tree |
 
@@ -219,3 +231,5 @@ Complete keybinding reference for nananvim. Leader key is `<Space>`.
 - Use `:` to enter command mode for more options
 - Press `g?` in any mode for context-specific help
 - The which-key plugin shows available keys when you pause
+- Codeium provides free AI suggestions - just start typing!
+- Configure Avante in `lua/config/local.lua` for AI chat features

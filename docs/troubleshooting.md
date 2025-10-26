@@ -90,15 +90,49 @@ Common issues and their solutions for nananvim.
 2. Install git: `sudo pacman -S git` or `sudo apt install git`
 3. Check gitsigns: `:Gitsigns`
 
-## Copilot Issues
+## Codeium Issues
 
-**Problem:** GitHub Copilot not suggesting or errors
+**Problem:** Codeium not providing suggestions
 
 **Solutions:**
-1. Authenticate: `:Copilot auth`
-2. Check status: `:Copilot status`
-3. Make sure you have an active GitHub Copilot subscription
-4. Restart copilot: `:Copilot disable` then `:Copilot enable`
+1. Check if Codeium is running: Look for suggestions as you type
+2. Try manually triggering: Type something and wait a moment
+3. Check if plugin is loaded: `:Lazy` and look for `codeium.vim`
+4. Restart nvim if suggestions stop appearing
+5. If you want to disable Codeium, comment it out in `lua/plugins/coding.lua`
+
+**Problem:** Codeium suggestions interfering with regular completion
+
+**Solutions:**
+1. Use `<C-]>` to dismiss Codeium suggestions
+2. Tab completes Codeium first - use `<C-y>` or `<CR>` for regular completion
+3. You can remap the Codeium accept key in `lua/plugins/coding.lua`
+
+## Avante (AI Chat) Issues
+
+**Problem:** Avante not working or showing errors
+
+**Solutions:**
+1. Make sure you've created `~/.config/nvim/lua/config/local.lua` with your provider config
+2. Check that your API key is set in environment: `echo $ANTHROPIC_API_KEY` or `echo $GROQ_API_KEY`
+3. Verify the API key is valid
+4. Check `:messages` for specific error messages
+5. Try `:AvanteToggle` to open/close the window
+
+**Problem:** Avante plugin not loading
+
+**Solutions:**
+1. The plugin only loads if `lua/config/local.lua` exists
+2. Create the file with your provider configuration (see README)
+3. Restart nvim after creating the file
+
+**Problem:** API errors or connection issues
+
+**Solutions:**
+1. Check your internet connection
+2. Verify your API endpoint is correct in `local.lua`
+3. Make sure you haven't exceeded your API rate limits
+4. For Groq free tier, check if you've hit daily limits
 
 ## Config Won't Load
 
@@ -119,12 +153,54 @@ Common issues and their solutions for nananvim.
 2. View all keymaps: `:WhichKey`
 3. Check keymap file: `~/.config/nvim/lua/config/keymaps.lua`
 
+## Completion Not Working
+
+**Problem:** No autocomplete suggestions appearing
+
+**Solutions:**
+1. Make sure LSP is running: `:LspInfo`
+2. Check if nvim-cmp is loaded: `:Lazy`
+3. Try manually triggering: `<C-Space>` in insert mode
+4. Check `:messages` for errors
+
+## Inlay Hints Not Showing
+
+**Problem:** Type hints not appearing inline
+
+**Solutions:**
+1. Toggle them on: `<leader>th`
+2. Make sure your LSP supports inlay hints
+3. Check `:LspInfo` to see if server is running
+4. Some languages don't support inlay hints
+
+## Terminal Not Opening
+
+**Problem:** `<C-\>` doesn't open terminal
+
+**Solutions:**
+1. Check if toggleterm is loaded: `:Lazy`
+2. Try the command directly: `:ToggleTerm`
+3. Check for conflicting keybindings
+4. Restart nvim
+
+## Buffer Line Not Showing
+
+**Problem:** No tab line at top
+
+**Solutions:**
+1. You need multiple buffers open
+2. Check setting: `always_show_bufferline = false` only shows with 2+ buffers
+3. Open another file to see it appear
+
 ## Still Having Issues?
 
 1. Run `:checkhealth` and look for errors
-2. Check the GitHub issues: https://github.com/m4c4r0n1n/nananvim/issues
-3. Open a new issue with:
+2. Check the output from `:messages` for recent errors
+3. Try with minimal config to isolate the issue
+4. Check the GitHub issues: https://github.com/m4c4r0n1n/nananvim/issues
+5. Open a new issue with:
    - Your OS and version
    - Neovim version: `nvim --version`
    - Error messages from `:messages`
    - Output from `:checkhealth`
+   - Steps to reproduce the issue
