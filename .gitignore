@@ -10,29 +10,20 @@ lazy-lock.json
 *.swp
 *.swo
 
-# Undo history
-*.un~
+# Personal config overrides - NOT committed
+lua/config/local.lua
+lua/config/dashboard.lua
 
 # API keys
 .env
 *.key
-*secret*
-
-# Personal config overrides
-local.lua
-personal.lua
-
-# Log files
-*.log
 
 # macOS
 .DS_Store
 
-# Linux
-.directory
-
 # Session files
 Session.vim
+<<<<<<< HEAD
 .session
 
 # Avante cache
@@ -42,3 +33,5 @@ avante/
 lua/config/local.lua
 lua/config/local.lua
 lua/config/local.lua
+=======
+>>>>>>> d9c6a55 (.)
