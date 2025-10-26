@@ -30,7 +30,6 @@ Include in your bug report:
 
 Open an issue with:
 - Clear use case
-- How it fits with nananvim's philosophy
 - Potential implementation approach
 - Performance impact assessment
 

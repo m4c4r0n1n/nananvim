@@ -145,23 +145,34 @@ Edit `lua/config/keymaps.lua`:
 keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
 
 -- Add your own:
-keymap("n", "<leader>gg", "<cmd>LazyGit<cr>", { desc = "LazyGit" })
+keymap("n", "<leader>gg", ":!lazygit<cr>", { desc = "LazyGit" })
 ```
 
 ### Plugin-Specific Keymaps
 
 Most plugins define their keymaps in their respective files in `lua/plugins/`.
 
-**Example - Change Copilot accept key:**
+**Example - Change Codeium accept key:**
 
-Edit `lua/plugins/coding.lua`, find the copilot section:
+Edit `lua/plugins/coding.lua`, find the Codeium section:
 
 ```lua
-keymap = {
-  accept = "<C-y>",  -- Change to whatever you want
-  next = "<M-]>",
-  prev = "<M-[>",
-  dismiss = "<C-]>",
+vim.keymap.set("i", "<C-y>", function()
+  return vim.fn["codeium#Accept"]()
+end, { expr = true, silent = true })
+```
+
+Change `"<C-y>"` to whatever key you prefer.
+
+**Example - Customize Avante keybindings:**
+
+Edit `lua/plugins/coding.lua`, find the Avante keys section:
+
+```lua
+keys = {
+  { "<leader>aa", ..., desc = "Avante: Ask" },
+  -- Change to your preferred keys
+  { "<leader>ai", ..., desc = "Avante: Ask" },  -- Changed from 'aa' to 'ai'
 },
 ```
 
@@ -188,6 +199,21 @@ return {
   },
 }
 ```
+
+**Disable Codeium:**
+
+Edit `lua/plugins/coding.lua` and add:
+
+```lua
+{
+  "Exafunction/codeium.vim",
+  enabled = false,  -- Disables Codeium
+  event = "InsertEnter",
+  ...
+}
+```
+
+**Disable Avante (AI Chat):**
 
 ## Adding New Plugins
 
@@ -217,7 +243,7 @@ return {
 
 ### Popular Plugins to Add:
 
-**LazyGit (Git UI):**
+**LazyGit (Git UI in Neovim):**
 ```lua
 {
   "kdheepak/lazygit.nvim",
@@ -227,6 +253,8 @@ return {
   },
 }
 ```
+
+**Note:** lazygit must be installed on your system first. It's included in the nananvim installer.
 
 **Harpoon (Quick file navigation):**
 ```lua
@@ -269,21 +297,75 @@ opt.scrolloff = 12
 opt.spell = true
 ```
 
+## Customizing AI Features
+
+### Customizing Codeium
+
+Edit `lua/plugins/coding.lua` to customize Codeium behavior:
+
+```lua
+-- Change keybindings
+vim.keymap.set("i", "<C-g>", function()  -- Changed from Tab
+  return vim.fn["codeium#Accept"]()
+end, { expr = true, silent = true })
+
+-- Disable Codeium for certain filetypes
+vim.g.codeium_filetypes = {
+  markdown = false,
+  text = false,
+}
+```
+
+### Customizing Avante (AI Chat)
+
+Create or edit `~/.config/nvim/lua/config/local.lua`:
+
+```lua
+return {
+  avante = {
+    provider = "claude",  -- or "openai" for Groq
+    providers = {
+      claude = {
+        endpoint = "https://api.anthropic.com",
+        model = "claude-sonnet-4-20250514",
+        extra_request_body = {
+          temperature = 0.7,  -- Adjust creativity (0-1)
+          max_tokens = 8000,  -- Increase for longer responses
+        },
+      },
+    },
+    behaviour = {
+      auto_suggestions = false,
+      auto_apply_diff_after_generation = true,  -- Auto-apply code changes
+    },
+    windows = {
+      width = 40,  -- Wider sidebar
+      position = "right",  -- or "left"
+    },
+  },
+}
+```
+
 ## Customizing Appearance
 
 ### Change Dashboard ASCII Art
 
-Edit `lua/plugins/ui.lua`, find the dashboard header and replace with your own:
+Create `~/.config/nvim/lua/config/dashboard.lua`:
 
 ```lua
-header = [[
-  Your ASCII art here
-]],
+return {
+  header = [[
+    Your custom ASCII art here
+    Line by line
+  ]],
+}
 ```
+
+Or edit `lua/plugins/ui.lua` directly and replace the header.
 
 ### Adjust Transparency
 
-Already enabled! If you want to disable it:
+Enabled by default. If you want to disable it:
 
 Edit `lua/plugins/colorscheme.lua`:
 
@@ -312,6 +394,9 @@ vim.opt.shiftwidth = 4
 
 -- Project-specific keymaps
 vim.keymap.set("n", "<leader>r", ":!cargo run<CR>")
+
+-- Disable Codeium for this project
+vim.g.codeium_enabled = false
 ```
 
 Then trust it with `:trust`
