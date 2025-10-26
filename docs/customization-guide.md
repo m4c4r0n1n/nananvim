@@ -64,6 +64,7 @@ return {
   },
 }
 ```
+###### You can also just :colorscheme <Tab>, make sure to <Space> before pressing <Tab>, then <Tab> to your preferred theme.
 
 ## Adding Language Servers
 
