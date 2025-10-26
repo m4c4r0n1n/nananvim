@@ -1,13 +1,13 @@
 # Contributing to nananvim
 
-Thanks for considering contributing to nananvim! We're building a Neovim distro that actually works and we need people who give a damn about quality.
+Thanks for considering contributing to nananvim!
 
 ## Ground Rules
 
-1. **No bloat** - Every plugin and line of code needs to justify its existence
-2. **Performance matters** - If it makes startup slower, it should be worth it
-3. **It has to work** - Test your changes on at least 2 different systems
-4. **Keep it readable** - Code is read more than it's written
+1. **No bloat** 
+2. **Performance matters** 
+3. **It has to work**
+4. **Keep it readable**
 
 ## How to Contribute
 
@@ -112,7 +112,6 @@ return {
 ### Performance Guidelines
 - Lazy load everything possible
 - Use `event`, `cmd`, `ft`, or `keys` triggers
-- Avoid `lazy = false` unless absolutely necessary
 - Profile with `:Lazy profile` after changes
 
 ## Testing
@@ -206,22 +205,4 @@ Follow conventional commits:
 - `test:` - Test additions
 - `chore:` - Maintenance tasks
 
-## Questions?
-
-- Open an issue for discussion
-- Check existing issues and PRs
-- Read the codebase - it's not that big
-
-## Recognition
-
-Contributors get:
-- Credit in README
-- Good karma
-
-## License
-
-By contributing, you agree your contributions will be licensed under MIT.
-
----
-
-Remember: Quality over quantity, always.
+annnd yeah.. that's about it. 
