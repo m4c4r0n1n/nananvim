@@ -2,43 +2,6 @@
 
 Power user features and tips for nananvim.
 
-## GitHub Copilot
-
-### Setup
-
-```bash
-# Authenticate (first time only)
-:Copilot auth
-```
-
-Follow the browser prompt to authenticate with GitHub.
-
-### Usage
-
-Copilot suggestions appear automatically as you type (ghost text).
-
-**Keybindings:**
-- `<C-y>` - Accept suggestion
-- `<M-]>` - Next suggestion
-- `<M-[>` - Previous suggestion
-- `<C-]>` - Dismiss suggestion
-
-### Copilot Chat
-
-Open an AI chat interface:
-
-```vim
-:CopilotChat
-```
-
-Ask questions about your code, get refactoring suggestions, explanations, etc.
-
-### Tips
-
-- Write a comment describing what you want, Copilot will suggest the implementation
-- Copilot learns from your project context
-- Works best with descriptive function/variable names
-
 ## Telescope Advanced Usage
 
 ### Live Grep with Filters
