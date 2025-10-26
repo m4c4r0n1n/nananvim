@@ -12,7 +12,7 @@ Leader key is `<Space>`.
 | `<leader>fb` | Buffer list | Normal | Show open buffers |
 | `<leader>fo` | Recent files | Normal | Show recently opened files |
 | `<leader>fh` | Help tags | Normal | Search Neovim help |
-| `<leader>fc` | Colorschemes | Normal | Preview and select themes |
+| `:colorscheme <Tab>` | Colorschemes | Normal | Preview and select themes |
 | `<leader>fr` | Resume | Normal | Resume last Telescope picker |
 | `<leader>:` | Command history | Normal | Browse command history |
 

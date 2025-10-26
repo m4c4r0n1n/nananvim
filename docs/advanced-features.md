@@ -2,6 +2,218 @@
 
 Power user features and tips for nananvim.
 
+## DAP (Debugging)
+
+nananvim includes full debugging support with nvim-dap, dap-ui, and virtual text display.
+
+### Quick Start
+
+1. **Set a breakpoint**: Place cursor on line and press `<leader>db`
+2. **Start debugging**: Press `<leader>dc` to begin
+3. **Step through code**: 
+   - `<leader>di` - Step into function
+   - `<leader>do` - Step over function
+   - `<leader>dO` - Step out of function
+4. **View variables**: Press `<leader>dh` to hover over variables
+5. **Toggle UI**: Press `<leader>du` to open/close debug windows
+
+### All DAP Keybindings
+
+| Key | Action |
+|-----|--------|
+| `<leader>db` | Toggle breakpoint |
+| `<leader>dc` | Continue/start debugging |
+| `<leader>di` | Step into function |
+| `<leader>do` | Step over function |
+| `<leader>dO` | Step out of function |
+| `<leader>dr` | Open debug REPL |
+| `<leader>dl` | Re-run last debug configuration |
+| `<leader>dt` | Terminate debugging session |
+| `<leader>du` | Toggle DAP UI windows |
+| `<leader>dh` | Hover to show variable values |
+| `<leader>dS` | Show scope variables |
+
+### Language-Specific Setup
+
+#### Python
+
+Install debugpy in your environment:
+
+```bash
+# Global install
+pip install debugpy
+
+# Or in your project's venv
+source .venv/bin/activate
+pip install debugpy
+```
+
+The config automatically detects virtual environments.
+
+**Debug a Python script:**
+1. Open your Python file
+2. Set breakpoints with `<leader>db`
+3. Press `<leader>dc` to start
+4. DAP UI will open automatically
+
+#### C/C++/Rust
+
+Debug adapter (codelldb) is auto-installed via Mason.
+
+For better experience:
+```bash
+# Arch
+sudo pacman -S lldb
+
+# Ubuntu
+sudo apt install lldb
+```
+
+**Debug a C/C++ program:**
+1. Compile with debug symbols: `gcc -g main.c -o main`
+2. Open the source file in nvim
+3. Set breakpoints
+4. Press `<leader>dc`
+5. When prompted, enter the path to your executable
+
+**For CMake projects:**
+```bash
+cmake -DCMAKE_BUILD_TYPE=Debug -B build
+cmake --build build
+```
+
+#### JavaScript/TypeScript
+
+Debug adapter (node2) is auto-installed via Mason.
+
+**Debug Node.js:**
+1. Open your JavaScript/TypeScript file
+2. Set breakpoints
+3. Press `<leader>dc`
+4. Select "Launch" to run current file
+
+**Debug with npm scripts:**
+Edit `lua/plugins/dap.lua` and add:
+
+```lua
+{
+  name = "npm start",
+  type = "node2",
+  request = "launch",
+  runtimeExecutable = "npm",
+  runtimeArgs = { "start" },
+  cwd = vim.fn.getcwd(),
+}
+```
+
+### Understanding the UI
+
+When you start debugging, you'll see:
+
+**Left sidebar (40 columns):**
+- **Scopes**: Local and global variables
+- **Breakpoints**: All set breakpoints
+- **Stacks**: Call stack trace
+- **Watches**: Expressions you're watching
+
+**Bottom panel (10 lines):**
+- **REPL**: Interactive debug console
+- **Console**: Program output
+
+**Main buffer:**
+- Shows your code with a blue arrow (󰁕) at current execution line
+- Breakpoints marked with red dot ()
+
+### Virtual Text
+
+Variable values appear inline as you step through code. Toggle this in `lua/plugins/dap.lua`:
+
+```lua
+require("nvim-dap-virtual-text").setup({
+  enabled = true,  -- Set to false to disable
+})
+```
+
+### Conditional Breakpoints
+
+Set a conditional breakpoint:
+1. Move cursor to line
+2. Run: `:lua require('dap').set_breakpoint(vim.fn.input('Condition: '))`
+3. Or create a keymap in `lua/config/keymaps.lua`:
+
+```lua
+keymap("n", "<leader>dB", function()
+  require('dap').set_breakpoint(vim.fn.input('Condition: '))
+end, { desc = "Conditional Breakpoint" })
+```
+
+### Log Points
+
+Add a log point instead of stopping:
+
+```lua
+keymap("n", "<leader>dL", function()
+  require('dap').set_breakpoint(nil, nil, vim.fn.input('Log message: '))
+end, { desc = "Log Point" })
+```
+
+### REPL Commands
+
+When in debug REPL (`<leader>dr`):
+- `.exit` - Close REPL
+- `.c` - Continue
+- `.n` - Next
+- Evaluate any expression by just typing it
+
+### Adding More Languages
+
+To add support for other languages, edit `lua/plugins/dap.lua`.
+
+**Example - Go (delve):**
+
+1. Install delve: `go install github.com/go-delve/delve/cmd/dlv@latest`
+
+2. Add to `lua/plugins/dap.lua`:
+
+```lua
+-- After other adapters
+dap.adapters.go = {
+  type = 'server',
+  port = '${port}',
+  executable = {
+    command = 'dlv',
+    args = {'dap', '-l', '127.0.0.1:${port}'},
+  }
+}
+
+dap.configurations.go = {
+  {
+    type = 'go',
+    name = 'Debug',
+    request = 'launch',
+    program = '${file}'
+  },
+}
+```
+
+### Troubleshooting DAP
+
+**Adapter not found:**
+- Check `:Mason` to ensure debug adapter is installed
+- Run `:checkhealth dap`
+
+**Breakpoints not hitting:**
+- Make sure you compiled with debug symbols (`-g` flag)
+- Check that the file path matches the source
+
+**UI not opening:**
+- Press `<leader>du` to manually toggle
+- Check `:messages` for errors
+
+**Python venv not detected:**
+- Activate your venv before starting nvim
+- Or set `VIRTUAL_ENV` environment variable
+
 ## Telescope Advanced Usage
 
 ### Live Grep with Filters
@@ -348,41 +560,6 @@ Most plugins are lazy-loaded. To make a plugin load faster:
 :Lazy profile
 ```
 
-## DAP (Debugging)
-
-Not included by default, but here's how to add it:
-
-```lua
--- Add to lua/plugins/dap.lua
-return {
-  {
-    "mfussenegger/nvim-dap",
-    dependencies = {
-      "rcarriga/nvim-dap-ui",
-      "theHamsta/nvim-dap-virtual-text",
-    },
-    config = function()
-      local dap = require("dap")
-      local dapui = require("dapui")
-      
-      dapui.setup()
-      require("nvim-dap-virtual-text").setup()
-      
-      -- Auto-open UI
-      dap.listeners.after.event_initialized["dapui_config"] = function()
-        dapui.open()
-      end
-    end,
-    keys = {
-      { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "Toggle Breakpoint" },
-      { "<leader>dc", function() require("dap").continue() end, desc = "Continue" },
-      { "<leader>di", function() require("dap").step_into() end, desc = "Step Into" },
-      { "<leader>do", function() require("dap").step_over() end, desc = "Step Over" },
-    },
-  },
-}
-```
-
 ## Advanced Git
 
 ### Interactive Rebase
@@ -410,3 +587,4 @@ Check out:
 - `:Lazy` - Plugin manager UI
 - `:Mason` - LSP/tool installer UI
 - `:checkhealth` - Diagnostic info
+- `:checkhealth dap` - DAP-specific diagnostics

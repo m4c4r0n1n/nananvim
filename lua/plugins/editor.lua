@@ -49,9 +49,10 @@ return {
       { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
       { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
       { "<leader>fo", "<cmd>Telescope oldfiles<cr>", desc = "Recent files" },
-      { "<leader>fc", "<cmd>Telescope colorscheme<cr>", desc = "Colorschemes" },
       { "<leader>fr", "<cmd>Telescope resume<cr>", desc = "Resume" },
       { "<leader>:", "<cmd>Telescope command_history<cr>", desc = "Command History" },
+      -- Removed <leader>fc colorscheme picker - it causes UI issues
+      -- Use :colorscheme <tab> to change colorschemes instead
     },
     opts = function()
       local actions = require("telescope.actions")

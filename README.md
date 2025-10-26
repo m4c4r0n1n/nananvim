@@ -9,6 +9,7 @@ A minimal Neovim config that actually works. Built primarily for Arch but works 
 - **Snacks.nvim**: Dashboard on startup, plus a file picker that can preview images, PDFs, and more right in your terminal (if you're using Kitty)
 - **Treesitter**: Better syntax highlighting and code navigation for 20+ languages
 - **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, C/C++, HTML/CSS/JSON out of the box)
+- **DAP**: Debug Adapter Protocol support for Python, C/C++/Rust, and JavaScript/TypeScript with DAP UI
 - **Telescope**: Fuzzy finder for live grep, buffers, help tags, and more
 - **Rose Pine Moon**: Beautiful theme with pure black background for that clean aesthetic
 - **Codeium**: Free AI code suggestions as you type
@@ -110,8 +111,9 @@ The config *should* work natively on Windows, but you'll need to:
 - Manually install dependencies via Chocolatey/Scoop
 - Image previews won't work (no Kitty/proper terminal support)
 - Some plugins might be janky
+- Sorry if it doesn't work, why are you on Windows?
 
-Honestly just use WSL2 lol, it's much easier.
+Honestly just use WSL2
 
 ## What You'll Need
 
@@ -132,6 +134,12 @@ Honestly just use WSL2 lol, it's much easier.
 - **Node.js 18+**: For TypeScript/JavaScript LSP and prettier
 - **Python 3.10+**: For pyright, black, isort
 - **clang**: For C/C++ LSP
+
+**For debugging (DAP):**
+
+- **debugpy**: Python debugging (`pip install debugpy`)
+- **lldb-vscode** or **codelldb**: C/C++/Rust debugging (auto-installed via Mason)
+- **node-debug2**: JavaScript/TypeScript debugging (auto-installed via Mason)
 
 After setup, run `:checkhealth` to see what's working and what's missing.
 
@@ -225,6 +233,49 @@ Just don't create `local.lua` - you'll still get:
 - `<leader>ac` - Open chat window
 - `<leader>af` - Focus Avante window
 
+## Debugging with DAP
+
+nananvim includes full debugging support via nvim-dap. Debug adapters are auto-installed through Mason.
+
+### Quick Start
+
+1. Set a breakpoint: `<leader>db`
+2. Start debugging: `<leader>dc`
+3. Step through code: `<leader>di` (into), `<leader>do` (over), `<leader>dO` (out)
+4. Toggle DAP UI: `<leader>du`
+
+### Language-Specific Setup
+
+**Python:**
+```bash
+pip install debugpy
+```
+
+**C/C++/Rust:**
+Debug adapters auto-install via Mason. For better experience:
+```bash
+# On Arch
+sudo pacman -S lldb
+
+# On Ubuntu
+sudo apt install lldb
+```
+
+**JavaScript/TypeScript:**
+Auto-installed via Mason, no additional setup needed.
+
+### DAP Keybindings
+
+- `<leader>db` - Toggle breakpoint
+- `<leader>dc` - Continue/Start debugging
+- `<leader>di` - Step into function
+- `<leader>do` - Step over function
+- `<leader>dO` - Step out of function
+- `<leader>dr` - Open REPL
+- `<leader>dt` - Terminate debugging
+- `<leader>du` - Toggle DAP UI
+- `<leader>dh` - Hover to see variable values
+
 ## Config Structure
 
 If you want to understand how this is organized or modify it:
@@ -254,7 +305,8 @@ If you want to understand how this is organized or modify it:
 │       ├── lsp.lua            # LSP servers, Mason, formatters
 │       ├── treesitter.lua     # Syntax highlighting
 │       ├── git.lua            # Gitsigns
-│       └── diagnostics.lua    # Trouble, todo-comments
+│       ├── diagnostics.lua    # Trouble, todo-comments
+│       └── dap.lua            # Debug Adapter Protocol
 ├── init.lua               # Main entry point
 ├── README.md              # This file
 ├── KEYBINDINGS.md         # Complete keybinding reference
@@ -291,6 +343,16 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 - `<leader>rn` - Rename symbol
 - `<leader>cf` - Format current buffer
 - `<leader>th` - Toggle inlay hints
+
+### Debugging (DAP)
+
+- `<leader>db` - Toggle breakpoint
+- `<leader>dc` - Continue/Start debugging
+- `<leader>di` - Step into
+- `<leader>do` - Step over
+- `<leader>dO` - Step out
+- `<leader>dt` - Terminate debugging
+- `<leader>du` - Toggle DAP UI
 
 ### Git
 
@@ -392,6 +454,7 @@ This config wouldn't exist without these amazing projects:
 - [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) - Syntax highlighting
 - [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) - LSP configs
 - [mason.nvim](https://github.com/williamboman/mason.nvim) - LSP installer
+- [nvim-dap](https://github.com/mfussenegger/nvim-dap) - Debug Adapter Protocol
 - [codeium.vim](https://github.com/Exafunction/codeium.vim) - Free AI suggestions
 - [avante.nvim](https://github.com/yetone/avante.nvim) - AI chat
 - And many more listed in the plugin files
