@@ -23,15 +23,7 @@ lua/config/dashboard.lua
 
 # Session files
 Session.vim
-<<<<<<< HEAD
 .session
 
 # Avante cache
 avante/
-
-# Personal overrides
-lua/config/local.lua
-lua/config/local.lua
-lua/config/local.lua
-=======
->>>>>>> d9c6a55 (.)
