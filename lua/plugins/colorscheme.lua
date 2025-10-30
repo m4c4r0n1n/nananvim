@@ -1,4 +1,6 @@
+-- lua/plugins/colorscheme.lua
 return {
+  -- Rose Pine (default)
   {
     "rose-pine/neovim",
     name = "rose-pine",
