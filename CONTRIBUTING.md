@@ -15,7 +15,6 @@ Thanks for considering contributing to nananvim!
 
 Before creating an issue:
 - Run `:checkhealth` and include the output
-- Check if it's already reported
 - Try with a minimal config to isolate the issue
 
 Include in your bug report:
@@ -24,14 +23,13 @@ Include in your bug report:
 - Steps to reproduce
 - Expected vs actual behavior
 - Error messages (check `:messages`)
-- Relevant config sections
 
 ### Suggesting Features
 
 Open an issue with:
 - Clear use case
 - Potential implementation approach
-- Performance impact assessment
+- Performance impact 
 
 ### Pull Requests
 
@@ -60,7 +58,7 @@ Open an issue with:
    # Test your specific feature
    ```
 
-4. **Commit with clear messages**
+4. **Commit yo shit**
    ```bash
    git commit -m "feat: add feature"
    # or
@@ -109,7 +107,7 @@ return {
 ```
 
 ### Performance Guidelines
-- Lazy load everything possible
+- Lazy load unless otherwise necessary on startup
 - Use `event`, `cmd`, `ft`, or `keys` triggers
 - Profile with `:Lazy profile` after changes
 
@@ -190,7 +188,7 @@ ensure_installed = {
 }
 ```
 
-4. Test that it actually works!
+4. Test that it works.
 
 ## Commit Message Format
 

@@ -44,15 +44,19 @@ return {
       "nvim-tree/nvim-web-devicons",
     },
     keys = {
-      { "f", "<cmd>Telescope find_files<cr>", desc = "Find files" },
+      { "f", "<cmd>Telescope find_files<cr>", desc = "Find files (cwd)" },
+      { "<leader>ff", "<cmd>Telescope find_files cwd=~<cr>", desc = "Find files (home)" },
+      {
+        "<leader>fa",
+        "<cmd>Telescope find_files hidden=true no_ignore=true cwd=~<cr>",
+        desc = "Find all files (home)",
+      },
       { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
       { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
       { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
       { "<leader>fo", "<cmd>Telescope oldfiles<cr>", desc = "Recent files" },
       { "<leader>fr", "<cmd>Telescope resume<cr>", desc = "Resume" },
       { "<leader>:", "<cmd>Telescope command_history<cr>", desc = "Command History" },
-      -- Removed <leader>fc colorscheme picker - it causes UI issues
-      -- Use :colorscheme <tab> to change colorschemes instead
     },
     opts = function()
       local actions = require("telescope.actions")
@@ -74,7 +78,15 @@ return {
             height = 0.80,
             preview_cutoff = 120,
           },
-          file_ignore_patterns = { ".git/", "node_modules" },
+          file_ignore_patterns = {
+            "%.git/",
+            "node_modules/",
+            "%.cache/",
+            "%.npm/",
+            "%.cargo/",
+            "%.rustup/",
+            "__pycache__/",
+          },
           path_display = { "truncate" },
           winblend = 0,
           border = {},
@@ -116,6 +128,10 @@ return {
           },
         },
         pickers = {
+          find_files = {
+            hidden = true,
+            follow = true,
+          },
           buffers = {
             initial_mode = "normal",
             mappings = {

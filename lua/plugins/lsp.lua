@@ -156,7 +156,7 @@ return {
           vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, opts)
           vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
 
-          vim.keymap.set("n", "<leader>th", function()
+          vim.keymap.set("n", "<leader>ih", function()
             local enabled = vim.lsp.inlay_hint.is_enabled({ bufnr = ev.buf })
             vim.lsp.inlay_hint.enable(not enabled, { bufnr = ev.buf })
           end, { buffer = ev.buf, desc = "Toggle Inlay Hints" })

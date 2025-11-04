@@ -39,7 +39,17 @@ return {
         quickfile = { enabled = true },
         statuscolumn = { enabled = true },
         words = { enabled = true },
-        image = { enabled = true },
+        image = {
+          enabled = true,
+          resolve = function(file, src)
+            -- Convert GitHub blob URLs to raw URLs
+            if src:match("github%.com") and src:match("/blob/") then
+              src = src:gsub("github%.com", "raw.githubusercontent.com")
+              src = src:gsub("/blob/", "/")
+            end
+            return src
+          end,
+        },
         picker = { enabled = true },
         dashboard = {
           enabled = true,

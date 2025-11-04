@@ -12,7 +12,7 @@ Leader key is `<Space>`.
 | `<leader>fb` | Buffer list | Normal | Show open buffers |
 | `<leader>fo` | Recent files | Normal | Show recently opened files |
 | `<leader>fh` | Help tags | Normal | Search Neovim help |
-| `:colorscheme <Tab>` | Colorschemes | Normal | Preview and select themes |
+| `<leader>th` | Theme switcher | Normal | Browse and select colorschemes |
 | `<leader>fr` | Resume | Normal | Resume last Telescope picker |
 | `<leader>:` | Command history | Normal | Browse command history |
 
@@ -69,7 +69,7 @@ Leader key is `<Space>`.
 | `<leader>ca` | Code action | Normal/Visual | Show available code actions |
 | `<leader>rn` | Rename | Normal | Rename symbol |
 | `<leader>cf` | Format | Normal/Visual | Format code |
-| `<leader>th` | Toggle hints | Normal | Toggle inlay hints |
+| `<leader>ih` | Toggle inlay hints | Normal | Toggle LSP inlay hints |
 | `]d` | Next diagnostic | Normal | Jump to next error/warning |
 | `[d` | Previous diagnostic | Normal | Jump to previous error/warning |
 | `<leader>d` | Show diagnostic | Normal | Show diagnostic message |
@@ -157,11 +157,61 @@ Leader key is `<Space>`.
 
 ## Terminal
 
+**There are TWO terminal options:**
+
+### ToggleTerm (Floating Terminal)
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<C-\>` | Toggle terminal | Normal/Terminal | Toggle floating terminal |
+| `<C-\>` | Toggle terminal | Normal/Terminal | Toggle floating terminal (Ctrl+Backslash) |
 | `<Esc>` | Exit terminal mode | Terminal | Return to normal mode |
 | `<C-h/j/k/l>` | Navigate | Terminal | Navigate from terminal |
+
+### Nanabrowser Terminal Panel
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<leader>tt` | Open terminal | Normal | Open terminal in nanabrowser panel |
+| `<leader>p` | Toggle panels | Normal | Toggle all nanabrowser panels |
+
+**Note:** `<C-\>` is Control+Backslash, NOT `<leader>C\` (Space+C+Backslash)
+
+## Theme Switcher
+
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<leader>th` | Theme switcher | Normal | Open theme picker with all installed colorschemes |
+| `<leader>tb` | Toggle background | Normal | Cycle between Terminal, and Blackout backgrounds |
+
+### Inside Theme Picker
+| Key | Action | Description |
+|-----|--------|-------------|
+| `j` / `<Down>` | Move down | Navigate theme list |
+| `k` / `<Up>` | Move up | Navigate theme list |
+| `gg` | Jump to top | Go to first theme |
+| `G` | Jump to bottom | Go to last theme |
+| `/` | Search mode | Start filtering themes by name |
+| `<BS>` | Backspace | Delete character in search (when searching) |
+| `<C-c>` | Clear search | Clear search filter completely |
+| `<Enter>` | Apply/Exit search | Apply theme and close (or exit search mode) |
+| `<Space>` | Apply theme | Apply selected theme and close |
+| `p` | Preview | Preview theme (auto-happens on navigation) |
+| `q` / `<Esc>` | Close | Close picker (or exit search mode) |
+
+**Background Modes:**
+- **Blackout**: Force pure black (#000000) background override
+- **Terminal**: Force terminal background override
+
+## Nanabrowser (Web Browser + Terminal + TODO Panels)
+
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<leader>p` | Toggle panels | Normal | Toggle all three panels (Browser │ Terminal │ TODO) |
+| `<leader>wb` | Browse URL (w3m) | Normal | Open URL in w3m text browser (read-only) |
+| `<leader>wo` | Open URL (external) | Normal | Open URL in external browser (Firefox/Chrome) |
+| `gx` | Open URL in browser | Normal/Visual | Open URL under cursor in external browser |
+| `<leader>tt` | Open terminal | Normal | Open terminal panel |
+| `<leader>td` | Focus TODO | Normal | Focus TODO panel |
+
+**Note:** w3m browser is read-only in Neovim. Use `gx` or `<leader>wo` for interactive browsing.
 
 ## Utility
 
@@ -231,5 +281,5 @@ Leader key is `<Space>`.
 - Use `:` to enter command mode for more options
 - Press `g?` in any mode for context-specific help
 - The which-key plugin shows available keys when you pause
-- Codeium provides free AI suggestions - just start typing!
+- Codeium provides free AI suggestions - just start typing
 - Configure Avante in `lua/config/local.lua` for AI chat features

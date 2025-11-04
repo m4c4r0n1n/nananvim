@@ -4,14 +4,50 @@ How to make nananvim your own.
 
 ## Changing the Colorscheme
 
-### Using a Different Theme
+### Using the Theme Switcher (Easiest Way)
 
-nananvim uses Rose Pine Moon by default. To change it:
+nananvim includes a theme switcher that lets you browse and preview all installed colorschemes:
 
-1. Edit `lua/plugins/colorscheme.lua`
-2. Replace the entire file with your preferred theme:
+1. Press `<leader>th` to open the theme picker
+2. Use `j`/`k` or arrow keys to navigate
+3. Themes preview automatically as you navigate
+4. Press `<Space>` or `<Enter>` to apply a theme
+5. Use `/` to search for specific themes
+6. Press `<leader>tb` to toggle between Terminal and Blackout backgrounds
 
-**Catppuccin:**
+**Built-in themes you can try:**
+- Rose Pine (Moon/Main/Dawn variants)
+- And any other colorschemes you've installed
+
+The theme switcher remembers your choice across sessions!
+
+### Adding New Themes Not in the Switcher
+
+Some themes aren't installed by default, but you can add them yourself:
+
+**Option 1: Quick Add (Install theme, let switcher handle it)**
+
+Create a new file in `lua/plugins/` for your theme. The theme switcher will automatically detect it:
+
+**Example - Add Gruvbox:**
+
+Create `lua/plugins/gruvbox.lua`:
+```lua
+return {
+  {
+    "ellisonleao/gruvbox.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      transparent_mode = true,
+    },
+  },
+}
+```
+
+**Example - Add Catppuccin:**
+
+Create `lua/plugins/catppuccin.lua`:
 ```lua
 return {
   {
@@ -19,18 +55,42 @@ return {
     name = "catppuccin",
     lazy = false,
     priority = 1000,
-    config = function()
-      require("catppuccin").setup({
-        flavour = "mocha", -- latte, frappe, macchiato, mocha
-        transparent_background = true,
-      })
-      vim.cmd.colorscheme("catppuccin")
-    end,
+    opts = {
+      flavour = "mocha", -- latte, frappe, macchiato, mocha
+      transparent_background = true,
+    },
   },
 }
 ```
 
-**Gruvbox:**
+**Example - Add Tokyo Night:**
+
+Create `lua/plugins/tokyonight.lua`:
+```lua
+return {
+  {
+    "folke/tokyonight.nvim",
+    lazy = false,
+    priority = 1000,
+    opts = {
+      style = "night", -- storm, moon, night, day
+      transparent = true,
+    },
+  },
+}
+```
+
+Restart nvim, then press `<leader>th` - your new theme will appear in the list!
+
+**Option 2: Set as Default Theme (Replace Rose Pine)**
+
+If you want to completely replace Rose Pine and set a different theme as default:
+
+1. Edit `lua/plugins/colorscheme.lua`
+2. Replace the Rose Pine config with your preferred theme
+3. Add `vim.cmd.colorscheme("your-theme-name")` to auto-apply it
+
+Example replacing with Gruvbox:
 ```lua
 return {
   {
@@ -47,24 +107,7 @@ return {
 }
 ```
 
-**Tokyo Night:**
-```lua
-return {
-  {
-    "folke/tokyonight.nvim",
-    lazy = false,
-    priority = 1000,
-    config = function()
-      require("tokyonight").setup({
-        style = "night", -- storm, moon, night, day
-        transparent = true,
-      })
-      vim.cmd.colorscheme("tokyonight")
-    end,
-  },
-}
-```
-###### You can also just :colorscheme <Tab>, make sure to <Space> before pressing <Tab>, then <Tab> to your preferred theme.
+**Quick theme switching tip:** You can also use `:colorscheme <Tab>` (with a space before `<Tab>`) to cycle through installed themes temporarily.
 
 ## Adding Language Servers
 
