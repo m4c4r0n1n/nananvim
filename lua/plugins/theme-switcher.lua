@@ -1,8 +1,7 @@
 -- Theme Switcher - Browse and apply colorschemes
 return {
   {
-    "theme-switcher.nvim",
-    dir = vim.fn.expand("~/projects/theme-switcher.nvim"),
+    "m4c4r0n1n/theme-switcher.nvim",
     lazy = false,
     config = function()
       require("theme-switcher").setup({

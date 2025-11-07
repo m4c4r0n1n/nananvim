@@ -1,8 +1,7 @@
 -- Side-by-side panel system: Browser │ Terminal │ TODO
 return {
   {
-    "nanabrowser.nvim",
-    dir = vim.fn.expand("~/projects/nanabrowser.nvim"),
+    "m4c4r0n1n/nanabrowser.nvim",
     lazy = false,
     config = function()
       require("nanabrowser").setup({
