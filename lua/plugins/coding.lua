@@ -109,6 +109,17 @@ return {
     end,
   },
 
+  -- Emmet for HTML/CSS abbreviations
+  {
+    "mattn/emmet-vim",
+    ft = { "html", "css", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
+    init = function()
+      vim.g.user_emmet_leader_key = "<C-z>"
+      vim.g.user_emmet_mode = "inv" -- enable in insert, normal, and visual modes
+      vim.g.user_emmet_install_global = 0
+    end,
+  },
+
   -- Avante (AI chat - OPTIONAL)
   -- To enable: create lua/config/local.lua and add your provider config
   {
