@@ -2,6 +2,8 @@
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
+## We Still Alive
+
 A random dude's minimal and easily customizable neovim config that actually works. Built primarily for Arch but works on most Linux distros and MacOS. Bear with me if something's janky or whatever, I'm just one nana-man trying to build a decent config. I built this for fun initially and to make a small config full of useful tools without too much bloat all while keeping it easy to customize. The idea is to have the most over-glorified, ever evolving neovim config dots possible while remaining easily customizable and well documented should someone else ever decide to give them a shot. Pretty minimal, easy for those who don't want to spend all day configuring neovim to act like an IDE. I'll add random shit as I find it, or find something useful, still a work in progress. Should you trust a random solo dude's configs for nvim? Hell yes.
 
 ## What's in it?
