@@ -91,7 +91,7 @@ opt.mouse = "a"
 
 -- Folding (using treesitter)
 opt.foldmethod = "expr"
-opt.foldexpr = "nvim_treesitter#foldexpr()"
+opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 opt.foldenable = false
 opt.foldlevel = 99
 opt.foldlevelstart = 99

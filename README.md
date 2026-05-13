@@ -38,7 +38,7 @@ curl -fsSL https://raw.githubusercontent.com/m4c4r0n1n/nananvim/main/install.sh 
 The installer will:
 - Detect your distro (Arch, Ubuntu(lsp issues are harmless working on fix), Fedora, Gentoo, MacOS)
 - Install all required dependencies
-- Download Neovim 0.10.2+ if needed
+- Download Neovim 0.12.0+ if needed
 - Clone this config to `~/.config/nvim`
 - Backup your existing config if present
 
@@ -58,7 +58,7 @@ mv ~/.config/nvim ~/.config/nvim.bak
 
 **For Arch:**
 ```bash
-sudo pacman -S git ripgrep fd imagemagick kitty nodejs npm python clang
+sudo pacman -S git ripgrep fd imagemagick kitty nodejs npm python clang tree-sitter-cli
 ```
 
 **For Ubuntu/Debian:**
@@ -66,12 +66,15 @@ sudo pacman -S git ripgrep fd imagemagick kitty nodejs npm python clang
 sudo apt install git ripgrep fd-find imagemagick kitty nodejs npm python3 clang
 # fd-find is called fdfind on Ubuntu, so symlink it:
 ln -s $(which fdfind) ~/.local/bin/fd
+# tree-sitter-cli only lands in apt from 23.10+; otherwise grab the binary:
+# curl -Lo /tmp/tree-sitter.gz https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-x64.gz
+# gunzip /tmp/tree-sitter.gz && chmod +x /tmp/tree-sitter && sudo mv /tmp/tree-sitter /usr/local/bin/
 ```
 
-### 3. Install Neovim 0.10.2+
+### 3. Install Neovim 0.12.0+
 
 ```bash
-curl -LO https://github.com/neovim/neovim/releases/download/v0.10.2/nvim.appimage
+curl -LO https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
 chmod u+x nvim.appimage
 sudo mv nvim.appimage /usr/local/bin/nvim
 ```
@@ -120,7 +123,8 @@ Honestly using WSL2 is your best option.
 
 **The bare minimum** (config will work without these, but you'll miss features):
 
-- **Neovim 0.10+**: The editor itself (earlier versions might work but no promises)
+- **Neovim 0.12+**: The editor itself (nvim-treesitter v2 requires this; earlier versions won't work)
+- **tree-sitter CLI**: Needed by nvim-treesitter v2 to compile parsers. The installer handles this.
 - **Git**: For lazy.nvim to work
 - **Ripgrep & fd**: Makes file searching pretty fast
 - **A Nerd Font**: For icons to display properly

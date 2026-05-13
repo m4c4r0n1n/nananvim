@@ -65,7 +65,7 @@ Leader key is `<Space>`.
 | `gi` | Go to implementation | Normal | Jump to implementation |
 | `gt` | Go to type definition | Normal | Jump to type definition |
 | `K` | Hover | Normal | Show hover documentation |
-| `<C-k>` | Signature help | Normal/Insert | Show function signature |
+| `<C-k>` | Signature help | Insert | Show function signature (insert-only so it doesn't shadow window-up nav) |
 | `<leader>ca` | Code action | Normal/Visual | Show available code actions |
 | `<leader>rn` | Rename | Normal | Rename symbol |
 | `<leader>cf` | Format | Normal/Visual | Format code |
@@ -238,6 +238,16 @@ Leader key is `<Space>`.
 | `o` | Other end | Visual | Jump to other end of selection |
 | `O` | Other corner | Visual Block | Jump to other corner |
 
+## Treesitter Selection
+
+Smart node-aware selection. Walks the syntax tree, so each press expands to the enclosing node (expression → statement → block → function → ...).
+
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<C-Space>` | Start selection | Normal | Select the node under cursor |
+| `<C-Space>` | Expand selection | Visual | Grow selection to parent node |
+| `<BS>` | Shrink selection | Visual | Step back to previous node |
+
 ## Text Objects
 
 | Key | Action | Mode | Description |
@@ -266,7 +276,10 @@ Leader key is `<Space>`.
 | `:Lazy` | Open plugin manager |
 | `:Mason` | Open LSP/formatter installer |
 | `:LspInfo` | Show LSP status for current buffer |
-| `:TSInstallInfo` | Show Treesitter parser info |
+| `:TSUpdate` | Update / install all configured parsers |
+| `:TSInstall <lang>` | Install a specific parser |
+| `:TSUninstall <lang>` | Remove a parser |
+| `:TSLog` | Show treesitter install log |
 | `:checkhealth` | Run health checks |
 | `:TokenCount` | Count tokens in current buffer |
 | `:AvanteToggle` | Toggle Avante window (if configured) |

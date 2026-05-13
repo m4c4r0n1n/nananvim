@@ -22,7 +22,7 @@ NVIM_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/nvim"
 NVIM_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nvim"
 REPO_URL="https://github.com/m4c4r0n1n/nananvim.git"
 BACKUP_DIR="$HOME/.config/nvim.bak.$(date +%Y%m%d_%H%M%S)"
-MIN_NVIM_VERSION="0.10.0"
+MIN_NVIM_VERSION="0.12.0"
 
 # Logging
 LOG_FILE="/tmp/nananvim_install_$(date +%Y%m%d_%H%M%S).log"
@@ -146,6 +146,7 @@ install_dependencies_arch() {
         python-pip
         clang
         lazygit
+        tree-sitter-cli
     )
     
     if ! check_command "kitty"; then
@@ -210,7 +211,27 @@ install_dependencies_ubuntu() {
         sudo tar xf lazygit.tar.gz -C /usr/local/bin lazygit
         rm lazygit.tar.gz
     fi
-    
+
+    # Install tree-sitter CLI (required by nvim-treesitter v2; not in older apt repos)
+    if ! check_command "tree-sitter"; then
+        if apt-cache show tree-sitter-cli >/dev/null 2>&1; then
+            sudo apt install -y tree-sitter-cli
+        else
+            print_info "tree-sitter-cli not in apt; downloading prebuilt binary..."
+            local arch
+            arch=$(uname -m)
+            case "$arch" in
+                x86_64) arch=x64 ;;
+                aarch64|arm64) arch=arm64 ;;
+                *) print_error "Unsupported arch for tree-sitter binary: $arch"; return 1 ;;
+            esac
+            curl -Lo /tmp/tree-sitter.gz "https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-${arch}.gz"
+            gunzip -f /tmp/tree-sitter.gz
+            chmod +x /tmp/tree-sitter
+            sudo mv /tmp/tree-sitter /usr/local/bin/tree-sitter
+        fi
+    fi
+
     print_success "Dependencies installed"
 }
 
@@ -229,6 +250,7 @@ install_dependencies_fedora() {
         python3-pip
         clang
         lazygit
+        tree-sitter-cli
     )
     
     if ! check_command "kitty"; then
@@ -261,6 +283,7 @@ install_dependencies_macos() {
         python
         llvm
         lazygit
+        tree-sitter
     )
     
     if ! check_command "kitty"; then
