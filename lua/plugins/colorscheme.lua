@@ -11,8 +11,10 @@ return {
         variant = "moon",
         -- Don't disable background - let theme-switcher control it
       })
-      -- Auto-apply rose-pine-moon as default theme
-      vim.cmd.colorscheme("rose-pine-moon")
+      -- Defer to avoid getcompletion interrupt during ColorSchemePre phase
+      vim.schedule(function()
+        vim.cmd.colorscheme("rose-pine-moon")
+      end)
     end,
   },
 }
