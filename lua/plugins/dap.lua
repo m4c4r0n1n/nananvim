@@ -230,14 +230,10 @@ return {
       dap.configurations.rust = dap.configurations.cpp
 
       -- Zero-boilerplate per-project debugging: any project that ships a
-      -- .vscode/launch.json gets its configs loaded automatically, mapped onto
-      -- the adapters above — no Lua editing per project.
-      pcall(function()
-        require("dap.ext.vscode").load_launchjs(nil, {
-          codelldb = { "c", "cpp", "rust" },
-          python = { "python" },
-        })
-      end)
+      -- .vscode/launch.json has its configs read automatically on dap.continue()
+      -- / :DapNew (nvim-dap's built-in launch.json provider), matched to the
+      -- adapters above by each config's "type". No call or Lua editing needed —
+      -- the old dap.ext.vscode.load_launchjs() is deprecated for exactly this.
 
       -- JS/TS debugging intentionally omitted: node-debug2-adapter is archived
       -- upstream and js-debug-adapter isn't shipped by default. Wire up
