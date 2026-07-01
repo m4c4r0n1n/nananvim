@@ -2,6 +2,18 @@
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
+#UPDATES!!
+I've been slow to update things, I doubt anyone uses this anyway, but I found a few things that could be improved and a few things that could be dropped, I'll revise this About Me one day, but for now, most of this is still true, I've been really lazy on actually posting screenshots or anything like that. Here is a small list of fixes I've made tonight:
+nanabrowser.nvim (plugin core — lua/nanabrowser/init.lua):
+
+- Future-proofed for Neovim 0.11/0.12: replaced deprecated termopen() → jobstart({term=true}) and all nvim_buf_set_option → nvim_set_option_value; added a nvim-0.10+ version guard.
+- New float layout (default): one centered, tabbed window (<Tab>/<S-Tab> to cycle Browser/Terminal/TODO) — no permanent column theft. Classic split layout still available, now sized as a fraction of the screen and reflows correctly on open/close.
+- Browser now auto-detects a text browser (w3m → lynx → elinks) and gracefully falls back to the external browser if none is installed (previously it just errored).
+- Added optional reader mode (-dump into a real buffer) for readable docs.
+- External-browser detection via $BROWSER → xdg-open → common browsers; browser commands now use arg-lists (no shell-quoting breakage).
+- Fixed dead user commands (NanaTodos, NanaTodosToggle, NanaTerminalToggle now resolve)
+If you do decide to use this config and something breaks, send me a message and I **WILL** fix it immediately. Thank you.
+
 ## We Still Alive
 
 A random dude's minimal and easily customizable neovim config that actually works. Built primarily for Arch but works on most Linux distros and MacOS. Bear with me if something's janky or whatever, I really only fix things as I find them as I use this config daily. I built this for fun initially and to make a small config full of useful tools without too much bloat all while keeping it easy to customize. The idea is to have the most over-glorified, ever evolving neovim config dots possible while remaining easily customizable and well documented should someone else ever decide to give them a shot. Pretty minimal, easy for those who don't want to spend all day configuring neovim to act like an IDE. I'll add random shit as I find it, or find something useful, still a work in progress. Should you trust a random solo dude's configs for nvim? Hell yes.
