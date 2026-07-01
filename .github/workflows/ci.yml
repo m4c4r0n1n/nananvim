@@ -4,6 +4,7 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
   schedule:
     # Test weekly to catch upstream breaking changes
     - cron: '0 0 * * 0'
