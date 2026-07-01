@@ -2,8 +2,7 @@
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
-#UPDATES!!
-
+# UPDATES!!
 I've been slow to update things, I doubt anyone uses this anyway, but I found a few things that could be improved and a few things that could be dropped, I'll revise this About Me one day, but for now, most of this is still true, I've been really lazy on actually posting screenshots or anything like that. Here is a small list of fixes I've made tonight:
 nanabrowser.nvim (plugin core — lua/nanabrowser/init.lua):
 
