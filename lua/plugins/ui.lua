@@ -69,6 +69,7 @@ return {
       { "<leader>fo", function() Snacks.picker.recent() end, desc = "Recent files" },
       { "<leader>fr", function() Snacks.picker.resume() end, desc = "Resume" },
       { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
+      { "<C-\\>", function() Snacks.terminal.toggle() end, desc = "Toggle terminal", mode = { "n", "t" } },
     },
   },
   { "nvim-tree/nvim-web-devicons", lazy = true },
