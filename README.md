@@ -26,16 +26,14 @@ A random dude's minimal and easily customizable neovim config that actually work
 
 ## What's in it?
 
-- **Snacks.nvim**: Dashboard on startup, plus a file picker that can preview images, PDFs, and more right in your terminal (if you're using Kitty)
+- **Snacks.nvim**: Dashboard on startup, plus the fuzzy finder/file picker that can preview images, PDFs, and more right in your terminal (Kitty or Ghostty — anything with the kitty graphics protocol)
 - **Treesitter**: Better syntax highlighting and code navigation for 20+ languages
 - **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, C/C++, HTML/CSS/JSON out of the box)
-- **DAP**: Debug Adapter Protocol support for Python, C/C++/Rust, and JavaScript/TypeScript with DAP UI
-- **Telescope**: Fuzzy finder for live grep, buffers, help tags, and more
+- **DAP**: Debug Adapter Protocol support for Python and C/C++/Rust (via codelldb) with DAP UI
 - **Theme Switcher**: Browse and preview colorschemes in real-time with `<leader>th`
-- **Rose Pine Moon**: Beautiful default theme with pure black background for that clean aesthetic, or your own terminal background color
-- **Codeium**: Free AI code suggestions as you type
-- **Avante.nvim**: AI chat for code (optional, requires API key setup)
-- **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, toggleterm, lualine status bar
+- **Rose Pine Moon**: Default theme, blacked out by default (theme text colors on a pure black background); `<leader>tb` swaps between blackout and the theme's own background
+- **AI (opt-in)**: Codeium inline suggestions + Avante chat, both off by default — flip them on with a `lua/config/local.lua` (see AI setup below)
+- **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, snacks terminal, lualine status bar
 
 ## Screenshots
 
@@ -94,9 +92,9 @@ ln -s $(which fdfind) ~/.local/bin/fd
 ### 3. Install Neovim 0.12.0+
 
 ```bash
-curl -LO https://github.com/neovim/neovim/releases/download/stable/nvim.appimage
-chmod u+x nvim.appimage
-sudo mv nvim.appimage /usr/local/bin/nvim
+curl -fLO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
+chmod u+x nvim-linux-x86_64.appimage
+sudo mv nvim-linux-x86_64.appimage /usr/local/bin/nvim
 ```
 
 ### 4. Clone this config
@@ -152,7 +150,7 @@ Honestly using WSL2 is your best option.
 **For the full experience:**
 
 - **ImageMagick**: Required for inline image previews in Snacks picker
-- **Kitty**: Terminal emulator that supports inline images (WezTerm works too with tweaks)
+- **A kitty-graphics terminal**: Kitty, Ghostty, or WezTerm — anything that speaks the kitty graphics protocol (needed for inline image previews)
 
 **For language servers and formatters:**
 
@@ -163,19 +161,27 @@ Honestly using WSL2 is your best option.
 **For debugging (DAP):**
 
 - **debugpy**: Python debugging (`pip install debugpy`)
-- **lldb-vscode** or **codelldb**: C/C++/Rust debugging (auto-installed via Mason)
-- **node-debug2**: JavaScript/TypeScript debugging (auto-installed via Mason)
+- **codelldb**: C/C++/Rust debugging (auto-installed via Mason; no system lldb needed)
 
 After setup, run `:checkhealth` to see what's working and what's missing.
 
 ## AI Features Setup
 
-nananvim includes **free Codeium** for inline code suggestions - no setup required. If you don't want AI suggestions, you can disable Codeium by removing it from `lua/plugins/coding.lua`.
+AI is **off by default** to keep startup lean and reliable — no binary downloads, no `make` build, nothing loads until you opt in. Both Codeium (inline suggestions) and Avante (chat) are gated behind a single file: `lua/config/local.lua`. Create it and they turn on.
+
+**Just want free Codeium suggestions?** That's the whole setup:
+
+```bash
+mkdir -p ~/.config/nvim/lua/config
+echo 'return {}' > ~/.config/nvim/lua/config/local.lua
+```
+
+For Avante chat, put your provider config in that same file (see below).
 
 ### Codeium (Inline Suggestions)
 
-**Keybindings:**
-- `<Tab>` - Accept suggestion
+**Keybindings** (once enabled):
+- `<Tab>` - Accept suggestion (falls back to the completion menu when it's open, so cmp keeps `<Tab>`)
 - `<M-]>` - Next suggestion
 - `<M-[>` - Previous suggestion
 - `<C-]>` - Dismiss suggestion
@@ -243,12 +249,11 @@ For AI chat (like ChatGPT in nvim), you'll need to configure a provider:
    }
 ```
 
-#### Option 3: Skip AI Chat
+#### Option 3: Skip AI entirely
 
-Just don't create `local.lua` - you'll still get:
-- ✅ Free Codeium suggestions
-- ✅ LSP autocomplete  
-- ✅ All other features
+Just don't create `local.lua` - no AI plugins load at all (no Codeium, no Avante, no build step). You still get:
+- ✅ LSP autocomplete
+- ✅ Everything else in the config
 
 **Avante keybindings** (only if configured):
 - `<leader>aa` - Ask AI
@@ -279,17 +284,10 @@ pip install debugpy
 ```
 
 **C/C++/Rust:**
-Debug adapters auto-install via Mason. For better experience:
-```bash
-# On Arch
-sudo pacman -S lldb
-
-# On Ubuntu
-sudo apt install lldb
-```
+Uses `codelldb`, auto-installed via Mason — no system lldb or extra packages needed.
 
 **JavaScript/TypeScript:**
-Auto-installed via Mason, no additional setup needed.
+Not wired up by default (the old node-debug2 adapter is archived upstream). If you need JS/TS debugging, add `js-debug-adapter` in `lua/plugins/dap.lua`.
 
 ### DAP Keybindings
 
@@ -322,12 +320,12 @@ If you want to understand how this is organized or modify it:
 │   │   ├── init.lua       # Loads all config modules
 │   │   ├── options.lua    # Vim options
 │   │   ├── keymaps.lua    # Global keymaps
-│   │   ├── autocmds.lua   # Autocommands + appearance
+│   │   ├── autocmds.lua   # Autocommands
 │   │   └── commands.lua   # Custom commands
 │   └── plugins/
 │       ├── colorscheme.lua    # Rose Pine Moon theme
 │       ├── ui.lua             # Snacks, bufferline, lualine
-│       ├── editor.lua         # Telescope, neo-tree, which-key
+│       ├── editor.lua         # neo-tree, which-key, sleuth
 │       ├── coding.lua         # Completion, autopairs, Codeium, Avante
 │       ├── lsp.lua            # LSP servers, Mason, formatters
 │       ├── treesitter.lua     # Syntax highlighting
@@ -352,10 +350,11 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 
 ### File Navigation
 
-- `f` - Find files (Telescope)
+- `<leader>f` - Find files (Snacks picker) — note: bare `f` is back to the native find-in-line motion
 - `<leader>fg` - Live grep (search in files)
 - `<leader>fb` - Switch buffers
 - `<leader>fo` - Recent files
+- `<leader>fr` - Resume last picker
 - `<leader>e` - Toggle file explorer (Neo-tree)
 - `H` in Neo-tree to toggle hidden files
 - `<leader>o` - Focus file explorer
@@ -369,7 +368,7 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 - `<leader>ca` - Code actions (quick fixes)
 - `<leader>rn` - Rename symbol
 - `<leader>cf` - Format current buffer
-- `<leader>th` - Toggle inlay hints
+- `<leader>ih` - Toggle inlay hints
 
 ### Debugging (DAP)
 
@@ -384,7 +383,7 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 ### Git
 
 - `]h` / `[h` - Next/previous git hunk
-- `<leader>hs` - Stage hunk
+- `<leader>hs` - Stage / unstage hunk (toggle — run it again on a staged hunk to undo)
 - `<leader>hr` - Reset hunk
 - `<leader>hS` - Stage entire buffer
 - `<leader>hp` - Preview hunk
@@ -393,28 +392,27 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 
 ### Buffer Management
 
-- `<S-h>` / `<S-l>` - Cycle through buffers (Shift + h/l)
-- `[b` / `]b` - Previous/next buffer
+- `[b` / `]b` - Previous/next buffer (bare `H`/`L` are left as their native top/bottom-of-screen motions)
 - `<leader>bp` - Pin buffer
 - `<leader>bo` - Close all other buffers
 - `<leader>bP` - Close all non-pinned buffers
 
 ### Diagnostics & Problems
 
-- `<leader>xx` - Show document diagnostics (Trouble)
-- `<leader>xX` - Show workspace diagnostics
+- `<leader>xx` - Diagnostics (Trouble)
+- `<leader>xX` - Buffer diagnostics (Trouble)
 - `<leader>xL` - Location list
 - `<leader>xQ` - Quickfix list
 - `]t` / `[t` - Next/previous TODO comment
 
 ### Terminal
 
-- `<C-\>` - Toggle floating terminal
+- `<C-\>` - Toggle floating terminal (Snacks terminal)
 
 ### AI Features
 
-**Codeium (always active):**
-- `<Tab>` - Accept suggestion
+**Codeium (only when AI is enabled via `local.lua`):**
+- `<Tab>` - Accept suggestion (yields to the completion menu when it's open)
 - `<M-]>` - Next suggestion
 - `<M-[>` - Previous suggestion
 - `<C-]>` - Dismiss
@@ -427,7 +425,7 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 ### Themes
 
 - `<leader>th` - Theme switcher (browse and preview all themes)
-- `<leader>tb` - Toggle background (Terminal/Blackout)
+- `<leader>tb` - Toggle blackout ⇄ theme background (blacked out by default)
 
 ### Other Useful Stuff
 
@@ -477,8 +475,7 @@ Contributions are welcome! Just read [CONTRIBUTING.md](CONTRIBUTING.md) before s
 This config wouldn't exist without these amazing projects:
 
 - [lazy.nvim](https://github.com/folke/lazy.nvim) - Plugin manager by folke
-- [snacks.nvim](https://github.com/folke/snacks.nvim) - Dashboard & utilities
-- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) - Fuzzy finder
+- [snacks.nvim](https://github.com/folke/snacks.nvim) - Dashboard, picker & utilities
 - [rose-pine](https://github.com/rose-pine/neovim) - Theme
 - [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) - Syntax highlighting
 - [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) - LSP configs

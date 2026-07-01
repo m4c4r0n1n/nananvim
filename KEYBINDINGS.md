@@ -7,13 +7,13 @@ Leader key is `<Space>`.
 ### File & Buffer Navigation
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `f` | Find files | Normal | Telescope file picker |
+| `<leader>f` | Find files | Normal | Snacks picker (bare `f` stays the native find-in-line motion) |
 | `<leader>fg` | Live grep | Normal | Search text in all files |
 | `<leader>fb` | Buffer list | Normal | Show open buffers |
 | `<leader>fo` | Recent files | Normal | Show recently opened files |
+| `<leader>fa` | Find all files (home) | Normal | Include hidden/ignored files under `~` |
 | `<leader>fh` | Help tags | Normal | Search Neovim help |
-| `<leader>th` | Theme switcher | Normal | Browse and select colorschemes |
-| `<leader>fr` | Resume | Normal | Resume last Telescope picker |
+| `<leader>fr` | Resume | Normal | Resume last picker |
 | `<leader>:` | Command history | Normal | Browse command history |
 
 ### Window Navigation
@@ -30,10 +30,8 @@ Leader key is `<Space>`.
 ### Buffer Management
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<S-h>` | Previous buffer | Normal | Cycle to previous buffer |
-| `<S-l>` | Next buffer | Normal | Cycle to next buffer |
-| `[b` | Previous buffer | Normal | Alternative prev buffer |
-| `]b` | Next buffer | Normal | Alternative next buffer |
+| `[b` | Previous buffer | Normal | Cycle to previous buffer |
+| `]b` | Next buffer | Normal | Cycle to next buffer |
 | `<leader>bp` | Pin buffer | Normal | Pin/unpin buffer |
 | `<leader>bP` | Delete non-pinned | Normal | Close all unpinned buffers |
 | `<leader>bo` | Delete others | Normal | Close all other buffers |
@@ -81,11 +79,10 @@ Leader key is `<Space>`.
 |-----|--------|------|-------------|
 | `]h` | Next hunk | Normal | Jump to next git change |
 | `[h` | Previous hunk | Normal | Jump to previous git change |
-| `<leader>hs` | Stage hunk | Normal | Stage current hunk |
+| `<leader>hs` | Stage/unstage hunk | Normal | Toggle staging (run again on a staged hunk to unstage) |
 | `<leader>hr` | Reset hunk | Normal | Undo changes in hunk |
 | `<leader>hS` | Stage buffer | Normal | Stage entire file |
 | `<leader>hR` | Reset buffer | Normal | Undo all changes in file |
-| `<leader>hu` | Undo stage | Normal | Unstage hunk |
 | `<leader>hp` | Preview hunk | Normal | Preview changes in hunk |
 | `<leader>hb` | Blame line | Normal | Show git blame for line |
 | `<leader>hd` | Diff this | Normal | Show diff view |
@@ -107,10 +104,10 @@ Leader key is `<Space>`.
 
 ## AI Features
 
-### Codeium (Free Inline Suggestions)
+### Codeium (Inline Suggestions — opt-in via `lua/config/local.lua`)
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<Tab>` | Accept suggestion | Insert | Accept Codeium suggestion |
+| `<Tab>` | Accept suggestion | Insert | Accept Codeium suggestion (yields to the completion menu when it's open) |
 | `<M-]>` | Next suggestion | Insert | Show next suggestion |
 | `<M-[>` | Previous suggestion | Insert | Show previous suggestion |
 | `<C-]>` | Dismiss | Insert | Dismiss suggestion |
@@ -146,8 +143,8 @@ Leader key is `<Space>`.
 
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<leader>xx` | Document diagnostics | Normal | Show file diagnostics |
-| `<leader>xX` | Workspace diagnostics | Normal | Show all diagnostics |
+| `<leader>xx` | Diagnostics | Normal | All diagnostics (Trouble) |
+| `<leader>xX` | Buffer diagnostics | Normal | Current buffer only (Trouble) |
 | `<leader>xL` | Location list | Normal | Open location list |
 | `<leader>xQ` | Quickfix list | Normal | Open quickfix list |
 | `<leader>xt` | Todo list | Normal | Show all TODOs |
@@ -159,12 +156,11 @@ Leader key is `<Space>`.
 
 **There are TWO terminal options:**
 
-### ToggleTerm (Floating Terminal)
+### Snacks terminal (Floating Terminal)
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
 | `<C-\>` | Toggle terminal | Normal/Terminal | Toggle floating terminal (Ctrl+Backslash) |
 | `<Esc>` | Exit terminal mode | Terminal | Return to normal mode |
-| `<C-h/j/k/l>` | Navigate | Terminal | Navigate from terminal |
 
 ### Nanabrowser Terminal Panel
 | Key | Action | Mode | Description |
@@ -179,7 +175,7 @@ Leader key is `<Space>`.
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
 | `<leader>th` | Theme switcher | Normal | Open theme picker with all installed colorschemes |
-| `<leader>tb` | Toggle background | Normal | Cycle between Terminal, and Blackout backgrounds |
+| `<leader>tb` | Toggle background | Normal | Toggle blackout ⇄ the theme's own background (blacked out by default) |
 
 ### Inside Theme Picker
 | Key | Action | Description |
@@ -197,21 +193,23 @@ Leader key is `<Space>`.
 | `q` / `<Esc>` | Close | Close picker (or exit search mode) |
 
 **Background Modes:**
-- **Blackout**: Force pure black (#000000) background override
-- **Terminal**: Force terminal background override
+- **Blackout** (default): Pure black (#000000) background, keeping the theme's text/foreground colors
+- **Normal**: The theme's own background (`<leader>tb` toggles back to this)
+- **Terminal**: Transparent background (available via `:lua require("theme-switcher").set_background("terminal")`)
 
 ## Nanabrowser (Web Browser + Terminal + TODO Panels)
 
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<leader>p` | Toggle panels | Normal | Toggle all three panels (Browser │ Terminal │ TODO) |
-| `<leader>wb` | Browse URL (w3m) | Normal | Open URL in w3m text browser (read-only) |
-| `<leader>wo` | Open URL (external) | Normal | Open URL in external browser (Firefox/Chrome) |
+| `<leader>p` | Toggle panels | Normal | Toggle Browser / Terminal / TODO (tabbed float by default) |
+| `<Tab>` / `<S-Tab>` | Cycle panels | Panel | Switch between panels in the float layout |
+| `<leader>wb` | Browse URL (in-editor) | Normal | Open URL in the in-editor text browser (auto-detects w3m → lynx → elinks) |
+| `<leader>wo` | Open URL (external) | Normal | Open URL in your external browser |
 | `gx` | Open URL in browser | Normal/Visual | Open URL under cursor in external browser |
 | `<leader>tt` | Open terminal | Normal | Open terminal panel |
 | `<leader>td` | Focus TODO | Normal | Focus TODO panel |
 
-**Note:** w3m browser is read-only in Neovim. Use `gx` or `<leader>wo` for interactive browsing.
+**Note:** The in-editor browser is an interactive text browser (w3m/lynx/elinks). If none is installed it falls back to your external browser automatically. For JS-heavy sites use `gx` or `<leader>wo`.
 
 ## Utility
 
@@ -294,5 +292,5 @@ Smart node-aware selection. Walks the syntax tree, so each press expands to the 
 - Use `:` to enter command mode for more options
 - Press `g?` in any mode for context-specific help
 - The which-key plugin shows available keys when you pause
-- Codeium provides free AI suggestions - just start typing
-- Configure Avante in `lua/config/local.lua` for AI chat features
+- AI is opt-in: create `lua/config/local.lua` to enable Codeium suggestions (`return {}` is enough) and Avante chat
+- Configure Avante's provider in that same `lua/config/local.lua`
