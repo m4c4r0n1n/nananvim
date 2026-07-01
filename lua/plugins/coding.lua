@@ -2,6 +2,16 @@
 -- lua/config/local.lua. Keeps fresh installs lean: no binary download, no
 -- `make` build, and no eager load unless you actually want AI.
 local ai_enabled = vim.fn.filereadable(vim.fn.stdpath("config") .. "/lua/config/local.lua") == 1
+local extras = require("config.extras")
+
+-- Nerd-font icons for completion kinds (only used when extras.cmp_rich is on).
+local kind_icons = {
+  Text = "󰉿", Method = "󰆧", Function = "󰊕", Constructor = "", Field = "󰜢",
+  Variable = "󰀫", Class = "󰠱", Interface = "", Module = "", Property = "󰜢",
+  Unit = "󰑭", Value = "󰎠", Enum = "", Keyword = "󰌋", Snippet = "",
+  Color = "󰏘", File = "󰈙", Reference = "󰈇", Folder = "󰉋", EnumMember = "",
+  Constant = "󰏿", Struct = "󰙅", Event = "", Operator = "󰆕", TypeParameter = "",
+}
 
 return {
   {
@@ -47,23 +57,34 @@ return {
             end
           end, { "i", "s" }),
         }),
-        sources = cmp.config.sources({
+        sources = cmp.config.sources(vim.list_extend({
           { name = "nvim_lsp" },
           { name = "luasnip" },
           { name = "buffer" },
           { name = "path" },
-        }),
+        }, extras.cmp_extra_sources or {})),
         formatting = {
           format = function(entry, vim_item)
-            vim_item.menu = ({
+            local menu = ({
               nvim_lsp = "[LSP]",
               luasnip = "[Snippet]",
               buffer = "[Buffer]",
               path = "[Path]",
-            })[entry.source.name]
+            })[entry.source.name] or ("[" .. entry.source.name .. "]")
+            vim_item.menu = menu
+            -- Rich UI: prefix the kind with a nerd-font icon.
+            if extras.cmp_rich and kind_icons[vim_item.kind] then
+              vim_item.kind = kind_icons[vim_item.kind] .. " " .. vim_item.kind
+            end
             return vim_item
           end,
         },
+        -- Rich UI: bordered menu + docs and inline ghost text preview.
+        window = extras.cmp_rich and {
+          completion = cmp.config.window.bordered(),
+          documentation = cmp.config.window.bordered(),
+        } or {},
+        experimental = { ghost_text = extras.cmp_rich },
       })
     end,
   },

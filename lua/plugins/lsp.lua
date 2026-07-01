@@ -1,3 +1,5 @@
+local extras = require("config.extras")
+
 return {
   {
     "williamboman/mason.nvim",
@@ -203,16 +205,30 @@ return {
     "WhoIsSethDaniel/mason-tool-installer.nvim",
     lazy = false,
     dependencies = { "williamboman/mason.nvim" },
-    opts = {
-      ensure_installed = {
+    opts = function()
+      -- Formatters (conform) are always installed.
+      local tools = {
         "prettierd",
         "prettier",
         "black",
         "isort",
         "clang-format",
-      },
-      auto_update = false,
-      run_on_start = true,
-    },
+      }
+      -- Linters (nvim-lint) auto-install so linting works out of the box.
+      -- Matches the filetypes wired in lua/plugins/lint.lua.
+      if extras.lint then
+        vim.list_extend(tools, {
+          "shellcheck",
+          "markdownlint",
+          "hadolint",
+          "yamllint",
+        })
+      end
+      return {
+        ensure_installed = tools,
+        auto_update = false,
+        run_on_start = true,
+      }
+    end,
   },
 }

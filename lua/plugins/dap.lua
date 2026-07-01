@@ -1,3 +1,9 @@
+-- Graphical debugger (nvim-dap + dap-ui). Gated by the extras switch — returns
+-- an empty spec when disabled. Loads only on the <leader>d* keys.
+if not require("config.extras").dap then
+  return {}
+end
+
 return {
   {
     "mfussenegger/nvim-dap",
@@ -223,6 +229,16 @@ return {
       dap.configurations.c = dap.configurations.cpp
       dap.configurations.rust = dap.configurations.cpp
 
+      -- Zero-boilerplate per-project debugging: any project that ships a
+      -- .vscode/launch.json gets its configs loaded automatically, mapped onto
+      -- the adapters above — no Lua editing per project.
+      pcall(function()
+        require("dap.ext.vscode").load_launchjs(nil, {
+          codelldb = { "c", "cpp", "rust" },
+          python = { "python" },
+        })
+      end)
+
       -- JS/TS debugging intentionally omitted: node-debug2-adapter is archived
       -- upstream and js-debug-adapter isn't shipped by default. Wire up
       -- vscode-js-debug here if you need it.
@@ -242,7 +258,9 @@ return {
             "python",
             "codelldb", -- C/C++/Rust
           },
-          automatic_installation = false,
+          -- Install a debug adapter on demand the first time it's needed, so
+          -- debugging a new language works without hand-wiring mason.
+          automatic_installation = true,
           handlers = {},
         })
       end, 1000) -- Wait 1 second after Mason is ready
