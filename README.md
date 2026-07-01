@@ -29,11 +29,30 @@ A random dude's minimal and easily customizable neovim config that actually work
 - **Snacks.nvim**: Dashboard on startup, plus the fuzzy finder/file picker that can preview images, PDFs, and more right in your terminal (Kitty or Ghostty — anything with the kitty graphics protocol)
 - **Treesitter**: Better syntax highlighting and code navigation for 20+ languages
 - **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, C/C++, HTML/CSS/JSON out of the box)
-- **DAP**: Debug Adapter Protocol support for Python and C/C++/Rust (via codelldb) with DAP UI
+- **Completion**: nvim-cmp with kind icons, bordered menu/docs, and inline ghost text — plus a hook to append your own sources
+- **Linting**: nvim-lint layered on top of LSP (shellcheck, markdownlint, hadolint, yamllint auto-installed); add a linter by adding one table entry
+- **DAP**: Debug Adapter Protocol support for Python and C/C++/Rust (via codelldb) with DAP UI, and automatic `.vscode/launch.json` loading per project
 - **Theme Switcher**: Browse and preview colorschemes in real-time with `<leader>th`
 - **Rose Pine Moon**: Default theme, blacked out by default (theme text colors on a pure black background); `<leader>tb` swaps between blackout and the theme's own background
 - **AI (opt-in)**: Codeium inline suggestions + Avante chat, both off by default — flip them on with a `lua/config/local.lua` (see AI setup below)
 - **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, snacks terminal, lualine status bar
+
+### Extras switch
+
+The richer completion UI, standalone linting, and the DAP layer are all wired
+through a single master switch at `lua/config/extras.lua`. They're **on by
+default** but still fully lazy-loaded — the flags only decide whether a feature's
+trigger is armed, not whether it loads at startup. Flip any to `false` to make it
+genuinely gone on a lean machine:
+
+```lua
+return {
+  cmp_rich = true, -- kind icons, bordered menus, ghost text
+  lint = true,     -- nvim-lint linters + auto-installed tools
+  dap = true,      -- nvim-dap + dap-ui + .vscode/launch.json
+  cmp_extra_sources = {}, -- append your own cmp sources here
+}
+```
 
 ## Screenshots
 
