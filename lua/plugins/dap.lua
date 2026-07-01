@@ -196,17 +196,20 @@ return {
         },
       }
 
-      -- C/C++/Rust (using lldb)
-      dap.adapters.lldb = {
-        type = "executable",
-        command = "/usr/bin/lldb-vscode", -- Adjust path as needed
-        name = "lldb",
+      -- C/C++/Rust via codelldb (installed by mason-nvim-dap below)
+      dap.adapters.codelldb = {
+        type = "server",
+        port = "${port}",
+        executable = {
+          command = vim.fn.stdpath("data") .. "/mason/bin/codelldb",
+          args = { "--port", "${port}" },
+        },
       }
 
       dap.configurations.cpp = {
         {
           name = "Launch",
-          type = "lldb",
+          type = "codelldb",
           request = "launch",
           program = function()
             return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
@@ -220,33 +223,9 @@ return {
       dap.configurations.c = dap.configurations.cpp
       dap.configurations.rust = dap.configurations.cpp
 
-      -- Node.js/TypeScript
-      dap.adapters.node2 = {
-        type = "executable",
-        command = "node",
-        args = { vim.fn.stdpath("data") .. "/mason/packages/node-debug2-adapter/out/src/nodeDebug.js" },
-      }
-
-      dap.configurations.javascript = {
-        {
-          name = "Launch",
-          type = "node2",
-          request = "launch",
-          program = "${file}",
-          cwd = vim.fn.getcwd(),
-          sourceMaps = true,
-          protocol = "inspector",
-          console = "integratedTerminal",
-        },
-        {
-          name = "Attach to process",
-          type = "node2",
-          request = "attach",
-          processId = require("dap.utils").pick_process,
-        },
-      }
-
-      dap.configurations.typescript = dap.configurations.javascript
+      -- JS/TS debugging intentionally omitted: node-debug2-adapter is archived
+      -- upstream and js-debug-adapter isn't shipped by default. Wire up
+      -- vscode-js-debug here if you need it.
     end,
   },
 
@@ -262,7 +241,6 @@ return {
           ensure_installed = {
             "python",
             "codelldb", -- C/C++/Rust
-            "node2", -- JavaScript/TypeScript
           },
           automatic_installation = false,
           handlers = {},

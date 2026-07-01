@@ -5,7 +5,8 @@ opt.number = true
 opt.relativenumber = true
 opt.numberwidth = 4
 
--- Tabs & indentation
+-- Tabs & indentation (fallbacks only: vim-sleuth auto-detects and overrides
+-- tabstop/shiftwidth/expandtab per-buffer from file contents)
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
@@ -23,8 +24,8 @@ opt.smartcase = true
 opt.hlsearch = true
 opt.incsearch = true
 
--- Cursor line
-opt.cursorline = true
+-- Cursor line (disabled globally; the theme-switcher enables it in its picker)
+opt.cursorline = false
 
 -- Appearance
 opt.termguicolors = true

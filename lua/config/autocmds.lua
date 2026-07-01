@@ -5,14 +5,18 @@ vim.api.nvim_create_autocmd("TextYankPost", {
     vim.hl.on_yank()
   end,
 })
--- Disable cursor line highlighting
-vim.opt.cursorline = false
-vim.opt.cursorcolumn = false
-
--- Set background
+-- Extra "blackout" polish for UI groups the theme-switcher itself doesn't
+-- cover (telescope/neo-tree/pmenu/diagnostics/borders). Gated behind the
+-- switcher's own bg_mode so normal/terminal themes render untouched — the
+-- switcher owns the blackout state, this just extends it.
 vim.api.nvim_create_autocmd("ColorScheme", {
   pattern = "*",
   callback = function()
+    local ok, switcher = pcall(require, "theme-switcher")
+    if not ok or not switcher.state or switcher.state.bg_mode ~= "blackout" then
+      return
+    end
+
     local black_groups = {
       "Normal",
       "NormalFloat",
@@ -20,8 +24,6 @@ vim.api.nvim_create_autocmd("ColorScheme", {
       "SignColumn",
       "LineNr",
       "CursorLineNr",
-      "CursorLine",
-      "CursorColumn",
       "ColorColumn",
       "Folded",
       "FoldColumn",
