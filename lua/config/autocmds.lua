@@ -6,7 +6,7 @@ vim.api.nvim_create_autocmd("TextYankPost", {
   end,
 })
 -- Extra "blackout" polish for UI groups the theme-switcher itself doesn't
--- cover (telescope/neo-tree/pmenu/diagnostics/borders). Gated behind the
+-- cover (neo-tree/pmenu/diagnostics/borders). Gated behind the
 -- switcher's own bg_mode so normal/terminal themes render untouched — the
 -- switcher owns the blackout state, this just extends it.
 vim.api.nvim_create_autocmd("ColorScheme", {
@@ -45,11 +45,6 @@ vim.api.nvim_create_autocmd("ColorScheme", {
       "SnacksNotifierError",
       "SnacksNotifierDebug",
       "SnacksNotifierTrace",
-      -- Telescope
-      "TelescopeNormal",
-      "TelescopePromptNormal",
-      "TelescopeResultsNormal",
-      "TelescopePreviewNormal",
       -- Completion menu
       "Pmenu",
       "PmenuSbar",
@@ -66,12 +61,6 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "FloatBorder", { fg = "#5E81AC", bg = "#000000" })
     vim.api.nvim_set_hl(0, "NeoTreeVertSplit", { fg = "#5E81AC", bg = "#000000" })
     vim.api.nvim_set_hl(0, "NeoTreeWinSeparator", { fg = "#5E81AC", bg = "#000000" })
-
-    -- Telescope borders
-    vim.api.nvim_set_hl(0, "TelescopeBorder", { fg = "#5E81AC", bg = "#000000" })
-    vim.api.nvim_set_hl(0, "TelescopePromptBorder", { fg = "#5E81AC", bg = "#000000" })
-    vim.api.nvim_set_hl(0, "TelescopeResultsBorder", { fg = "#5E81AC", bg = "#000000" })
-    vim.api.nvim_set_hl(0, "TelescopePreviewBorder", { fg = "#5E81AC", bg = "#000000" })
 
     -- Make main window separators invisible (between code splits)
     vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#000000", bg = "#000000" })

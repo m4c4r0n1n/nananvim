@@ -32,7 +32,10 @@ return {
           "jsonls",
           "clangd",
         },
-        automatic_installation = true,
+        -- mason-lspconfig 3.x: automatic_installation was replaced by
+        -- automatic_enable. Servers are configured + enabled explicitly in
+        -- nvim-lspconfig below, so keep this off to avoid double-enabling.
+        automatic_enable = false,
       })
     end,
   },
@@ -162,21 +165,6 @@ return {
           end, { buffer = ev.buf, desc = "Toggle Inlay Hints" })
         end,
       })
-
-      -- Auto-enable inlay hints on filetype set
-      vim.api.nvim_create_autocmd("FileType", {
-        group = vim.api.nvim_create_augroup("InlayHintsOnFiletype", {}),
-        callback = function(ev)
-          vim.defer_fn(function()
-            local clients = vim.lsp.get_clients({ bufnr = ev.buf })
-            for _, client in ipairs(clients) do
-              if client.server_capabilities.inlayHintProvider then
-                vim.lsp.inlay_hint.enable(true, { bufnr = ev.buf })
-              end
-            end
-          end, 100)
-        end,
-      })
     end,
   },
   {
@@ -197,11 +185,11 @@ return {
       formatters_by_ft = {
         lua = { "stylua" },
         python = { "isort", "black" },
-        javascript = { { "prettierd", "prettier" } },
-        typescript = { { "prettierd", "prettier" } },
-        json = { { "prettierd", "prettier" } },
-        html = { { "prettierd", "prettier" } },
-        css = { { "prettierd", "prettier" } },
+        javascript = { "prettierd", "prettier", stop_after_first = true },
+        typescript = { "prettierd", "prettier", stop_after_first = true },
+        json = { "prettierd", "prettier", stop_after_first = true },
+        html = { "prettierd", "prettier", stop_after_first = true },
+        css = { "prettierd", "prettier", stop_after_first = true },
         c = { "clang-format" },
         cpp = { "clang-format" },
       },

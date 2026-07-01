@@ -59,6 +59,17 @@ return {
         },
       }
     end,
+    keys = {
+      { "<leader>f", function() Snacks.picker.files() end, desc = "Find files (cwd)" },
+      { "<leader>ff", function() Snacks.picker.files({ cwd = vim.fn.expand("~") }) end, desc = "Find files (home)" },
+      { "<leader>fa", function() Snacks.picker.files({ cwd = vim.fn.expand("~"), hidden = true, ignored = true }) end, desc = "Find all files (home)" },
+      { "<leader>fg", function() Snacks.picker.grep() end, desc = "Live grep" },
+      { "<leader>fb", function() Snacks.picker.buffers() end, desc = "Buffers" },
+      { "<leader>fh", function() Snacks.picker.help() end, desc = "Help tags" },
+      { "<leader>fo", function() Snacks.picker.recent() end, desc = "Recent files" },
+      { "<leader>fr", function() Snacks.picker.resume() end, desc = "Resume" },
+      { "<leader>:", function() Snacks.picker.command_history() end, desc = "Command History" },
+    },
   },
   { "nvim-tree/nvim-web-devicons", lazy = true },
   {
@@ -68,8 +79,6 @@ return {
       { "<leader>bp", "<Cmd>BufferLineTogglePin<CR>", desc = "Toggle pin" },
       { "<leader>bP", "<Cmd>BufferLineGroupClose ungrouped<CR>", desc = "Delete non-pinned buffers" },
       { "<leader>bo", "<Cmd>BufferLineCloseOthers<CR>", desc = "Delete other buffers" },
-      { "<S-h>", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer" },
-      { "<S-l>", "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer" },
       { "[b", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer" },
       { "]b", "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer" },
     },

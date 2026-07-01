@@ -199,9 +199,9 @@ install_dependencies_ubuntu() {
     # Install Neovim AppImage if version is old
     if ! check_command "nvim" || ! version_compare "$(nvim --version | head -1 | cut -d' ' -f2)" "$MIN_NVIM_VERSION"; then
         print_info "Installing Neovim 0.10+ via AppImage..."
-        curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-        chmod u+x nvim.appimage
-        sudo mv nvim.appimage /usr/local/bin/nvim
+        curl -fLO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
+        chmod u+x nvim-linux-x86_64.appimage
+        sudo mv nvim-linux-x86_64.appimage /usr/local/bin/nvim
     fi
     
     # Install lazygit

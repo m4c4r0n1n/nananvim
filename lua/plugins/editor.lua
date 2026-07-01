@@ -25,6 +25,8 @@ return {
       enable_diagnostics = true,
       filesystem = {
         follow_current_file = { enabled = true },
+        -- neo-tree hijacks directory buffers itself (independent of netrw);
+        -- "open_current" makes `:e <dir>` open the tree in the current window.
         hijack_netrw_behavior = "open_current",
         use_libuv_file_watcher = true,
       },
@@ -35,113 +37,6 @@ return {
         },
       },
     },
-  },
-  {
-    "nvim-telescope/telescope.nvim",
-    cmd = "Telescope",
-    dependencies = {
-      "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons",
-    },
-    keys = {
-      { "<leader>f", "<cmd>Telescope find_files<cr>", desc = "Find files (cwd)" },
-      { "<leader>ff", "<cmd>Telescope find_files cwd=~<cr>", desc = "Find files (home)" },
-      {
-        "<leader>fa",
-        "<cmd>Telescope find_files hidden=true no_ignore=true cwd=~<cr>",
-        desc = "Find all files (home)",
-      },
-      { "<leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
-      { "<leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
-      { "<leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
-      { "<leader>fo", "<cmd>Telescope oldfiles<cr>", desc = "Recent files" },
-      { "<leader>fr", "<cmd>Telescope resume<cr>", desc = "Resume" },
-      { "<leader>:", "<cmd>Telescope command_history<cr>", desc = "Command History" },
-    },
-    opts = function()
-      local actions = require("telescope.actions")
-      return {
-        defaults = {
-          prompt_prefix = "  ",
-          selection_caret = " ",
-          entry_prefix = "  ",
-          sorting_strategy = "ascending",
-          layout_strategy = "horizontal",
-          layout_config = {
-            horizontal = {
-              prompt_position = "top",
-              preview_width = 0.55,
-              results_width = 0.8,
-            },
-            vertical = { mirror = false },
-            width = 0.87,
-            height = 0.80,
-            preview_cutoff = 120,
-          },
-          file_ignore_patterns = {
-            "%.git/",
-            "node_modules/",
-            "%.cache/",
-            "%.npm/",
-            "%.cargo/",
-            "%.rustup/",
-            "__pycache__/",
-          },
-          path_display = { "truncate" },
-          winblend = 0,
-          border = {},
-          borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
-          color_devicons = true,
-          set_env = { ["COLORTERM"] = "truecolor" },
-          mappings = {
-            i = {
-              ["<C-n>"] = actions.cycle_history_next,
-              ["<C-p>"] = actions.cycle_history_prev,
-              ["<C-j>"] = actions.move_selection_next,
-              ["<C-k>"] = actions.move_selection_previous,
-              ["<C-c>"] = actions.close,
-              ["<Down>"] = actions.move_selection_next,
-              ["<Up>"] = actions.move_selection_previous,
-              ["<CR>"] = actions.select_default,
-              ["<C-x>"] = actions.select_horizontal,
-              ["<C-v>"] = actions.select_vertical,
-              ["<C-t>"] = actions.select_tab,
-              ["<C-u>"] = actions.preview_scrolling_up,
-              ["<C-d>"] = actions.preview_scrolling_down,
-            },
-            n = {
-              ["<esc>"] = actions.close,
-              ["<CR>"] = actions.select_default,
-              ["<C-x>"] = actions.select_horizontal,
-              ["<C-v>"] = actions.select_vertical,
-              ["<C-t>"] = actions.select_tab,
-              ["j"] = actions.move_selection_next,
-              ["k"] = actions.move_selection_previous,
-              ["H"] = actions.move_to_top,
-              ["M"] = actions.move_to_middle,
-              ["L"] = actions.move_to_bottom,
-              ["gg"] = actions.move_to_top,
-              ["G"] = actions.move_to_bottom,
-              ["<C-u>"] = actions.preview_scrolling_up,
-              ["<C-d>"] = actions.preview_scrolling_down,
-            },
-          },
-        },
-        pickers = {
-          find_files = {
-            hidden = true,
-            follow = true,
-          },
-          buffers = {
-            initial_mode = "normal",
-            mappings = {
-              i = { ["<C-d>"] = actions.delete_buffer },
-              n = { ["dd"] = actions.delete_buffer },
-            },
-          },
-        },
-      }
-    end,
   },
   {
     "akinsho/toggleterm.nvim",
