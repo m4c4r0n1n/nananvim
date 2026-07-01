@@ -150,9 +150,6 @@ opt.confirm = true
 -- Better completion experience
 opt.wildmenu = true
 
--- Hide command line when not in use
-opt.cmdheight = 1
-
 -- Preserve cursor position
 opt.jumpoptions = "view"
 

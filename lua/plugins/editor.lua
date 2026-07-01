@@ -44,7 +44,7 @@ return {
       "nvim-tree/nvim-web-devicons",
     },
     keys = {
-      { "f", "<cmd>Telescope find_files<cr>", desc = "Find files (cwd)" },
+      { "<leader>f", "<cmd>Telescope find_files<cr>", desc = "Find files (cwd)" },
       { "<leader>ff", "<cmd>Telescope find_files cwd=~<cr>", desc = "Find files (home)" },
       {
         "<leader>fa",

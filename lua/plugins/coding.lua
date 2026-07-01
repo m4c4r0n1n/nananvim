@@ -1,3 +1,8 @@
+-- AI plugins (codeium + avante) load only when you opt in by creating
+-- lua/config/local.lua. Keeps fresh installs lean: no binary download, no
+-- `make` build, and no eager load unless you actually want AI.
+local ai_enabled = vim.fn.filereadable(vim.fn.stdpath("config") .. "/lua/config/local.lua") == 1
+
 return {
   {
     "hrsh7th/nvim-cmp",
@@ -84,14 +89,23 @@ return {
     opts = {},
   },
 
-  -- Codeium.vim (AI suggestions)
+  -- Codeium.vim (AI suggestions) - opt-in, see ai_enabled above
   {
     "Exafunction/codeium.vim",
     event = "InsertEnter",
+    enabled = ai_enabled,
     config = function()
       vim.g.codeium_disable_bindings = 1
 
+      -- Accept a codeium suggestion, but yield <Tab> to nvim-cmp while its
+      -- completion menu is open (otherwise codeium silently steals cmp's
+      -- Tab-to-cycle behaviour).
       vim.keymap.set("i", "<Tab>", function()
+        local ok, cmp = pcall(require, "cmp")
+        if ok and cmp.visible() then
+          cmp.select_next_item()
+          return ""
+        end
         return vim.fn["codeium#Accept"]()
       end, { expr = true, silent = true })
 
@@ -124,10 +138,8 @@ return {
   -- To enable: create lua/config/local.lua and add your provider config
   {
     "yetone/avante.nvim",
-    event = "VeryLazy",
-    lazy = false,
     version = false,
-    enabled = vim.fn.filereadable(vim.fn.stdpath("config") .. "/lua/config/local.lua") == 1,
+    enabled = ai_enabled,
     opts = function()
       -- Try to load personal config, otherwise use defaults
       local ok, local_config = pcall(require, "config.local")
