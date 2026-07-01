@@ -3,7 +3,7 @@
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
 # UPDATES!!
-I've been slow to update things, I doubt anyone uses this anyway, but I found a few things that could be improved and a few things that could be dropped, I'll revise this About Me one day, but for now, most of this is still true, I've been really lazy on actually posting screenshots or anything like that. Here is a small list of fixes I've made tonight:
+I've been slow to update things, I doubt anyone uses this anyway, but I found a few things that could be improved and a few things that could be dropped. I'll revise this About Me one day but for now most of this is still true. I've been really lazy on actually posting screenshots or anything like that. Here is a small list of fixes I've made tonight:
 nanabrowser.nvim (plugin core — lua/nanabrowser/init.lua):
 
 - Future-proofed for Neovim 0.11/0.12: replaced deprecated termopen() → jobstart({term=true}) and all nvim_buf_set_option → nvim_set_option_value; added a nvim-0.10+ version guard.
