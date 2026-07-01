@@ -13,6 +13,11 @@ nanabrowser.nvim (plugin core — lua/nanabrowser/init.lua):
 - External-browser detection via $BROWSER → xdg-open → common browsers; browser commands now use arg-lists (no shell-quoting breakage).
 - Fixed dead user commands (NanaTodos, NanaTodosToggle, NanaTerminalToggle now resolve)
 
+
+
+
+
+
 If you do decide to use this config and something breaks, send me a message and I **WILL** fix it immediately. Thank you.
 
 ## We Still Alive
