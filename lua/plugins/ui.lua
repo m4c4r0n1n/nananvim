@@ -4,6 +4,13 @@ return {
     priority = 1000,
     lazy = false,
     opts = function()
+      -- snacks.image detects ghostty only via a live terminal query, which can
+      -- miss. Ghostty always sets TERM_PROGRAM, so declare kitty-graphics
+      -- support explicitly (SNACKS_GHOSTTY is snacks' own detection override).
+      if vim.env.TERM_PROGRAM == "ghostty" then
+        vim.env.SNACKS_GHOSTTY = "1"
+      end
+
       -- Try to load custom dashboard
       local ok, custom = pcall(require, "config.dashboard")
       local header = [[
