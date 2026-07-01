@@ -148,11 +148,11 @@ install_dependencies_arch() {
         lazygit
         tree-sitter-cli
     )
-    
+
     if ! check_command "kitty"; then
         packages+=(kitty)
     fi
-    
+
     sudo pacman -S --needed --noconfirm "${packages[@]}" || {
         print_error "Failed to install packages"
         return 1
@@ -252,11 +252,11 @@ install_dependencies_fedora() {
         lazygit
         tree-sitter-cli
     )
-    
+
     if ! check_command "kitty"; then
         packages+=(kitty)
     fi
-    
+
     sudo dnf install -y "${packages[@]}" || {
         print_error "Failed to install packages"
         return 1
@@ -296,6 +296,32 @@ install_dependencies_macos() {
     }
     
     print_success "Dependencies installed"
+}
+
+install_optional_browser() {
+    # w3m powers nanabrowser's in-editor text browser. It is optional:
+    # nanabrowser falls back to the external browser if w3m is missing, so a
+    # failure here must never abort the install.
+    if check_command "w3m"; then
+        print_success "w3m already installed"
+        return 0
+    fi
+
+    print_info "Installing w3m (optional in-editor text browser)..."
+    case "$OS" in
+        arch)                        sudo pacman -S --needed --noconfirm w3m ;;
+        ubuntu|debian|pop|linuxmint) sudo apt install -y w3m ;;
+        fedora)                      sudo dnf install -y w3m ;;
+        macos)                       brew install w3m ;;
+        *)                           false ;;
+    esac
+
+    if check_command "w3m"; then
+        print_success "w3m installed"
+    else
+        print_warning "w3m not installed; the in-editor browser will use your external browser instead"
+    fi
+    return 0
 }
 
 check_neovim_version() {
@@ -431,7 +457,7 @@ main() {
             print_warning "Gentoo support coming soon! Please install dependencies manually:"
             echo "  emerge -av app-editors/neovim sys-apps/ripgrep sys-apps/fd"
             echo "  emerge -av media-gfx/imagemagick net-libs/nodejs"
-            echo "  emerge -av dev-lang/python sys-devel/clang"
+            echo "  emerge -av dev-lang/python sys-devel/clang www-client/w3m"
             exit 0
             ;;
         *)
@@ -442,6 +468,9 @@ main() {
             ;;
     esac
     
+    # Optional: in-editor text browser (non-fatal)
+    install_optional_browser
+
     # Check Neovim version
     check_neovim_version || exit 1
     
