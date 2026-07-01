@@ -8,7 +8,7 @@ return {
         -- nil = auto-detect. text browser falls back to external if none installed.
         text_browser = nil, -- w3m > lynx > elinks
         external_browser = nil, -- $BROWSER > xdg-open > brave/chromium/firefox
-        layout = "float", -- "float" (tabbed, no column theft) | "split"
+        layout = "auto", -- "auto" (side-by-side if wide enough, else tabbed) | "float" | "split"
         reader_mode = false, -- true = static readable dump, great for docs
         float = { width = 0.85, height = 0.85, border = "rounded" },
         split = { position = "botright", size = 0.35 }, -- fraction of screen height
