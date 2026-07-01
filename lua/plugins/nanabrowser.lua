@@ -17,6 +17,7 @@ return {
     end,
     keys = {
       { "<leader>p", function() require("nanabrowser").toggle_panels() end, desc = "Toggle panels" },
+      { "<leader>pz", function() require("nanabrowser").toggle_zoom() end, desc = "Zoom panel (focus one / show all)" },
       { "<leader>wb", function() require("nanabrowser").open_browser_prompt() end, desc = "Browse URL (in-editor)" },
       { "<leader>wo", function() require("nanabrowser").open_external_prompt() end, desc = "Open URL (external)" },
       { "gx", function() require("nanabrowser").open_external_cursor() end, desc = "Open URL in browser", mode = { "n", "v" } },
