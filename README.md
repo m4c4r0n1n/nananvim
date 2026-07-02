@@ -3,22 +3,7 @@
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
 # UPDATES!!
-I've been slow to update things, I doubt anyone uses this anyway, but I found a few things that could be improved and a few things that could be dropped. I've been really lazy on actually posting updated screenshots or anything like that, but I've fixed the About Me at least. Here is a small list of fixes I've made tonight:
-
-
-
-nanabrowser.nvim (plugin core — lua/nanabrowser/init.lua):
-
-- Future-proofed for Neovim 0.11/0.12: replaced deprecated termopen() → jobstart({term=true}) and all nvim_buf_set_option → nvim_set_option_value; added a nvim-0.10+ version guard.
-- New float layout (default): one centered, tabbed window (<Tab>/<S-Tab> to cycle Browser/Terminal/TODO) — no permanent column theft. Classic split layout still available, now sized as a fraction of the screen and reflows correctly on open/close.
-- Browser now auto-detects a text browser (w3m → lynx → elinks) and gracefully falls back to the external browser if none is installed (previously it just errored).
-- Added optional reader mode (-dump into a real buffer) for readable docs.
-- External-browser detection via $BROWSER → xdg-open → common browsers; browser commands now use arg-lists (no shell-quoting breakage).
-- Fixed dead user commands (NanaTodos, NanaTodosToggle, NanaTerminalToggle now resolve)
-
-
-
-
+I've been slow to update things, I doubt anyone uses this anyway, but I found a few things that could be improved and a few things that could be dropped. I've been really lazy on actually posting updated screenshots or anything like that, but I've fixed the About Me at least.
 
 
 If you do decide to use this config and something breaks, send me a message and I **WILL** fix it immediately. Thank you.
@@ -29,22 +14,22 @@ A random dude's minimal and easily customizable neovim config that actually work
 
 ## What's in it?
 
-- **Snacks.nvim**: Dashboard on startup, plus the fuzzy finder/file picker that can preview images, PDFs, and more right in your terminal (Kitty or Ghostty — anything with the kitty graphics protocol)
+- **Snacks.nvim**: Dashboard on startup, plus the fuzzy finder/file picker that can preview images, PDFs, and more right in your terminal (Kitty or Ghostty, anything with the kitty graphics protocol)
 - **Treesitter**: Better syntax highlighting and code navigation for 20+ languages
 - **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, C/C++, HTML/CSS/JSON out of the box)
-- **Completion**: nvim-cmp with kind icons, bordered menu/docs, and inline ghost text — plus a hook to append your own sources
+- **Completion**: nvim-cmp with kind icons, bordered menu/docs, and inline ghost text, plus a hook to append your own sources
 - **Linting**: nvim-lint layered on top of LSP (shellcheck, markdownlint, hadolint, yamllint auto-installed); add a linter by adding one table entry
 - **DAP**: Debug Adapter Protocol support for Python and C/C++/Rust (via codelldb) with DAP UI, and automatic `.vscode/launch.json` loading per project
 - **Theme Switcher**: Browse and preview colorschemes in real-time with `<leader>th`
 - **Rose Pine Moon**: Default theme, blacked out by default (theme text colors on a pure black background); `<leader>tb` swaps between blackout and the theme's own background
-- **AI (opt-in)**: Codeium inline suggestions + Avante chat, both off by default — flip them on with a `lua/config/local.lua` (see AI setup below)
+- **AI (opt-in)**: Codeium inline suggestions + Avante chat, both off by default, flip them on with a `lua/config/local.lua` (see AI setup below)
 - **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, snacks terminal, lualine status bar
 
 ### Extras switch
 
 The richer completion UI, standalone linting, and the DAP layer are all wired
 through a single master switch at `lua/config/extras.lua`. They're **on by
-default** but still fully lazy-loaded — the flags only decide whether a feature's
+default** but still fully lazy-loaded, the flags only decide whether a feature's
 trigger is armed, not whether it loads at startup. Flip any to `false` to make it
 genuinely gone on a lean machine:
 
