@@ -149,7 +149,8 @@ install_dependencies_arch() {
         tree-sitter-cli
     )
 
-    if ! check_command "kitty"; then
+    # kitty is only for image previews (kitty graphics protocol); ghostty speaks it too
+    if ! check_command "kitty" && ! check_command "ghostty"; then
         packages+=(kitty)
     fi
 
@@ -180,7 +181,8 @@ install_dependencies_ubuntu() {
         build-essential
     )
     
-    if ! check_command "kitty"; then
+    # kitty is only for image previews (kitty graphics protocol); ghostty speaks it too
+    if ! check_command "kitty" && ! check_command "ghostty"; then
         packages+=(kitty)
     fi
     
@@ -198,7 +200,7 @@ install_dependencies_ubuntu() {
     
     # Install Neovim AppImage if version is old
     if ! check_command "nvim" || ! version_compare "$(nvim --version | head -1 | cut -d' ' -f2)" "$MIN_NVIM_VERSION"; then
-        print_info "Installing Neovim 0.10+ via AppImage..."
+        print_info "Installing Neovim ${MIN_NVIM_VERSION}+ via AppImage..."
         curl -fLO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
         chmod u+x nvim-linux-x86_64.appimage
         sudo mv nvim-linux-x86_64.appimage /usr/local/bin/nvim
@@ -253,7 +255,8 @@ install_dependencies_fedora() {
         tree-sitter-cli
     )
 
-    if ! check_command "kitty"; then
+    # kitty is only for image previews (kitty graphics protocol); ghostty speaks it too
+    if ! check_command "kitty" && ! check_command "ghostty"; then
         packages+=(kitty)
     fi
 
@@ -286,7 +289,8 @@ install_dependencies_macos() {
         tree-sitter
     )
     
-    if ! check_command "kitty"; then
+    # kitty is only for image previews (kitty graphics protocol); ghostty speaks it too
+    if ! check_command "kitty" && ! check_command "ghostty"; then
         packages+=(kitty)
     fi
     
@@ -401,11 +405,11 @@ post_install_message() {
     echo -e "${CYAN}Next steps:${NC}"
     echo -e "  1. ${BOLD}nvim${NC}              - Launch Neovim (plugins will auto-install)"
     echo -e "  2. ${BOLD}:checkhealth${NC}     - Verify everything is working"
-    echo -e "  3. ${BOLD}:Copilot setup${NC}   - Configure GitHub Copilot (optional)"
+    echo -e "  3. Create ${BOLD}lua/config/local.lua${NC} to opt in to AI plugins (optional)"
     echo
     echo -e "${YELLOW}Tips:${NC}"
-    echo -e "  • Press ${BOLD}f${NC} to find files"
-    echo -e "  • Press ${BOLD}<Space>${NC} to see keybindings"
+    echo -e "  • Press ${BOLD}<Space>f${NC} to find files"
+    echo -e "  • Press ${BOLD}<Space>${NC} and wait to see keybindings"
     echo -e "  • Run ${BOLD}:Mason${NC} to manage language servers"
     echo
     
