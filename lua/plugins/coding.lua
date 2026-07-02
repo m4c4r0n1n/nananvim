@@ -174,9 +174,11 @@ return {
         providers = {
           claude = {
             endpoint = "https://api.anthropic.com",
-            model = "claude-sonnet-4-20250514",
+            -- claude-sonnet-4-20250514 is deprecated (retires 2026-06-15).
+            -- Sonnet 5 also rejects non-default sampling params, so no
+            -- temperature here (it would 400 the request).
+            model = "claude-sonnet-5",
             extra_request_body = {
-              temperature = 0,
               max_tokens = 4096,
             },
           },

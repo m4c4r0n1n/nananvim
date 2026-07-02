@@ -72,23 +72,11 @@ return {
         severity_sort = true,
         float = {
           border = "rounded",
-          source = "always",
+          source = true, -- "always" is deprecated
           header = "",
           prefix = "",
         },
       })
-
-      -- Sign definitions
-      local signs = {
-        Error = " ",
-        Warn = " ",
-        Hint = "󰌶 ",
-        Info = " ",
-      }
-      for type, icon in pairs(signs) do
-        local hl = "DiagnosticSign" .. type
-        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-      end
 
       -- Register LSP servers
       vim.lsp.config("lua_ls", {
@@ -140,12 +128,9 @@ return {
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("UserLspConfig", {}),
         callback = function(ev)
-          local clients = vim.lsp.get_clients({ bufnr = ev.buf })
-          if #clients == 0 then
-            return
-          end
-
-          local client = clients[1]
+          -- The client that actually attached, not clients[1] of whatever
+          -- happens to be on the buffer (order is arbitrary with multiple LSPs)
+          local client = vim.lsp.get_client_by_id(ev.data.client_id)
           local opts = { buffer = ev.buf }
 
           if client and client.server_capabilities.inlayHintProvider then
@@ -177,7 +162,7 @@ return {
       {
         "<leader>cf",
         function()
-          require("conform").format({ async = true, lsp_fallback = true })
+          require("conform").format({ async = true, lsp_format = "fallback" })
         end,
         mode = "",
         desc = "Format buffer",
@@ -197,7 +182,7 @@ return {
       },
       format_on_save = {
         timeout_ms = 500,
-        lsp_fallback = true,
+        lsp_format = "fallback", -- lsp_fallback is the deprecated spelling
       },
     },
   },
@@ -208,6 +193,7 @@ return {
     opts = function()
       -- Formatters (conform) are always installed.
       local tools = {
+        "stylua", -- conform formats lua with it, so it must actually exist
         "prettierd",
         "prettier",
         "black",

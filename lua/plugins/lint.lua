@@ -18,7 +18,7 @@ return {
       lint.linters_by_ft = {
         sh = { "shellcheck" },
         bash = { "shellcheck" },
-        zsh = { "shellcheck" },
+        -- zsh intentionally absent: shellcheck refuses zsh (SC1071 on every file)
         markdown = { "markdownlint" },
         dockerfile = { "hadolint" },
         yaml = { "yamllint" },

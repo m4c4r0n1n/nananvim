@@ -257,7 +257,9 @@ return {
           -- Install a debug adapter on demand the first time it's needed, so
           -- debugging a new language works without hand-wiring mason.
           automatic_installation = true,
-          handlers = {},
+          -- No `handlers`: mason-nvim-dap's automatic setup overwrites the
+          -- adapters defined above and list_extend-appends its own configs,
+          -- which duplicated every entry in the dap.continue() picker.
         })
       end, 1000) -- Wait 1 second after Mason is ready
     end,
