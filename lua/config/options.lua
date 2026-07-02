@@ -32,6 +32,13 @@ opt.termguicolors = true
 opt.background = "dark"
 opt.signcolumn = "yes"
 
+-- Terminal window/tab title: name the terminal after the file being edited, so
+-- Ghostty's tab shows e.g. "nvim · init.lua" instead of a generic title (picked
+-- up via the OSC title escape). Unnamed/scratch buffers fall back to the folder
+-- name rather than a blank "[No Name]".
+opt.title = true
+opt.titlestring = [[nvim · %{empty(expand('%:t')) ? fnamemodify(getcwd(), ':t') : expand('%:t')}]]
+
 -- Transparency (works with terminals that support it)
 opt.pumblend = 10
 opt.winblend = 0
