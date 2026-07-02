@@ -5,7 +5,6 @@
 # UPDATES!!
 I've been slow to update things, I doubt anyone uses this anyway, but I found a few things that could be improved and a few things that could be dropped. I've been really lazy on actually posting updated screenshots or anything like that, but I've fixed the About Me at least.
 
-
 If you do decide to use this config and something breaks, send me a message and I **WILL** fix it immediately. Thank you.
 
 ## What's in it?
