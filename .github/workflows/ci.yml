@@ -15,7 +15,8 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, ubuntu-22.04]
-        nvim-version: [nightly]
+        # stable = what users actually install; nightly = early warning for breakage
+        nvim-version: [stable, nightly]
     
     runs-on: ${{ matrix.os }}
     

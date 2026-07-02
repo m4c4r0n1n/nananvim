@@ -178,8 +178,8 @@ Common issues and their solutions for nananvim.
 **Problem:** `<C-\>` doesn't open terminal
 
 **Solutions:**
-1. Check if toggleterm is loaded: `:Lazy`
-2. Try the command directly: `:ToggleTerm`
+1. Check if snacks.nvim is loaded: `:Lazy`
+2. Try the command directly: `:lua Snacks.terminal.toggle()`
 3. Check for conflicting keybindings
 4. Restart nvim
 

@@ -185,8 +185,8 @@ ensure_installed = {
 Edit `lua/config/keymaps.lua`:
 
 ```lua
--- Example: Change file finder from 'f' to '<leader>ff'
-keymap("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Find files" })
+-- Example: bind the file finder somewhere else
+keymap("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find files" })
 
 -- Add your own:
 keymap("n", "<leader>gg", ":!lazygit<cr>", { desc = "LazyGit" })

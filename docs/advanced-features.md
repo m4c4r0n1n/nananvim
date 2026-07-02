@@ -214,22 +214,28 @@ dap.configurations.go = {
 - Activate your venv before starting nvim
 - Or set `VIRTUAL_ENV` environment variable
 
-## Telescope Advanced Usage
+## Picker Advanced Usage (snacks.picker)
 
-### Live Grep with Filters
+Searching is powered by [snacks.nvim](https://github.com/folke/snacks.nvim)'s picker.
 
-Search only in specific file types:
+### Live Grep
 
 ```vim
-:Telescope live_grep
-" Then type your search and add glob patterns:
-" search term -- *.lua *.md
+<leader>fg
+```
+
+Or scope a grep to open buffers only:
+
+```lua
+:lua Snacks.picker.grep_buffers()
 ```
 
 ### Find in Current Buffer
 
-```vim
-:Telescope current_buffer_fuzzy_find
+Fuzzy-find lines in the buffer you're editing:
+
+```lua
+:lua Snacks.picker.lines()
 ```
 
 ### Search Command History
@@ -244,10 +250,7 @@ Add to `lua/config/keymaps.lua`:
 
 ```lua
 keymap("n", "<leader>fc", function()
-  require("telescope.builtin").find_files({
-    cwd = "~/.config/nvim",
-    prompt_title = "Nvim Config Files",
-  })
+  Snacks.picker.files({ cwd = vim.fn.stdpath("config"), title = "Nvim Config Files" })
 end, { desc = "Find config files" })
 ```
 
@@ -286,10 +289,10 @@ Then use `vif` to select inside function, `vac` for class, etc.
 
 ### Inlay Hints
 
-Toggle type hints inline:
+Toggle type hints inline (`<leader>th` is the theme switcher):
 
 ```vim
-<leader>th
+<leader>ih
 ```
 
 ### Code Actions
@@ -310,16 +313,16 @@ Common actions:
 
 Search for symbols across your entire project:
 
-```vim
-:Telescope lsp_workspace_symbols
+```lua
+:lua Snacks.picker.lsp_workspace_symbols()
 ```
 
 ### Document Symbols
 
 Search for symbols in current file:
 
-```vim
-:Telescope lsp_document_symbols
+```lua
+:lua Snacks.picker.lsp_symbols()
 ```
 
 ## Snippets
@@ -430,23 +433,18 @@ Add to `lua/plugins/editor.lua`:
 
 ## Terminal Integration
 
+Two terminals are built in:
+
+- `<C-\>` — quick floating terminal (snacks.terminal), toggles from normal or terminal mode
+- `<leader>tt` — the nanabrowser panel terminal (lives in the Browser │ Terminal │ TODO workspace, `<leader>p`)
+
 ### Multiple Terminals
 
-```vim
-:ToggleTerm  " Opens terminal 1
-:2ToggleTerm " Opens terminal 2
-```
-
-### Send Commands to Terminal
-
-Add to `lua/config/keymaps.lua`:
+snacks.terminal keys instances by command and cwd — different invocations get their own terminal:
 
 ```lua
--- Send current line to terminal
-keymap("n", "<leader>tl", ":ToggleTermSendCurrentLine<CR>")
-
--- Send visual selection
-keymap("v", "<leader>ts", ":ToggleTermSendVisualSelection<CR>")
+:lua Snacks.terminal.toggle()          -- default shell
+:lua Snacks.terminal.toggle("btop")    -- separate instance running btop
 ```
 
 ### Lazygit Integration
@@ -513,8 +511,7 @@ end, {})
 
 -- Open config directory
 vim.api.nvim_create_user_command("EditConfig", function()
-  vim.cmd("cd ~/.config/nvim")
-  vim.cmd("Telescope find_files")
+  Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
 end, {})
 
 -- Format and save
