@@ -157,7 +157,7 @@ Honestly using WSL2 is your best option.
 **For the full experience:**
 
 - **ImageMagick**: Required for inline image previews in Snacks picker
-- **A kitty-graphics terminal**: Kitty, Ghostty, or WezTerm — anything that speaks the kitty graphics protocol (needed for inline image previews)
+- **A kitty-graphics terminal**: Kitty, Ghostty, or WezTerm, anything that speaks the kitty graphics protocol (needed for inline image previews)
 
 **For language servers and formatters:**
 
@@ -174,7 +174,7 @@ After setup, run `:checkhealth` to see what's working and what's missing.
 
 ## AI Features Setup
 
-AI is **off by default** to keep startup lean and reliable — no binary downloads, no `make` build, nothing loads until you opt in. Both Codeium (inline suggestions) and Avante (chat) are gated behind a single file: `lua/config/local.lua`. Create it and they turn on.
+AI is **off by default** to keep startup lean and reliable, no binary downloads, no `make` build, nothing loads until you opt in. Both Codeium (inline suggestions) and Avante (chat) are gated behind a single file: `lua/config/local.lua`. Create it and they turn on.
 
 **Just want free Codeium suggestions?** That's the whole setup:
 
@@ -291,7 +291,7 @@ pip install debugpy
 ```
 
 **C/C++/Rust:**
-Uses `codelldb`, auto-installed via Mason — no system lldb or extra packages needed.
+Uses `codelldb`, auto-installed via Mason, no system lldb or extra packages needed.
 
 **JavaScript/TypeScript:**
 Not wired up by default (the old node-debug2 adapter is archived upstream). If you need JS/TS debugging, add `js-debug-adapter` in `lua/plugins/dap.lua`.
@@ -347,7 +347,7 @@ If you want to understand how this is organized or modify it:
 └── lazy-lock.json         # Plugin versions
 ```
 
-All plugin files in `lua/plugins/` are automatically loaded by Lazy - you don't need to require them manually.
+All plugin files in `lua/plugins/` are automatically loaded by Lazy, you don't need to require them manually.
 
 ## Keybindings
 
@@ -390,7 +390,7 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 ### Git
 
 - `]h` / `[h` - Next/previous git hunk
-- `<leader>hs` - Stage / unstage hunk (toggle — run it again on a staged hunk to undo)
+- `<leader>hs` - Stage / unstage hunk (toggle, run it again on a staged hunk to undo)
 - `<leader>hr` - Reset hunk
 - `<leader>hS` - Stage entire buffer
 - `<leader>hp` - Preview hunk
