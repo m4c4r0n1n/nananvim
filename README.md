@@ -8,10 +8,6 @@ I've been slow to update things, I doubt anyone uses this anyway, but I found a 
 
 If you do decide to use this config and something breaks, send me a message and I **WILL** fix it immediately. Thank you.
 
-## We Still Alive
-
-A random dude's minimal and easily customizable neovim config that actually works. Built primarily for Arch but works on most Linux distros and MacOS. Bear with me if something's janky or whatever, I really only fix things as I find them as I use this config daily. I built this for fun initially and to make a small config full of useful tools without too much bloat all while keeping it easy to customize. The idea is to have the most over-glorified, ever evolving neovim config dots possible while remaining easily customizable and well documented should someone else ever decide to give them a shot. Pretty minimal, easy for those who don't want to spend all day configuring neovim to act like an IDE. I'll add random shit as I find it, or find something useful, still a work in progress. Should you trust a random solo dude's configs for nvim? Hell yes.
-
 ## What's in it?
 
 - **Snacks.nvim**: Dashboard on startup, plus the fuzzy finder/file picker that can preview images, PDFs, and more right in your terminal (Kitty or Ghostty, anything with the kitty graphics protocol)
