@@ -314,7 +314,7 @@ Just don't create `local.lua` - no AI plugins load at all (no Codeium, no Avante
 
 ## Debugging with DAP
 
-<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/dcefdc75-2f95-4e84-9449-16c00213ea3a" />
+<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/84a823a8-a373-4cc9-99f4-34ccc3909be5" />
 
 nananvim includes full debugging support via nvim-dap. Debug adapters are auto-installed through Mason.
 
