@@ -65,11 +65,13 @@ return {
 
 ### Snacks picker with inline image preview
 
-<img width="1699" height="1376" alt="251020_01h25m18s_screenshot" src="https://github.com/user-attachments/assets/80f31521-00a1-4269-a15e-86f8131e266b" />
+<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/e32f4014-bffa-4233-89b6-8761646188b2" />
+
 
 ### Editing with LSP, Treesitter syntax highlighting, and Rose Pine Moon theme
 
-<img width="939" height="1136" alt="image" src="https://github.com/user-attachments/assets/2c54f8b5-b89c-4c1c-8973-15997cc21f3c" />
+<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/6b440076-23e1-47d2-801a-01083cc3c1f0" />
+
 
 ## Try it without touching your config
 
@@ -305,7 +307,8 @@ Just don't create `local.lua` - no AI plugins load at all (no Codeium, no Avante
 
 ## Debugging with DAP
 
-<img width="939" height="560" alt="251026_01h02m58s_screenshot" src="https://github.com/user-attachments/assets/ebf115c9-a363-4c4e-8073-629113305e19" />
+<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/478e1db4-1507-4148-a02f-0137b6ed236e" />
+
 
 nananvim includes full debugging support via nvim-dap. Debug adapters are auto-installed through Mason.
 
