@@ -4,6 +4,18 @@ return {
     event = "VeryLazy",
     opts = {
       plugins = { spelling = true },
+      spec = {
+        { "<leader>a", group = "ai" },
+        { "<leader>b", group = "buffers" },
+        { "<leader>c", group = "code" },
+        { "<leader>d", group = "debug" },
+        { "<leader>f", group = "find" },
+        { "<leader>h", group = "git hunks" },
+        { "<leader>p", group = "panels" },
+        { "<leader>t", group = "theme/term/todo" },
+        { "<leader>w", group = "web" },
+        { "<leader>x", group = "diagnostics" },
+      },
     },
   },
   {
