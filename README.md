@@ -38,7 +38,7 @@ One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser 
 - **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, C/C++, HTML/CSS/JSON out of the box)
 - **Completion**: nvim-cmp with kind icons, bordered menu/docs, and inline ghost text, plus a hook to append your own sources
 - **Linting**: nvim-lint layered on top of LSP (shellcheck, markdownlint, hadolint, yamllint auto-installed); add a linter by adding one table entry
-- **DAP**: Debug Adapter Protocol support for Python, C/C++/Rust (via codelldb), Bash/sh, and JavaScript/TypeScript with DAP UI, and automatic `.vscode/launch.json` loading per project
+- **DAP**: Debug Adapter Protocol support for Python, C/C++/Rust (via codelldb), Bash/sh, JavaScript/TypeScript, and Lua (Neovim config/plugins, via osv) with DAP UI, and automatic `.vscode/launch.json` loading per project
 - **Rose Pine Moon**: Default theme, blacked out by default
 - **AI (opt-in)**: Codeium inline suggestions + Avante chat, both off by default, flip them on with a `lua/config/local.lua` (see AI setup below)
 - **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, snacks terminal, lualine status bar, which-key with labeled groups
@@ -211,6 +211,7 @@ Honestly using WSL2 is your best option.
 
 - **debugpy / codelldb / bash-debug-adapter / js-debug-adapter**: Python, C/C++/Rust, Bash/sh, and JS/TS debugging, all auto-installed via Mason, no manual install needed
 - **node**: only needed if you debug JavaScript/TypeScript (the js-debug adapter runs on it)
+- **osv**: Lua debugging for Neovim config/plugins, a pure-Lua plugin (no system package, nothing to install)
 
 After setup, run `:checkhealth nananvim` to see what's working and what's missing.
 
@@ -341,6 +342,15 @@ Uses `bash-debug-adapter`, auto-installed via Mason (bundles its own `bashdb`).
 **JavaScript/TypeScript:**
 Uses `js-debug-adapter` (vscode-js-debug), auto-installed via Mason. Requires `node` on your PATH.
 
+**Lua (Neovim config/plugins):**
+Uses `osv` (one-small-step-for-vimkind), a pure-Lua plugin, nothing to install. Because it debugs Lua running *inside* Neovim (anything using the `vim` API), it's a two-instance workflow, the same as debugging Neovim Lua in any editor:
+
+1. In the Neovim instance running the code you want to debug (the **debuggee**), press `<leader>dL` to start the debug server (`osv.launch` on port 8086).
+2. In a **second** Neovim with the source file open (your editor/**client**), set breakpoints with `<leader>db` and press `<leader>dc` to attach.
+3. Trigger the code in the debuggee (e.g. run the command or `:source` the file). The breakpoint hits and you step through from the client.
+
+Attaching and launching are deliberately separate keys: if one instance both launched and attached, it would freeze itself on the first breakpoint with no client left to drive it. That two-instance split is inherent to debugging in-process Lua, not a nananvim quirk. For standalone `.lua` scripts run outside Neovim, osv isn't the right tool (it has no plain-interpreter mode).
+
 **Panels too cramped?** The DAP UI panel sizes live at the top of the `config`
 function in `lua/plugins/dap.lua` (`left_panel_width` / `bottom_panel_height`).
 Bump either number and restart to give the sidebar or repl/console more room.
@@ -348,14 +358,17 @@ Bump either number and restart to give the sidebar or repl/console more room.
 ### DAP Keybindings
 
 - `<leader>db` - Toggle breakpoint
-- `<leader>dc` - Continue/Start debugging
+- `<leader>dc` - Continue/Start debugging (attach, for Lua)
 - `<leader>di` - Step into function
 - `<leader>do` - Step over function
 - `<leader>dO` - Step out of function
 - `<leader>dr` - Open REPL
+- `<leader>dl` - Run last configuration
+- `<leader>dL` - Launch the Lua debug server (run this in the debuggee, see Lua setup above)
 - `<leader>dt` - Terminate debugging
 - `<leader>du` - Toggle DAP UI
 - `<leader>dh` - Hover to see variable values
+- `<leader>dS` - Show scopes in a float
 
 ## Config Structure
 
@@ -455,12 +468,17 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 ### Debugging (DAP)
 
 - `<leader>db` - Toggle breakpoint
-- `<leader>dc` - Continue/Start debugging
+- `<leader>dc` - Continue/Start debugging (attach, for Lua)
 - `<leader>di` - Step into
 - `<leader>do` - Step over
 - `<leader>dO` - Step out
+- `<leader>dr` - Open REPL
+- `<leader>dl` - Run last configuration
+- `<leader>dL` - Launch Lua debug server (debuggee)
 - `<leader>dt` - Terminate debugging
 - `<leader>du` - Toggle DAP UI
+- `<leader>dh` - Hover variables
+- `<leader>dS` - Show scopes (float)
 
 ### Git
 

@@ -70,8 +70,23 @@ Leader key is `<Space>`.
 | `<leader>ih` | Toggle inlay hints | Normal | Toggle LSP inlay hints |
 | `]d` | Next diagnostic | Normal | Jump to next error/warning |
 | `[d` | Previous diagnostic | Normal | Jump to previous error/warning |
-| `<leader>d` | Show diagnostic | Normal | Show diagnostic message |
-| `<leader>dl` | List diagnostics | Normal | List all diagnostics |
+
+## Debugging (DAP)
+
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<leader>db` | Toggle breakpoint | Normal | Set/remove a breakpoint on the current line |
+| `<leader>dc` | Continue / start | Normal | Start debugging, or continue (attach, for Lua) |
+| `<leader>di` | Step into | Normal | Step into the function call |
+| `<leader>do` | Step over | Normal | Step over the current line |
+| `<leader>dO` | Step out | Normal | Step out of the current function |
+| `<leader>dr` | Open REPL | Normal | Open the debug REPL |
+| `<leader>dl` | Run last | Normal | Re-run the last debug configuration |
+| `<leader>dL` | Launch Lua server | Normal | Start osv in the debuggee (Lua two-instance debugging) |
+| `<leader>dt` | Terminate | Normal | Stop the debug session |
+| `<leader>du` | Toggle DAP UI | Normal | Open/close the debug UI panels |
+| `<leader>dh` | Hover variables | Normal | Show variable values under the cursor |
+| `<leader>dS` | Scopes | Normal | Show scope variables in a float |
 
 ## Git Integration
 

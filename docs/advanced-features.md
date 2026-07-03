@@ -28,6 +28,7 @@ nananvim includes full debugging support with nvim-dap, dap-ui, and virtual text
 | `<leader>dO` | Step out of function |
 | `<leader>dr` | Open debug REPL |
 | `<leader>dl` | Re-run last debug configuration |
+| `<leader>dL` | Launch the Lua debug server (osv, run in the debuggee) |
 | `<leader>dt` | Terminate debugging session |
 | `<leader>du` | Toggle DAP UI windows |
 | `<leader>dh` | Hover to show variable values |
@@ -84,7 +85,7 @@ cmake --build build
 
 #### JavaScript/TypeScript
 
-Debug adapter (node2) is auto-installed via Mason.
+Debug adapter (`js-debug-adapter` / vscode-js-debug, type `pwa-node`) is auto-installed via Mason. Needs `node` on your PATH.
 
 **Debug Node.js:**
 1. Open your JavaScript/TypeScript file
@@ -98,13 +99,23 @@ Edit `lua/plugins/dap.lua` and add:
 ```lua
 {
   name = "npm start",
-  type = "node2",
+  type = "pwa-node",
   request = "launch",
   runtimeExecutable = "npm",
   runtimeArgs = { "start" },
   cwd = vim.fn.getcwd(),
 }
 ```
+
+#### Lua (Neovim config/plugins)
+
+Uses `osv` (one-small-step-for-vimkind), a pure-Lua plugin with nothing to install. It debugs Lua that runs *inside* Neovim (config, plugins, anything touching the `vim` API), which makes it a **two-instance** workflow, the same as debugging Neovim Lua in any editor:
+
+1. In the Neovim running the code you want to debug (the **debuggee**), press `<leader>dL`. This starts the debug server (`osv.launch` on port 8086); you'll see "Server started on port 8086".
+2. In a **second** Neovim with the source file open (the **client**/editor), set a breakpoint with `<leader>db`, then press `<leader>dc` to attach.
+3. Trigger the code in the debuggee (run the plugin command, or `:source %`). Execution stops at your breakpoint and you step through from the client.
+
+Why two instances? osv installs a debug hook in the debuggee and freezes it when a breakpoint hits, exactly what a debugger should do. The client that drives stepping has to be a *separate* live instance, otherwise the one instance freezes itself with nothing left to continue it. This is inherent to in-process Lua debugging, not specific to nananvim. For standalone `.lua`/LuaJIT scripts run outside Neovim, osv doesn't apply.
 
 ### Understanding the UI
 
@@ -149,10 +160,11 @@ end, { desc = "Conditional Breakpoint" })
 
 ### Log Points
 
-Add a log point instead of stopping:
+Add a log point instead of stopping (`<leader>dL` is already taken by the Lua
+debug-server launch, so this example uses `<leader>dP`):
 
 ```lua
-keymap("n", "<leader>dL", function()
+keymap("n", "<leader>dP", function()
   require('dap').set_breakpoint(nil, nil, vim.fn.input('Log message: '))
 end, { desc = "Log Point" })
 ```

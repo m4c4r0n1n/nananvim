@@ -11,6 +11,10 @@ return {
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
       "nvim-neotest/nvim-nio",
+      -- Lua adapter for debugging Neovim config/plugin code (anything using the
+      -- vim API). It runs a DAP server you attach to; see the nlua adapter and
+      -- the <leader>dL launch key below for the two-instance workflow.
+      "jbyuki/one-small-step-for-vimkind",
     },
     keys = {
       {
@@ -90,6 +94,13 @@ return {
           widgets.centered_float(widgets.scopes)
         end,
         desc = "Scopes",
+      },
+      {
+        "<leader>dL",
+        function()
+          require("osv").launch({ port = 8086 })
+        end,
+        desc = "Launch Lua Debug Server (debuggee)",
       },
     },
     config = function()
@@ -277,6 +288,37 @@ return {
         },
       }
       dap.configurations.bash = dap.configurations.sh
+
+      -- ==========================================
+      -- Lua (Neovim config/plugins) via osv
+      -- ==========================================
+      -- osv debugs Lua that runs INSIDE Neovim (anything using the vim API), so
+      -- it uses a two-instance workflow, same as debugging nvim Lua in any
+      -- editor:
+      --   1. In the nvim running the code you want to debug (the "debuggee"),
+      --      press <leader>dL to start the server (osv.launch on port 8086).
+      --   2. In a SECOND nvim with the source open (your "client"/editor), set
+      --      breakpoints with <leader>db and press <leader>dc to attach.
+      --   3. Trigger the code in the debuggee; the breakpoint hits and you step
+      --      from the client.
+      -- The adapter is a pure server callback: attaching must NOT also launch, or
+      -- one instance becomes both debuggee and client and deadlocks on the first
+      -- breakpoint (the old ECONNREFUSED/freeze bug).
+      dap.adapters.nlua = function(callback, config)
+        callback({
+          type = "server",
+          host = config.host or "127.0.0.1",
+          port = config.port or 8086,
+        })
+      end
+
+      dap.configurations.lua = {
+        {
+          type = "nlua",
+          request = "attach",
+          name = "Attach to running Neovim instance (start it with <leader>dL)",
+        },
+      }
 
       -- ==========================================
       -- JavaScript / TypeScript via vscode-js-debug (js-debug-adapter)
