@@ -1,7 +1,6 @@
 # nananvim
 
-<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/fc99e03d-490c-4d01-83f4-e7e98620010e" />
-
+<img width="1718" height="1362" alt="image" src="https://github.com/user-attachments/assets/de3c5790-93db-410b-bb40-52619dfa93ee" />
 
 A fast, minimal, fully documented Neovim config that actually works. ~45ms startup, 40 plugins with only 17 loaded at boot, CI-tested against Neovim **stable and nightly**. Batteries included, bloat optional.
 
@@ -65,12 +64,11 @@ return {
 
 ### Snacks picker with inline image preview
 
-<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/e32f4014-bffa-4233-89b6-8761646188b2" />
-
+<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/a36b2720-f89e-4226-93c6-452d5127a9f6" />
 
 ### Editing with LSP, Treesitter syntax highlighting, and Rose Pine Moon theme
 
-<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/6b440076-23e1-47d2-801a-01083cc3c1f0" />
+<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/c3855bf3-304a-4bdd-80bd-640c596a1046" />
 
 ### Silly Theme-Picker I Made
 
@@ -311,8 +309,7 @@ Just don't create `local.lua` - no AI plugins load at all (no Codeium, no Avante
 
 ## Debugging with DAP
 
-<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/478e1db4-1507-4148-a02f-0137b6ed236e" />
-
+<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/dcefdc75-2f95-4e84-9449-16c00213ea3a" />
 
 nananvim includes full debugging support via nvim-dap. Debug adapters are auto-installed through Mason.
 
