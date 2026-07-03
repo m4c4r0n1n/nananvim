@@ -38,7 +38,7 @@ One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser 
 - **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, C/C++, HTML/CSS/JSON out of the box)
 - **Completion**: nvim-cmp with kind icons, bordered menu/docs, and inline ghost text, plus a hook to append your own sources
 - **Linting**: nvim-lint layered on top of LSP (shellcheck, markdownlint, hadolint, yamllint auto-installed); add a linter by adding one table entry
-- **DAP**: Debug Adapter Protocol support for Python and C/C++/Rust (via codelldb) with DAP UI, and automatic `.vscode/launch.json` loading per project
+- **DAP**: Debug Adapter Protocol support for Python, C/C++/Rust (via codelldb), Bash/sh, and JavaScript/TypeScript with DAP UI, and automatic `.vscode/launch.json` loading per project
 - **Rose Pine Moon**: Default theme, blacked out by default
 - **AI (opt-in)**: Codeium inline suggestions + Avante chat, both off by default, flip them on with a `lua/config/local.lua` (see AI setup below)
 - **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, snacks terminal, lualine status bar, which-key with labeled groups
@@ -209,8 +209,8 @@ Honestly using WSL2 is your best option.
 
 **For debugging (DAP):**
 
-- **debugpy**: Python debugging (`pip install debugpy`)
-- **codelldb**: C/C++/Rust debugging (auto-installed via Mason; no system lldb needed)
+- **debugpy / codelldb / bash-debug-adapter / js-debug-adapter**: Python, C/C++/Rust, Bash/sh, and JS/TS debugging, all auto-installed via Mason, no manual install needed
+- **node**: only needed if you debug JavaScript/TypeScript (the js-debug adapter runs on it)
 
 After setup, run `:checkhealth nananvim` to see what's working and what's missing.
 
@@ -327,16 +327,23 @@ nananvim includes full debugging support via nvim-dap. Debug adapters are auto-i
 
 ### Language-Specific Setup
 
+Debug adapters are auto-installed via Mason, so most languages need nothing extra.
+
 **Python:**
-```bash
-pip install debugpy
-```
+`debugpy` is auto-installed via Mason (run from its own venv, so no `pip install` needed). The program under debug still runs on your project interpreter (venv if one is active).
 
 **C/C++/Rust:**
 Uses `codelldb`, auto-installed via Mason, no system lldb or extra packages needed.
 
+**Bash/sh:**
+Uses `bash-debug-adapter`, auto-installed via Mason (bundles its own `bashdb`).
+
 **JavaScript/TypeScript:**
-Not wired up by default (the old node-debug2 adapter is archived upstream). If you need JS/TS debugging, add `js-debug-adapter` in `lua/plugins/dap.lua`.
+Uses `js-debug-adapter` (vscode-js-debug), auto-installed via Mason. Requires `node` on your PATH.
+
+**Panels too cramped?** The DAP UI panel sizes live at the top of the `config`
+function in `lua/plugins/dap.lua` (`left_panel_width` / `bottom_panel_height`).
+Bump either number and restart to give the sidebar or repl/console more room.
 
 ### DAP Keybindings
 
