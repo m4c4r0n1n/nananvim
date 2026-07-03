@@ -75,6 +75,11 @@ return {
 <img width="1718" height="1362" alt="image" src="https://github.com/user-attachments/assets/d93ea09b-8973-4884-af19-5ab23d7dc9fc" />
 Like most others, but it doesn't keep moving the selections over each time you scroll.
 
+### A Panel Project
+
+<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/b98bac43-4de5-4aa4-b6ec-db4d8055b7ea" />
+
+
 ## Try it without touching your config
 
 Zero risk, your existing setup stays exactly where it is:
