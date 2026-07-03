@@ -79,7 +79,7 @@ Common issues and their solutions for nananvim.
 1. Check for large files - bigfile detection should help
 2. Disable unused plugins in `lua/plugins/`
 3. Check `:checkhealth` for issues
-4. Consider disabling inlay hints: `<leader>th`
+4. Consider disabling inlay hints: `<leader>ih`
 
 ## Git Integration Not Working
 
@@ -168,7 +168,7 @@ Common issues and their solutions for nananvim.
 **Problem:** Type hints not appearing inline
 
 **Solutions:**
-1. Toggle them on: `<leader>th`
+1. Toggle them on: `<leader>ih`
 2. Make sure your LSP supports inlay hints
 3. Check `:LspInfo` to see if server is running
 4. Some languages don't support inlay hints
@@ -194,7 +194,8 @@ Common issues and their solutions for nananvim.
 
 ## Still Having Issues?
 
-1. Run `:checkhealth` and look for errors
+1. Run `:checkhealth nananvim`, it checks every external tool this config uses and says what each one is for
+2. Run `:checkhealth` and look for errors
 2. Check the output from `:messages` for recent errors
 3. Try with minimal config to isolate the issue
 4. Check the GitHub issues: https://github.com/m4c4r0n1n/nananvim/issues

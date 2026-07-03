@@ -1,13 +1,37 @@
 # nananvim
 
+[![CI](https://github.com/m4c4r0n1n/nananvim/actions/workflows/ci.yml/badge.svg)](https://github.com/m4c4r0n1n/nananvim/actions/workflows/ci.yml)
+
+A fast, minimal, fully documented Neovim config that actually works. ~45ms startup, 40 plugins with only 17 loaded at boot, CI-tested against Neovim **stable and nightly**. Batteries included, bloat optional.
+
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
-# UPDATES!!
-I've been slow to update things, I doubt anyone uses this anyway, but I found a few things that could be improved and a few things that could be dropped. I've been really lazy on actually posting updated screenshots or anything like that, but I've fixed the About Me at least.
+Built primarily for Arch but works on most Linux distros and MacOS. I use this daily and fix things the moment they break. If you do decide to use this config and something breaks, open an issue and I **WILL** fix it immediately. Thank you.
 
-If you do decide to use this config and something breaks, send me a message and I **WILL** fix it immediately. Thank you.
+What's changed lately lives in the [CHANGELOG](CHANGELOG.md).
 
-## What's in it?
+## Why nananvim?
+
+There are a hundred "minimal nvim configs" out there. Here's what this one does differently:
+
+- **Actually fast**: ~45ms startup. 40 plugins total, only 17 load at startup, everything else waits for its trigger.
+- **Two first-party plugins you won't find anywhere else** (see below): a Browser│Terminal│TODO panel workspace, and a live-preview theme switcher with a blackout mode.
+- **An IDE when you want one, not when you don't**: rich completion UI, a full linting layer, and the entire DAP debugging stack sit behind per-feature flags in one file (`lua/config/extras.lua`). On by default, one `false` to genuinely remove any of them.
+- **AI is opt-in, not opt-out**: no Codeium, no Avante, no binary downloads, no `make` step, until you create one file. Delete the file, it's all gone.
+- **Tested, not vibes**: CI runs the whole config headless on stable *and* nightly Neovim on every push. `:checkhealth nananvim` diagnoses your machine.
+- **Documented like someone might actually read it**: full [keybinding reference](KEYBINDINGS.md), [customization guide](docs/customization-guide.md), [troubleshooting](docs/troubleshooting.md), [advanced features](docs/advanced-features.md).
+
+## First-party plugins
+
+### [nanabrowser.nvim](https://github.com/m4c4r0n1n/nanabrowser.nvim): Browser │ Terminal │ TODO workspace
+
+One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser (w3m/lynx/elinks, auto-detected), a terminal, and a persistent TODO list. Adaptive layout: side-by-side when your window is wide, a tabbed float when it isn't. `<leader>pz` zooms one panel to full size and back. `gx` opens the URL under your cursor externally; `<leader>wb` browses it in-editor. Extensible: `register_panel()` lets you add your own panels.
+
+### [theme-switcher.nvim](https://github.com/m4c4r0n1n/theme-switcher.nvim): live theme preview + blackout
+
+`<leader>th` opens a picker that previews every installed colorscheme **live as you move over it**, and remembers your pick across sessions. `<leader>tb` toggles blackout mode: the theme's text colors on a pure black background (the default), or the theme's own background. Drop any colorscheme plugin into `lua/plugins/` and it shows up automatically.
+
+## What else is in it?
 
 - **Snacks.nvim**: Dashboard on startup, plus the fuzzy finder/file picker that can preview images, PDFs, and more right in your terminal (Kitty or Ghostty, anything with the kitty graphics protocol)
 - **Treesitter**: Better syntax highlighting and code navigation for 20+ languages
@@ -15,10 +39,9 @@ If you do decide to use this config and something breaks, send me a message and 
 - **Completion**: nvim-cmp with kind icons, bordered menu/docs, and inline ghost text, plus a hook to append your own sources
 - **Linting**: nvim-lint layered on top of LSP (shellcheck, markdownlint, hadolint, yamllint auto-installed); add a linter by adding one table entry
 - **DAP**: Debug Adapter Protocol support for Python and C/C++/Rust (via codelldb) with DAP UI, and automatic `.vscode/launch.json` loading per project
-- **Theme Switcher**: Browse and preview colorschemes in real-time with `<leader>th`
-- **Rose Pine Moon**: Default theme, blacked out by default (theme text colors on a pure black background); `<leader>tb` swaps between blackout and the theme's own background
+- **Rose Pine Moon**: Default theme, blacked out by default
 - **AI (opt-in)**: Codeium inline suggestions + Avante chat, both off by default, flip them on with a `lua/config/local.lua` (see AI setup below)
-- **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, snacks terminal, lualine status bar
+- **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, snacks terminal, lualine status bar, which-key with labeled groups
 
 ### Extras switch
 
@@ -47,16 +70,25 @@ return {
 
 <img width="939" height="1136" alt="image" src="https://github.com/user-attachments/assets/2c54f8b5-b89c-4c1c-8973-15997cc21f3c" />
 
-## Quick Install (One-Line Installer)
+## Try it without touching your config
 
-The easiest way to install nananvim:
+Zero risk, your existing setup stays exactly where it is:
+
+```bash
+git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nananvim
+NVIM_APPNAME=nananvim nvim
+```
+
+Plugins install into their own isolated data directory. Don't like it? `rm -rf ~/.config/nananvim ~/.local/share/nananvim ~/.local/state/nananvim ~/.cache/nananvim` and it never happened. Like it? Alias `NVIM_APPNAME=nananvim nvim` or do a real install below.
+
+## Quick Install (One-Line Installer)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/m4c4r0n1n/nananvim/main/install.sh | bash
 ```
 
 The installer will:
-- Detect your distro (Arch, Ubuntu(lsp issues are harmless working on fix), Fedora, Gentoo, MacOS)
+- Detect your distro (Arch, Ubuntu, Fedora, Gentoo, MacOS)
 - Install all required dependencies
 - Download Neovim 0.12.0+ if needed
 - Clone this config to `~/.config/nvim`
@@ -91,6 +123,8 @@ ln -s $(which fdfind) ~/.local/bin/fd
 # gunzip /tmp/tree-sitter.gz && chmod +x /tmp/tree-sitter && sudo mv /tmp/tree-sitter /usr/local/bin/
 ```
 
+(Already on Ghostty or WezTerm? Skip kitty, it's only needed for the kitty graphics protocol, which they both speak.)
+
 ### 3. Install Neovim 0.12.0+
 
 ```bash
@@ -111,13 +145,15 @@ git clone https://github.com/m4c4r0n1n/nananvim.git ~/.config/nvim
 nvim
 ```
 
-Lazy.nvim will (should) automatically install all plugins on first launch. Just wait for it to finish.
+Lazy.nvim will automatically install all plugins on first launch. Just wait for it to finish.
 
 ### 6. Check everything's working
 
 ```vim
-:checkhealth
+:checkhealth nananvim
 ```
+
+This checks every external tool the config leans on (ripgrep, fd, tree-sitter, a kitty-graphics terminal, ImageMagick, text browsers, AI setup) and tells you exactly what's missing and what it's for.
 
 ## Windows Users
 
@@ -153,6 +189,7 @@ Honestly using WSL2 is your best option.
 
 - **ImageMagick**: Required for inline image previews in Snacks picker
 - **A kitty-graphics terminal**: Kitty, Ghostty, or WezTerm, anything that speaks the kitty graphics protocol (needed for inline image previews)
+- **w3m** (or lynx/elinks): The in-editor text browser for the panel workspace, auto-detected, falls back to your external browser if absent
 
 **For language servers and formatters:**
 
@@ -165,7 +202,7 @@ Honestly using WSL2 is your best option.
 - **debugpy**: Python debugging (`pip install debugpy`)
 - **codelldb**: C/C++/Rust debugging (auto-installed via Mason; no system lldb needed)
 
-After setup, run `:checkhealth` to see what's working and what's missing.
+After setup, run `:checkhealth nananvim` to see what's working and what's missing.
 
 ## AI Features Setup
 
@@ -240,9 +277,8 @@ For AI chat (like ChatGPT in nvim), you'll need to configure a provider:
        providers = {
          claude = {
            endpoint = "https://api.anthropic.com",
-           model = "claude-sonnet-4-20250514",
+           model = "claude-sonnet-5",
            extra_request_body = {
-             temperature = 0,
              max_tokens = 4096,
            },
          },
@@ -250,6 +286,7 @@ For AI chat (like ChatGPT in nvim), you'll need to configure a provider:
      },
    }
 ```
+(Don't set `temperature` for Claude Sonnet 5, it rejects non-default sampling params.)
 
 #### Option 3: Skip AI entirely
 
@@ -311,7 +348,7 @@ If you want to understand how this is organized or modify it:
 ~/.config/nvim/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml         # CI testing
+│       └── ci.yml         # CI: headless boot on stable + nightly nvim
 ├── docs/                  # Documentation
 │   ├── troubleshooting.md
 │   ├── customization-guide.md
@@ -323,19 +360,27 @@ If you want to understand how this is organized or modify it:
 │   │   ├── options.lua    # Vim options
 │   │   ├── keymaps.lua    # Global keymaps
 │   │   ├── autocmds.lua   # Autocommands
-│   │   └── commands.lua   # Custom commands
+│   │   ├── commands.lua   # Custom commands
+│   │   ├── extras.lua     # Master switch: cmp UI / lint / DAP flags
+│   │   └── local.lua      # (optional, gitignored) AI opt-in + overrides
+│   ├── nananvim/
+│   │   └── health.lua     # :checkhealth nananvim
 │   └── plugins/
 │       ├── colorscheme.lua    # Rose Pine Moon theme
-│       ├── ui.lua             # Snacks, bufferline, lualine
+│       ├── theme-switcher.lua # Live theme preview + blackout toggle
+│       ├── nanabrowser.lua    # Browser │ Terminal │ TODO workspace
+│       ├── ui.lua             # Snacks (dashboard/picker/terminal), bufferline, lualine
 │       ├── editor.lua         # neo-tree, which-key, sleuth
 │       ├── coding.lua         # Completion, autopairs, Codeium, Avante
-│       ├── lsp.lua            # LSP servers, Mason, formatters
+│       ├── lsp.lua            # LSP servers, Mason, conform formatters
+│       ├── lint.lua           # nvim-lint (gated by extras.lint)
 │       ├── treesitter.lua     # Syntax highlighting
 │       ├── git.lua            # Gitsigns
 │       ├── diagnostics.lua    # Trouble, todo-comments
-│       └── dap.lua            # Debug Adapter Protocol
+│       └── dap.lua            # Debug Adapter Protocol (gated by extras.dap)
 ├── init.lua               # Main entry point
 ├── README.md              # This file
+├── CHANGELOG.md           # What's changed
 ├── KEYBINDINGS.md         # Complete keybinding reference
 ├── CONTRIBUTING.md        # Contribution guidelines
 ├── install.sh             # One-line installer script
@@ -348,11 +393,13 @@ All plugin files in `lua/plugins/` are automatically loaded by Lazy, you don't n
 
 **Leader key:** Space
 
-I tried to keep these intuitive and similar to other popular configs. For a complete reference, see [KEYBINDINGS.md](KEYBINDINGS.md).
+I tried to keep these intuitive and similar to other popular configs. Press `<Space>` and wait, which-key shows every group, labeled. For a complete reference, see [KEYBINDINGS.md](KEYBINDINGS.md).
 
 ### File Navigation
 
-- `<leader>f` - Find files (Snacks picker) — note: bare `f` is back to the native find-in-line motion
+- `<leader>f` - Find files in cwd (Snacks picker; bare `f` stays the native find-in-line motion)
+- `<leader>ff` - Find files (home)
+- `<leader>fa` - Find all files incl. hidden/ignored (home)
 - `<leader>fg` - Live grep (search in files)
 - `<leader>fb` - Switch buffers
 - `<leader>fo` - Recent files
@@ -360,6 +407,22 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 - `<leader>e` - Toggle file explorer (Neo-tree)
 - `H` in Neo-tree to toggle hidden files
 - `<leader>o` - Focus file explorer
+
+### Panel Workspace (nanabrowser)
+
+- `<leader>p` - Toggle Browser │ Terminal │ TODO panels
+- `<leader>pz` - Zoom current panel (focus one / show all)
+- `<Tab>` / `<S-Tab>` - Cycle panels (float layout)
+- `<leader>wb` - Browse a URL in-editor (w3m/lynx/elinks)
+- `<leader>wo` - Open a URL in your external browser
+- `gx` - Open URL under cursor externally (normal/visual)
+- `<leader>tt` - Toggle the panel terminal
+- `<leader>td` - Focus the TODO panel
+
+### Themes
+
+- `<leader>th` - Theme switcher (live preview as you browse)
+- `<leader>tb` - Toggle blackout ⇄ theme background (blacked out by default)
 
 ### LSP (Language Server)
 
@@ -410,6 +473,7 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 ### Terminal
 
 - `<C-\>` - Toggle floating terminal (Snacks terminal)
+- `<leader>tt` - Panel terminal (part of the nanabrowser workspace)
 
 ### AI Features
 
@@ -423,11 +487,6 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 - `<leader>aa` - Ask AI
 - `<leader>ae` - Edit with AI (visual)
 - `<leader>ac` - Open chat
-
-### Themes
-
-- `<leader>th` - Theme switcher (browse and preview all themes)
-- `<leader>tb` - Toggle blackout ⇄ theme background (blacked out by default)
 
 ### Other Useful Stuff
 
@@ -447,11 +506,11 @@ I tried to keep these intuitive and similar to other popular configs. For a comp
 
 ## Known Issues & Bugs
 
-There's probably some stuff I'm forgetting to tweak or haven't discovered yet. I know it, you know it, but it escapes my mind right now. If you find something broken or weird:
+If you find something broken or weird:
 
-1. First, run `:checkhealth` to see if it's a missing dependency
+1. First, run `:checkhealth nananvim`, it knows what every dependency is for and will tell you what's missing
 2. Check if it's an LSP issue (some servers are finicky on certain distros)
-3. If it's actually broken, please open an issue!
+3. If it's actually broken, please open an issue, I use this daily and fix things fast
 
 Some known quirks:
 

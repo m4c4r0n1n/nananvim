@@ -257,7 +257,9 @@ Edit `lua/plugins/coding.lua` and add:
 }
 ```
 
-**Disable Avante (AI Chat):**
+**Disable Avante and Codeium (all AI):**
+
+Both are gated behind `lua/config/local.lua`, delete that file and no AI plugin loads at all. To keep Codeium but drop Avante, keep `local.lua` as `return {}` and add `enabled = false` to the avante spec in `lua/plugins/coding.lua`.
 
 ## Adding New Plugins
 
@@ -371,9 +373,9 @@ return {
     providers = {
       claude = {
         endpoint = "https://api.anthropic.com",
-        model = "claude-sonnet-4-20250514",
+        model = "claude-sonnet-5",
         extra_request_body = {
-          temperature = 0.7,  -- Adjust creativity (0-1)
+          -- don't set temperature: claude-sonnet-5 rejects non-default sampling params
           max_tokens = 8000,  -- Increase for longer responses
         },
       },

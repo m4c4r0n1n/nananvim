@@ -12,11 +12,11 @@ end
 
 local function check_exe(exe, msg, level)
   if has(exe) then
-    health.ok(exe .. " — " .. msg)
+    health.ok(exe .. ": " .. msg)
   elseif level == "error" then
-    health.error(exe .. " missing — " .. msg)
+    health.error(exe .. " missing: " .. msg)
   else
-    health.warn(exe .. " missing — " .. msg)
+    health.warn(exe .. " missing: " .. msg)
   end
 end
 
@@ -28,7 +28,7 @@ function M.check()
   if vim.fn.has("nvim-0.12") == 1 then
     health.ok("Neovim " .. ver .. " (0.12+ required by nvim-treesitter v2)")
   else
-    health.error("Neovim 0.12+ required — nvim-treesitter v2 and parts of this config won't work on " .. ver)
+    health.error("Neovim 0.12+ required: nvim-treesitter v2 and parts of this config won't work on " .. ver)
   end
 
   check_exe("git", "required by lazy.nvim to install/update plugins", "error")
@@ -51,12 +51,12 @@ function M.check()
     or term:find("ghostty")
     or (vim.env.TERM_PROGRAM or ""):find("WezTerm")
   if kitty_graphics then
-    health.ok("terminal speaks the kitty graphics protocol — inline image previews available")
+    health.ok("terminal speaks the kitty graphics protocol, inline image previews available")
   else
-    health.warn("no kitty-graphics terminal detected (TERM=" .. term .. ") — image previews in the picker won't render. Kitty, Ghostty, and WezTerm all work.")
+    health.warn("no kitty-graphics terminal detected (TERM=" .. term .. "), image previews in the picker won't render. Kitty, Ghostty, and WezTerm all work.")
   end
   check_exe("magick", "converts images for inline previews (ImageMagick)", "warn")
-  health.info("icons look broken? You need a Nerd Font set in your terminal — https://www.nerdfonts.com")
+  health.info("icons look broken? You need a Nerd Font set in your terminal: https://www.nerdfonts.com")
 
   health.start("nananvim: nanabrowser")
 
@@ -68,9 +68,9 @@ function M.check()
     end
   end
   if text_browser then
-    health.ok(text_browser .. " — in-editor text browser for the panel workspace (<leader>p)")
+    health.ok(text_browser .. ": in-editor text browser for the panel workspace (<leader>p)")
   else
-    health.warn("no text browser (w3m/lynx/elinks) — the browser panel will fall back to your external browser")
+    health.warn("no text browser (w3m/lynx/elinks), the browser panel will fall back to your external browser")
   end
 
   health.start("nananvim: extras (lua/config/extras.lua)")
@@ -81,21 +81,21 @@ function M.check()
       health.info(flag .. " = " .. tostring(extras[flag]))
     end
   else
-    health.error("lua/config/extras.lua failed to load — extras layer (cmp UI, lint, DAP) is disabled")
+    health.error("lua/config/extras.lua failed to load; extras layer (cmp UI, lint, DAP) is disabled")
   end
 
   health.start("nananvim: AI (opt-in)")
 
   local local_lua = vim.fn.stdpath("config") .. "/lua/config/local.lua"
   if vim.fn.filereadable(local_lua) == 1 then
-    health.ok("lua/config/local.lua exists — Codeium + Avante enabled")
+    health.ok("lua/config/local.lua exists: Codeium + Avante enabled")
     if vim.env.ANTHROPIC_API_KEY or vim.env.GROQ_API_KEY or vim.env.OPENAI_API_KEY then
       health.ok("provider API key found in environment")
     else
-      health.info("no ANTHROPIC_API_KEY / GROQ_API_KEY in environment — Avante chat needs one (Codeium doesn't)")
+      health.info("no ANTHROPIC_API_KEY / GROQ_API_KEY in environment; Avante chat needs one (Codeium doesn't)")
     end
   else
-    health.info("AI disabled (no lua/config/local.lua) — create it to enable Codeium + Avante, see README")
+    health.info("AI disabled (no lua/config/local.lua), create it to enable Codeium + Avante, see README")
   end
 end
 
