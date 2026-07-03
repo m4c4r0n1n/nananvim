@@ -1,6 +1,7 @@
 # nananvim
 
-[![CI](https://github.com/m4c4r0n1n/nananvim/actions/workflows/ci.yml/badge.svg)](https://github.com/m4c4r0n1n/nananvim/actions/workflows/ci.yml)
+<img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/fc99e03d-490c-4d01-83f4-e7e98620010e" />
+
 
 A fast, minimal, fully documented Neovim config that actually works. ~45ms startup, 40 plugins with only 17 loaded at boot, CI-tested against Neovim **stable and nightly**. Batteries included, bloat optional.
 
