@@ -72,6 +72,10 @@ return {
 
 <img width="1718" height="1400" alt="image" src="https://github.com/user-attachments/assets/6b440076-23e1-47d2-801a-01083cc3c1f0" />
 
+### Silly Theme-Picker I Made
+
+<img width="1718" height="1362" alt="image" src="https://github.com/user-attachments/assets/d93ea09b-8973-4884-af19-5ab23d7dc9fc" />
+Like most others, but it doesn't keep moving the selections over each time you scroll.
 
 ## Try it without touching your config
 
