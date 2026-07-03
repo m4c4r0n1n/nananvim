@@ -6,7 +6,7 @@ A fast, minimal, fully documented Neovim config that actually works. ~45ms start
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
-Built primarily for Arch but works on most Linux distros and MacOS. I use this daily and fix things the moment they break. If you do decide to use this config and something breaks, open an issue and I **WILL** fix it immediately. Thank you.
+Built primarily for Arch but works on most Linux distros and MacOS. I use this daily and fix things the moment they break, or eventually... If you do decide to use this config and something breaks, open an issue and I **WILL** fix it immediately. Thank you.
 
 What's changed lately lives in the [CHANGELOG](CHANGELOG.md).
 
