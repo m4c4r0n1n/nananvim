@@ -111,7 +111,7 @@ curl -fsSL https://raw.githubusercontent.com/m4c4r0n1n/nananvim/main/install.sh 
 ```
 
 The installer will:
-- Detect your distro (Arch, Ubuntu, Fedora, Gentoo, MacOS), x86_64 and arm64
+- Detect your distro (Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo, macOS, and distros based on them), x86_64 and arm64
 - Install all required dependencies (including lazygit and the tree-sitter CLI)
 - Download the latest stable Neovim (0.12+) if yours is too old
 - Clone this config to `~/.config/nvim`

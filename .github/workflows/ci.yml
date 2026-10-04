@@ -16,9 +16,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Each job installs nananvim with install.sh, as a user does, then runs
+# .github/test.sh: plugins, parsers and the smoke test.
 jobs:
-  # Install nananvim with install.sh on each distro, as a user would, then load
-  # every plugin and fail on any startup error.
   linux:
     name: ${{ matrix.name }}
     strategy:
@@ -31,8 +31,6 @@ jobs:
           - name: Fedora
             image: fedora:latest
             prep: dnf install -y sudo git curl
-          # Fedora 43 packages Neovim 0.11 and tree-sitter 0.25. The installer
-          # must upgrade both.
           - name: Fedora 43
             image: fedora:43
             prep: dnf install -y sudo git curl
@@ -42,8 +40,6 @@ jobs:
           - name: Ubuntu 24.04
             image: ubuntu:24.04
             prep: apt-get update && apt-get install -y sudo git curl ca-certificates
-          # Ubuntu 22.04 has glibc 2.35. The tree-sitter release binary needs
-          # 2.39, thus the installer builds tree-sitter from source.
           - name: Ubuntu 22.04
             image: ubuntu:22.04
             prep: apt-get update && apt-get install -y sudo git curl ca-certificates
@@ -54,165 +50,86 @@ jobs:
     steps:
       - name: Install git and sudo
         run: ${{ matrix.prep }}
-
       - uses: actions/checkout@v7
-
-      - name: Run install.sh
-        timeout-minutes: 25
+      - name: Install and test
+        timeout-minutes: 45
         shell: bash
-        run: |
-          git config --global --add safe.directory '*'
-          NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash install.sh
+        run: NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash .github/test.sh
 
-      - name: Install plugins
-        timeout-minutes: 10
-        shell: bash
-        run: nvim --headless "+Lazy! restore" +qa
-
-      - name: Install treesitter parsers
-        timeout-minutes: 15
-        shell: bash
-        run: |
-          nvim --headless -c 'lua
-            local spec = require("lazy.core.config").plugins["nvim-treesitter"]
-            local opts = require("lazy.core.plugin").values(spec, "opts", false)
-            require("nvim-treesitter").install(opts.ensure_installed):wait(900000)' -c qa
-
-      - name: Smoke test
-        timeout-minutes: 5
-        # "shell: bash" sets pipefail, thus a failed test is not hidden by tee.
-        shell: bash
-        run: nvim --headless -c "luafile $HOME/.config/nvim/.github/smoke.lua" 2>&1 | tee smoke.log
-
-      - name: Health check
-        if: always()
-        shell: bash
-        run: |
-          nvim --headless "+checkhealth nananvim" "+w! health.log" +qa || true
-          cat health.log || true
-
-      - name: Upload logs
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: logs-${{ matrix.name }}
-          path: |
-            health.log
-            smoke.log
-
-  # NixOS: install with nix profile in the official nix image (no normal Linux
-  # loader, as on NixOS). Docker runs it, because GitHub actions need glibc.
-  nixos:
-    name: NixOS (nix)
+  # These images cannot run GitHub actions (no glibc for node, or no node),
+  # thus Docker runs them.
+  docker:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: NixOS (nix)
+            image: nixos/nix:latest
+            prep: "true"
+            os: nixos
+          - name: Void
+            image: ghcr.io/void-linux/void-glibc-full:latest
+            prep: xbps-install -Syu xbps && xbps-install -Sy bash sudo git curl
+          - name: Gentoo
+            image: gentoo/stage3:latest
+            prep: emerge --getbinpkg --noreplace --ask=n app-admin/sudo dev-vcs/git
+            volumes: --volumes-from portage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-
-      - name: Install and smoke test in nixos/nix
-        timeout-minutes: 30
+      - name: Get the Gentoo package tree
+        if: matrix.name == 'Gentoo'
+        run: docker create -v /var/db/repos/gentoo --name portage gentoo/portage:latest /bin/true
+      - name: Install and test
+        timeout-minutes: 60
         run: |
-          docker run --rm \
+          docker run --rm ${{ matrix.volumes }} \
             -v "$GITHUB_WORKSPACE:/src" \
             -e NANANVIM_REPO=/src \
             -e NANANVIM_REF="$GITHUB_SHA" \
-            -e NANANVIM_OS=nixos \
-            nixos/nix:latest bash -c '
-              set -e
-              git config --global --add safe.directory "*"
-              bash /src/install.sh
-              nvim --headless "+Lazy! restore" +qa
-              nvim --headless -c "lua
-                local spec = require(\"lazy.core.config\").plugins[\"nvim-treesitter\"]
-                local opts = require(\"lazy.core.plugin\").values(spec, \"opts\", false)
-                require(\"nvim-treesitter\").install(opts.ensure_installed):wait(900000)" -c qa
-              nvim --headless -c "luafile $HOME/.config/nvim/.github/smoke.lua"
-            '
+            -e NANANVIM_OS="${{ matrix.os }}" \
+            ${{ matrix.image }} sh -c '${{ matrix.prep }} && bash /src/.github/test.sh'
 
   macos:
     name: macOS
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Install and test
+        timeout-minutes: 45
+        run: NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash .github/test.sh
 
-      - name: Run install.sh
-        timeout-minutes: 25
-        run: NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash install.sh
-
-      - name: Install plugins
-        timeout-minutes: 10
-        run: nvim --headless "+Lazy! restore" +qa
-
-      - name: Install treesitter parsers
-        timeout-minutes: 15
-        run: |
-          nvim --headless -c 'lua
-            local spec = require("lazy.core.config").plugins["nvim-treesitter"]
-            local opts = require("lazy.core.plugin").values(spec, "opts", false)
-            require("nvim-treesitter").install(opts.ensure_installed):wait(900000)' -c qa
-
-      - name: Smoke test
-        timeout-minutes: 5
-        run: nvim --headless -c "luafile $HOME/.config/nvim/.github/smoke.lua"
-
-  # Neovim nightly on Arch. A failure here is a warning about the next Neovim
-  # version. It does not fail the workflow.
+  # Neovim nightly on Arch. A failure is a warning. It does not fail the workflow.
   nightly:
     name: Arch (Neovim nightly)
     runs-on: ubuntu-latest
     container: archlinux:latest
     continue-on-error: true
+    env:
+      NVIM_NIGHTLY: "1"
     steps:
       - name: Install git and sudo
         run: pacman -Syu --noconfirm --needed sudo git curl
-
       - uses: actions/checkout@v7
-
-      - name: Run install.sh
-        timeout-minutes: 25
+      - name: Install and test
+        timeout-minutes: 45
         shell: bash
-        run: |
-          git config --global --add safe.directory '*'
-          NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash install.sh
-
-      - name: Install Neovim nightly
-        shell: bash
-        run: |
-          curl -fsSL -o /tmp/nvim.tar.gz https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
-          tar -xzf /tmp/nvim.tar.gz -C /opt
-          echo "/opt/nvim-linux-x86_64/bin" >> "$GITHUB_PATH"
-
-      - name: Install plugins and parsers
-        timeout-minutes: 20
-        shell: bash
-        run: |
-          nvim --version | head -1
-          nvim --headless "+Lazy! restore" +qa
-          nvim --headless -c 'lua
-            local spec = require("lazy.core.config").plugins["nvim-treesitter"]
-            local opts = require("lazy.core.plugin").values(spec, "opts", false)
-            require("nvim-treesitter").install(opts.ensure_installed):wait(900000)' -c qa
-
-      - name: Smoke test
-        timeout-minutes: 5
-        shell: bash
-        run: nvim --headless -c "luafile $HOME/.config/nvim/.github/smoke.lua"
+        run: NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash .github/test.sh
 
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-
       - name: Check Lua format with StyLua
         uses: JohnnyMorganz/stylua-action@v5
         with:
           token: ${{ github.token }}
           version: latest
           args: --check lua/ init.lua .github/smoke.lua
-
-      - name: Check install.sh with ShellCheck
-        run: shellcheck install.sh
-
+      - name: Check shell scripts with ShellCheck
+        run: shellcheck install.sh .github/test.sh
       - name: Check for em dashes
         run: |
           if grep -rn $'\xe2\x80\x94' --exclude-dir=.git .; then

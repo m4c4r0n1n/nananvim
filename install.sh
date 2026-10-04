@@ -83,7 +83,7 @@ detect_os() {
             # Derived distros (Kali, Mint, Manjaro, Nobara...) use the steps of
             # their base distro (ID_LIKE).
             case "$OS" in
-                arch|ubuntu|debian|fedora|nixos|gentoo) ;;
+                arch|ubuntu|debian|fedora|nixos|gentoo|void) ;;
                 *)
                     case " ${ID_LIKE:-} " in
                         *" arch "*) OS=arch ;;
@@ -443,6 +443,84 @@ install_dependencies_fedora() {
     print_success "Dependencies installed"
 }
 
+install_dependencies_void() {
+    print_info "Installing dependencies for Void Linux..."
+
+    local packages=(
+        git
+        curl
+        tar
+        gzip
+        unzip
+        make
+        gcc
+        neovim
+        ripgrep
+        fd
+        ImageMagick
+        nodejs
+        python3
+        lazygit
+    )
+
+    # kitty is only for image previews (kitty graphics protocol). Ghostty also supports it.
+    if ! check_command "kitty" && ! check_command "ghostty"; then
+        packages+=(kitty)
+    fi
+
+    # xbps-install stops on a package that is already installed. Thus ask
+    # only for the missing packages.
+    local missing=()
+    local pkg
+    for pkg in "${packages[@]}"; do
+        xbps-query "$pkg" >/dev/null 2>&1 || missing+=("$pkg")
+    done
+
+    # Update xbps first. An old xbps cannot install from the current repository.
+    sudo xbps-install -Syu xbps || true
+    if [ "${#missing[@]}" -gt 0 ]; then
+        sudo xbps-install -Sy "${missing[@]}" || {
+            print_error "Failed to install packages"
+            return 1
+        }
+    fi
+
+    print_success "Dependencies installed"
+}
+
+install_dependencies_gentoo() {
+    print_info "Installing dependencies for Gentoo (binary packages when available)..."
+
+    local packages=(
+        dev-vcs/git
+        net-misc/curl
+        app-arch/unzip
+        app-editors/neovim
+        sys-apps/ripgrep
+        sys-apps/fd
+        media-gfx/imagemagick
+        net-libs/nodejs
+        dev-util/tree-sitter-cli
+    )
+
+    # kitty is only for image previews (kitty graphics protocol). Ghostty also supports it.
+    if ! check_command "kitty" && ! check_command "ghostty"; then
+        packages+=(x11-terms/kitty)
+    fi
+
+    # --getbinpkg uses the official Gentoo binary packages, thus most
+    # packages do not compile. --noreplace keeps the packages you have.
+    sudo emerge --getbinpkg --noreplace --ask=n "${packages[@]}" || {
+        print_error "Failed to install packages"
+        return 1
+    }
+
+    # lazygit is not in the Gentoo repository.
+    install_lazygit_release
+
+    print_success "Dependencies installed"
+}
+
 install_dependencies_nixos() {
     print_info "Installing dependencies for NixOS (nix profile)..."
 
@@ -551,6 +629,8 @@ install_optional_browser() {
         fedora)                      sudo dnf install -y w3m ;;
         macos)                       brew install w3m ;;
         nixos)                       nix --extra-experimental-features "nix-command flakes" profile install nixpkgs#w3m ;;
+        void)                        sudo xbps-install -Sy w3m ;;
+        gentoo)                      sudo emerge --getbinpkg --noreplace --ask=n www-client/w3m ;;
         *)                           false ;;
     esac || true
 
@@ -696,11 +776,10 @@ main() {
             install_dependencies_macos
             ;;
         gentoo)
-            print_warning "Gentoo support is not available yet. Install the dependencies manually:"
-            echo "  emerge -av app-editors/neovim sys-apps/ripgrep sys-apps/fd dev-util/tree-sitter-cli"
-            echo "  emerge -av media-gfx/imagemagick net-libs/nodejs app-arch/unzip"
-            echo "  emerge -av dev-lang/python llvm-core/clang www-client/w3m dev-vcs/lazygit"
-            exit 0
+            install_dependencies_gentoo
+            ;;
+        void)
+            install_dependencies_void
             ;;
         *)
             print_error "Unsupported OS: $OS"

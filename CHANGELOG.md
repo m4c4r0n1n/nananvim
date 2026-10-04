@@ -4,7 +4,7 @@ Notable changes, newest first. If you use this config and something breaks after
 
 ## 2026-10-04, works on more systems
 
-The installer runs on Arch, Fedora, Debian, Ubuntu, NixOS and macOS now (plus stuff based on them like Manjaro, Mint or Kali), and CI actually runs it on every one of those so it stays that way. If your distro ships an old Neovim or tree-sitter it grabs a newer one instead of breaking. Also fixed the installer banner.
+The installer runs on Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo and macOS now (plus stuff based on them like Manjaro, Mint or Kali), and CI actually runs it on every one of those so it stays that way. If your distro ships an old Neovim or tree-sitter it grabs a newer one instead of breaking. Also fixed the installer banner.
 
 ## 2026-10-04, QOL round
 
