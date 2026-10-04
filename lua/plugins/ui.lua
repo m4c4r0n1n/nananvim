@@ -4,14 +4,14 @@ return {
     priority = 1000,
     lazy = false,
     opts = function()
-      -- snacks.image detects ghostty only via a live terminal query, which can
-      -- miss. Ghostty always sets TERM_PROGRAM, so declare kitty-graphics
-      -- support explicitly (SNACKS_GHOSTTY is snacks' own detection override).
+      -- snacks.image finds Ghostty only with a terminal query. This query can fail.
+      -- Ghostty always sets TERM_PROGRAM. Thus tell snacks that the kitty
+      -- graphics protocol is available (SNACKS_GHOSTTY is the snacks override).
       if vim.env.TERM_PROGRAM == "ghostty" then
         vim.env.SNACKS_GHOSTTY = "1"
       end
 
-      -- Try to load custom dashboard
+      -- Use the header from lua/config/dashboard.lua if that file exists.
       local ok, custom = pcall(require, "config.dashboard")
       local header = [[
 
@@ -59,21 +59,36 @@ return {
 |__|__|___._|__|__|___._|__|__|\___/ |__||__|__|__|
       ]]
 
-      -- change to whatever you want :)
-      if ok and custom.header then
+      -- Change the header in lua/config/dashboard.lua: return { header = [[...]] }
+      if ok and type(custom) == "table" and custom.header then
         header = custom.header
       end
 
       return {
         bigfile = { enabled = true },
-        notifier = { enabled = true },
         quickfile = { enabled = true },
+        notifier = { enabled = true },
+        input = { enabled = true },
         statuscolumn = { enabled = true },
         words = { enabled = true },
+        scope = { enabled = true },
+        indent = {
+          enabled = true,
+          -- Show the indent guide of the current scope only, without animation.
+          animate = { enabled = false },
+          scope = { enabled = true },
+          filter = function(buf)
+            local ignore = { "help", "dashboard", "neo-tree", "Trouble", "lazy", "mason", "snacks_dashboard" }
+            return vim.g.snacks_indent ~= false
+              and vim.b[buf].snacks_indent ~= false
+              and vim.bo[buf].buftype == ""
+              and not vim.tbl_contains(ignore, vim.bo[buf].filetype)
+          end,
+        },
         image = {
           enabled = true,
-          resolve = function(file, src)
-            -- Convert GitHub blob URLs to raw URLs
+          resolve = function(_, src)
+            -- Change GitHub blob URLs to raw URLs.
             if src:match("github%.com") and src:match("/blob/") then
               src = src:gsub("github%.com", "raw.githubusercontent.com")
               src = src:gsub("/blob/", "/")
@@ -81,16 +96,75 @@ return {
             return src
           end,
         },
-        picker = { enabled = true },
+        picker = {
+          enabled = true,
+          -- vim.ui.select (code actions and more) uses the picker.
+          ui_select = true,
+        },
+        lazygit = { enabled = true },
+        terminal = { enabled = true },
+        zen = { enabled = true },
         dashboard = {
           enabled = true,
           preset = {
             header = header,
+            keys = {
+              { icon = " ", key = "f", desc = "Find file", action = ":lua Snacks.dashboard.pick('files')" },
+              { icon = " ", key = "n", desc = "New file", action = ":ene | startinsert" },
+              { icon = " ", key = "g", desc = "Find text", action = ":lua Snacks.dashboard.pick('live_grep')" },
+              { icon = " ", key = "r", desc = "Recent files", action = ":lua Snacks.dashboard.pick('oldfiles')" },
+              {
+                icon = " ",
+                key = "c",
+                desc = "Config",
+                action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
+              },
+              { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
+              { icon = " ", key = "m", desc = "Mason", action = ":Mason" },
+              { icon = " ", key = "q", desc = "Quit", action = ":qa" },
+            },
+          },
+          sections = {
+            { section = "header" },
+            { section = "keys", gap = 1, padding = 1 },
+            { section = "startup" },
           },
         },
       }
     end,
+    config = function(_, opts)
+      require("snacks").setup(opts)
+
+      -- UI toggles under <leader>u. which-key shows the current state of each toggle.
+      vim.api.nvim_create_autocmd("User", {
+        pattern = "VeryLazy",
+        once = true,
+        callback = function()
+          Snacks.toggle.option("spell", { name = "Spelling" }):map("<leader>us")
+          Snacks.toggle.option("wrap", { name = "Wrap" }):map("<leader>uw")
+          Snacks.toggle.option("relativenumber", { name = "Relative number" }):map("<leader>uL")
+          Snacks.toggle.line_number():map("<leader>ul")
+          Snacks.toggle.diagnostics():map("<leader>ud")
+          Snacks.toggle.inlay_hints():map("<leader>uh")
+          Snacks.toggle.treesitter():map("<leader>uT")
+          Snacks.toggle.indent():map("<leader>ug")
+          Snacks.toggle.dim():map("<leader>uD")
+          Snacks.toggle.zen():map("<leader>uz")
+          Snacks.toggle({
+            name = "Format on save",
+            get = function()
+              return vim.g.autoformat
+            end,
+            set = function(state)
+              vim.g.autoformat = state
+              vim.b.autoformat = nil
+            end,
+          }):map("<leader>uf")
+        end,
+      })
+    end,
     keys = {
+      -- Find
       {
         "<leader>f",
         function()
@@ -113,11 +187,26 @@ return {
         desc = "Find all files (home)",
       },
       {
+        "<leader>fc",
+        function()
+          Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
+        end,
+        desc = "Find config file",
+      },
+      {
         "<leader>fg",
         function()
           Snacks.picker.grep()
         end,
         desc = "Live grep",
+      },
+      {
+        "<leader>fw",
+        function()
+          Snacks.picker.grep_word()
+        end,
+        mode = { "n", "x" },
+        desc = "Grep word or selection",
       },
       {
         "<leader>fb",
@@ -134,6 +223,13 @@ return {
         desc = "Help tags",
       },
       {
+        "<leader>fk",
+        function()
+          Snacks.picker.keymaps()
+        end,
+        desc = "Keymaps",
+      },
+      {
         "<leader>fo",
         function()
           Snacks.picker.recent()
@@ -148,12 +244,81 @@ return {
         desc = "Resume",
       },
       {
+        "<leader>fp",
+        function()
+          Snacks.picker.projects()
+        end,
+        desc = "Projects",
+      },
+      {
         "<leader>:",
         function()
           Snacks.picker.command_history()
         end,
-        desc = "Command History",
+        desc = "Command history",
       },
+      -- Search
+      {
+        "<leader>sd",
+        function()
+          Snacks.picker.diagnostics()
+        end,
+        desc = "Diagnostics",
+      },
+      {
+        "<leader>sb",
+        function()
+          Snacks.picker.lines()
+        end,
+        desc = "Buffer lines",
+      },
+      {
+        "<leader>su",
+        function()
+          Snacks.picker.undo()
+        end,
+        desc = "Undo history",
+      },
+      {
+        "<leader>sn",
+        function()
+          Snacks.notifier.show_history()
+        end,
+        desc = "Notification history",
+      },
+      {
+        "<leader>s/",
+        function()
+          Snacks.picker.search_history()
+        end,
+        desc = "Search history",
+      },
+      -- Buffers
+      {
+        "<leader>bd",
+        function()
+          Snacks.bufdelete()
+        end,
+        desc = "Delete buffer",
+      },
+      -- Words: jump between LSP references of the word under the cursor.
+      {
+        "]]",
+        function()
+          Snacks.words.jump(vim.v.count1)
+        end,
+        mode = { "n", "t" },
+        desc = "Next reference",
+      },
+      {
+        "[[",
+        function()
+          Snacks.words.jump(-vim.v.count1)
+        end,
+        mode = { "n", "t" },
+        desc = "Previous reference",
+      },
+      -- Terminal
       {
         "<C-\\>",
         function()
@@ -169,14 +334,22 @@ return {
     "akinsho/bufferline.nvim",
     event = "VeryLazy",
     keys = {
-      { "<leader>bp", "<Cmd>BufferLineTogglePin<CR>", desc = "Toggle pin" },
-      { "<leader>bP", "<Cmd>BufferLineGroupClose ungrouped<CR>", desc = "Delete non-pinned buffers" },
-      { "<leader>bo", "<Cmd>BufferLineCloseOthers<CR>", desc = "Delete other buffers" },
-      { "[b", "<cmd>BufferLineCyclePrev<cr>", desc = "Prev buffer" },
+      { "<leader>bp", "<cmd>BufferLineTogglePin<cr>", desc = "Toggle pin" },
+      { "<leader>bP", "<cmd>BufferLineGroupClose ungrouped<cr>", desc = "Delete non-pinned buffers" },
+      { "<leader>bo", "<cmd>BufferLineCloseOthers<cr>", desc = "Delete other buffers" },
+      { "[b", "<cmd>BufferLineCyclePrev<cr>", desc = "Previous buffer" },
       { "]b", "<cmd>BufferLineCycleNext<cr>", desc = "Next buffer" },
+      { "[B", "<cmd>BufferLineMovePrev<cr>", desc = "Move buffer left" },
+      { "]B", "<cmd>BufferLineMoveNext<cr>", desc = "Move buffer right" },
     },
     opts = {
       options = {
+        close_command = function(n)
+          Snacks.bufdelete(n)
+        end,
+        right_mouse_command = function(n)
+          Snacks.bufdelete(n)
+        end,
         diagnostics = "nvim_lsp",
         always_show_bufferline = false,
         offsets = {
@@ -191,42 +364,17 @@ return {
     },
   },
   {
-    "lukas-reineke/indent-blankline.nvim",
-    event = { "BufReadPost", "BufNewFile" },
-    main = "ibl",
-    opts = {
-      indent = {
-        char = "│",
-        tab_char = "│",
-      },
-      scope = { enabled = false },
-      exclude = {
-        filetypes = {
-          "help",
-          "alpha",
-          "dashboard",
-          "neo-tree",
-          "Trouble",
-          "lazy",
-          "mason",
-          "notify",
-          "toggleterm",
-        },
-      },
-    },
-  },
-  {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
     opts = {
       options = {
         theme = "auto",
         globalstatus = true,
-        disabled_filetypes = { statusline = { "dashboard", "alpha" } },
+        disabled_filetypes = { statusline = { "dashboard", "snacks_dashboard" } },
       },
       sections = {
         lualine_a = { "mode" },
-        lualine_b = { "branch" },
+        lualine_b = { "branch", "diff" },
         lualine_c = {
           { "diagnostics" },
           { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
@@ -237,8 +385,23 @@ return {
             function()
               return require("lazy.status").updates()
             end,
-            cond = require("lazy.status").has_updates,
+            cond = function()
+              return require("lazy.status").has_updates()
+            end,
             color = { fg = "#ff9e64" },
+          },
+          {
+            -- Names of the LSP servers on this buffer.
+            function()
+              local names = {}
+              for _, client in ipairs(vim.lsp.get_clients({ bufnr = 0 })) do
+                names[#names + 1] = client.name
+              end
+              return " " .. table.concat(names, " ")
+            end,
+            cond = function()
+              return #vim.lsp.get_clients({ bufnr = 0 }) > 0
+            end,
           },
           { "encoding" },
           { "fileformat" },
@@ -246,6 +409,7 @@ return {
         lualine_y = { "progress" },
         lualine_z = { "location" },
       },
+      extensions = { "neo-tree", "lazy", "mason", "trouble" },
     },
   },
 }

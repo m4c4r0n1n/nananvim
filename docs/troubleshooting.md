@@ -2,24 +2,35 @@
 
 Common issues and their solutions for nananvim.
 
+**First step for anything:** run `:checkhealth nananvim`. It checks every external tool this config uses and says what each one is for.
+
 ## LSP Not Working
 
-### Python LSP (Pyright) Issues
+### General
 
-**Problem:** Pyright not starting or showing errors
+1. See which servers are attached: `:checkhealth vim.lsp` (or `:LspInfo`, an alias). The status line also lists them on the right.
+2. Restart servers: `:lsp restart`
+3. Open `:Mason` and check that the server is installed. Mason installs all servers in the background on first launch, so wait a minute on a fresh install.
+
+### Python (basedpyright / ruff) Issues
+
+**Problem:** basedpyright or ruff not starting
 
 **Solutions:**
 1. Make sure Python 3 is installed: `python3 --version`
-2. Restart nvim and let Mason install pyright: `:Mason`
-3. Check LSP status: `:LspInfo`
-4. On Ubuntu/Pop!_OS, you might need: `sudo apt install python3-dev`
+2. Let Mason install them: `:Mason`
+3. On Ubuntu/Pop!_OS, Mason needs venv support: `sudo apt install python3-venv`
+
+**Problem:** Too many type errors
+
+basedpyright runs in "standard" mode (same as Pyright). If you changed it, set `typeCheckingMode = "standard"` again in `lua/plugins/lsp.lua`.
 
 ### TypeScript/JavaScript LSP Issues
 
 **Problem:** ts_ls not working
 
 **Solutions:**
-1. Install Node.js 18+: `node --version`
+1. Install Node.js 20+: `node --version`
 2. Restart nvim and check: `:Mason`
 3. For project-specific issues, ensure you have `package.json` in your project root
 
@@ -28,38 +39,41 @@ Common issues and their solutions for nananvim.
 **Problem:** C/C++ LSP not working
 
 **Solutions:**
-1. Install clang: `sudo pacman -S clang` (Arch) or `sudo apt install clang` (Ubuntu)
+1. Install clang: `sudo pacman -S clang` (Arch) or `sudo apt install clang` (Ubuntu). Mason also installs clangd if it is not on PATH.
 2. For compile_commands.json: Use CMake with `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` or use bear
-3. Restart LSP: `:LspRestart`
+3. Restart LSP: `:lsp restart`
 
 ## Image Previews Not Working
 
 **Problem:** Can't see images in Snacks picker
 
 **Solutions:**
-1. Make sure you're using Kitty terminal: `echo $TERM` (should show `xterm-kitty`)
+1. Use a terminal with the kitty graphics protocol: Kitty, Ghostty or WezTerm
 2. Install ImageMagick: `sudo pacman -S imagemagick` or `sudo apt install imagemagick`
-3. Check Snacks config in `lua/plugins/ui.lua` - make sure `image = { enabled = true }`
+3. Run `:checkhealth snacks` and read the `Snacks.image` section
 
 ## Plugins Not Loading
 
 **Problem:** Lazy.nvim shows errors or plugins won't install
 
 **Solutions:**
-1. Delete lazy cache: `rm -rf ~/.local/share/nvim`
-2. Restart nvim - it will reinstall everything
+1. Delete the plugin data: `rm -rf ~/.local/share/nvim/lazy`
+2. Restart nvim, it will reinstall everything
 3. Check internet connection
-4. If specific plugin fails, check its GitHub page for dependencies
+4. Restore the tested plugin versions: `:Lazy restore`
 
 ## Treesitter Errors
 
 **Problem:** Syntax highlighting broken or treesitter errors
 
+nananvim uses the `main` branch of nvim-treesitter. It compiles parsers with the `tree-sitter` CLI and a C compiler.
+
 **Solutions:**
-1. Update parsers: `:TSUpdate`
-2. Install all parsers: `:TSInstall all`
-3. Check for C compiler: `gcc --version` or `clang --version`
-4. On Ubuntu: `sudo apt install build-essential`
+1. Check the CLI and compiler: `tree-sitter --version` and `cc --version`
+2. Update parsers: `:TSUpdate`
+3. Install one parser: `:TSInstall <language>`
+4. Read the install log: `:TSLog`
+5. On Ubuntu: `sudo apt install build-essential`, then install the tree-sitter CLI (the installer does this)
 
 ## Mason Install Failures
 
@@ -67,19 +81,32 @@ Common issues and their solutions for nananvim.
 
 **Solutions:**
 1. Check internet connection
-2. On Ubuntu, install: `sudo apt install unzip wget curl`
-3. Clear Mason cache: `rm -rf ~/.local/share/nvim/mason`
+2. Install the unpack tools: `sudo apt install unzip curl` (Ubuntu) or `sudo pacman -S unzip curl` (Arch)
+3. Clear Mason data: `rm -rf ~/.local/share/nvim/mason`
 4. Restart nvim and run: `:Mason`
+
+## Format On Save
+
+**Problem:** A file isn't formatted when you save it
+
+**Solutions:**
+1. Check if format on save is on: `<leader>uf` shows the state, `:FormatToggle` changes it
+2. See which formatter conform picked: `:ConformInfo`
+3. Format manually: `<leader>cf`
+
+**Problem:** You don't want a project formatted
+
+Run `:FormatToggle!` (with `!`) to turn it off for the current buffer only.
 
 ## Performance Issues
 
 **Problem:** Neovim is slow or laggy
 
 **Solutions:**
-1. Check for large files - bigfile detection should help
-2. Disable unused plugins in `lua/plugins/`
-3. Check `:checkhealth` for issues
-4. Consider disabling inlay hints: `<leader>ih`
+1. Large files are detected automatically (snacks.bigfile turns off heavy features)
+2. Turn off a whole feature layer in `lua/config/extras.lua`
+3. Check `:Lazy profile` to see what loads at startup
+4. Toggle inlay hints off: `<leader>ih`
 
 ## Git Integration Not Working
 
@@ -90,41 +117,41 @@ Common issues and their solutions for nananvim.
 2. Install git: `sudo pacman -S git` or `sudo apt install git`
 3. Check gitsigns: `:Gitsigns`
 
-## Codeium Issues
+**Problem:** `<leader>gg` says lazygit not installed
 
-**Problem:** Codeium not providing suggestions
+Install lazygit (`sudo pacman -S lazygit`, `brew install lazygit`, or let the installer download it).
+
+## Windsurf (Codeium) Issues
+
+**Problem:** No AI suggestions
 
 **Solutions:**
-1. Check if Codeium is running: Look for suggestions as you type
-2. Try manually triggering: Type something and wait a moment
-3. Check if plugin is loaded: `:Lazy` and look for `codeium.vim`
+1. Windsurf only loads if `lua/config/local.lua` exists (`return {}` is enough)
+2. Log in once: `:Codeium Auth`
+3. Check if plugin is loaded: `:Lazy` and look for `windsurf.vim`
 4. Restart nvim if suggestions stop appearing
-5. If you want to disable Codeium, comment it out in `lua/plugins/coding.lua`
 
-**Problem:** Codeium suggestions interfering with regular completion
+**Problem:** Windsurf suggestions interfering with regular completion
 
 **Solutions:**
-1. Use `<C-]>` to dismiss Codeium suggestions
-2. Tab completes Codeium first - use `<C-y>` or `<CR>` for regular completion
-3. You can remap the Codeium accept key in `lua/plugins/coding.lua`
+1. While the completion menu is open, `<Tab>` moves in the menu. Windsurf only gets `<Tab>` when the menu is closed.
+2. Use `<C-]>` to dismiss a suggestion
+3. Remap the accept key in `lua/plugins/coding.lua`
 
 ## Avante (AI Chat) Issues
 
 **Problem:** Avante not working or showing errors
 
 **Solutions:**
-1. Make sure you've created `~/.config/nvim/lua/config/local.lua` with your provider config
+1. Make sure you've created `~/.config/nvim/lua/config/local.lua` (with your provider config, or `return {}` for the Claude default)
 2. Check that your API key is set in environment: `echo $ANTHROPIC_API_KEY` or `echo $GROQ_API_KEY`
 3. Verify the API key is valid
-4. Check `:messages` for specific error messages
+4. Check `:messages` and `<leader>sn` (notification history) for errors
 5. Try `:AvanteToggle` to open/close the window
 
-**Problem:** Avante plugin not loading
+**Problem:** Avante build fails
 
-**Solutions:**
-1. The plugin only loads if `lua/config/local.lua` exists
-2. Create the file with your provider configuration (see README)
-3. Restart nvim after creating the file
+Avante needs `make` and `curl` to download its prebuilt binary. Install them, then run `:Lazy build avante.nvim`.
 
 **Problem:** API errors or connection issues
 
@@ -139,8 +166,8 @@ Common issues and their solutions for nananvim.
 **Problem:** Neovim shows errors on startup
 
 **Solutions:**
-1. Check for syntax errors: `nvim --headless "+checkhealth" +qa`
-2. View startup errors: `:messages`
+1. Run the same smoke test CI runs: `nvim --headless -c "luafile ~/.config/nvim/.github/smoke.lua"`
+2. View startup errors: `:messages` and `<leader>sn`
 3. Backup and reset: `mv ~/.config/nvim ~/.config/nvim.bak` then reinstall
 4. Check lazy.nvim: `:Lazy`
 
@@ -149,17 +176,18 @@ Common issues and their solutions for nananvim.
 **Problem:** Custom commands like `<leader>cf` not working
 
 **Solutions:**
-1. Check if leader is set to space: `:echo mapleader` (should show space)
-2. View all keymaps: `:WhichKey`
-3. Check keymap file: `~/.config/nvim/lua/config/keymaps.lua`
+1. Check if leader is set to space: `:echo mapleader` (should show a space)
+2. Search all keymaps: `<leader>fk`
+3. Show the keymaps for this buffer: `<leader>?`
+4. Check keymap file: `~/.config/nvim/lua/config/keymaps.lua`
 
 ## Completion Not Working
 
 **Problem:** No autocomplete suggestions appearing
 
 **Solutions:**
-1. Make sure LSP is running: `:LspInfo`
-2. Check if nvim-cmp is loaded: `:Lazy`
+1. Make sure LSP is running: `:checkhealth vim.lsp`
+2. Check blink.cmp: `:checkhealth blink.cmp` (it also says if the fast Rust matcher downloaded)
 3. Try manually triggering: `<C-Space>` in insert mode
 4. Check `:messages` for errors
 
@@ -170,7 +198,7 @@ Common issues and their solutions for nananvim.
 **Solutions:**
 1. Toggle them on: `<leader>ih`
 2. Make sure your LSP supports inlay hints
-3. Check `:LspInfo` to see if server is running
+3. Check `:checkhealth vim.lsp` to see if the server is running
 4. Some languages don't support inlay hints
 
 ## Terminal Not Opening
@@ -180,7 +208,7 @@ Common issues and their solutions for nananvim.
 **Solutions:**
 1. Check if snacks.nvim is loaded: `:Lazy`
 2. Try the command directly: `:lua Snacks.terminal.toggle()`
-3. Check for conflicting keybindings
+3. Check for conflicting keybindings: `:verbose map <C-\>`
 4. Restart nvim
 
 ## Buffer Line Not Showing
@@ -194,14 +222,14 @@ Common issues and their solutions for nananvim.
 
 ## Still Having Issues?
 
-1. Run `:checkhealth nananvim`, it checks every external tool this config uses and says what each one is for
+1. Run `:checkhealth nananvim`
 2. Run `:checkhealth` and look for errors
-2. Check the output from `:messages` for recent errors
-3. Try with minimal config to isolate the issue
-4. Check the GitHub issues: https://github.com/m4c4r0n1n/nananvim/issues
-5. Open a new issue with:
+3. Check the output from `:messages` for recent errors
+4. Try with minimal config to isolate the issue
+5. Check the GitHub issues: https://github.com/m4c4r0n1n/nananvim/issues
+6. Open a new issue with:
    - Your OS and version
    - Neovim version: `nvim --version`
    - Error messages from `:messages`
-   - Output from `:checkhealth`
+   - Output from `:checkhealth nananvim`
    - Steps to reproduce the issue

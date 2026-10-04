@@ -2,6 +2,42 @@
 
 Notable changes, newest first. If you use this config and something breaks after an update, open an issue and I **WILL** fix it.
 
+## 2026-10-03, full update and upgrade
+
+Every plugin updated to its latest version, and the stack moved to what Neovim 0.12 does natively.
+
+**New**
+- **blink.cmp** replaces nvim-cmp + LuaSnip (Rust fuzzy matcher, signature help, ghost text, friendly-snippets, cmdline completion). Same keys: `<CR>` accepts only a selected item, `<Tab>`/`<S-Tab>` cycle
+- **flash.nvim** (`s` / `S` jumps, `f`/`t` stay native) and **grug-far** project-wide search and replace (`<leader>sr`)
+- **Treesitter text objects and motions** finally wired up: `af`/`if`, `ac`/`ic`, `aa`/`ia`, `]f`/`[f`, `]c`/`[c`, `]a`/`[a`, plus a sticky context line (nvim-treesitter-context, `[x`)
+- Parsers now **auto-install** the first time you open a file type, and 27 install up front
+- **Lazygit and git pickers** (`<leader>gg`, `gl`, `gs`, `gc`, `gb`, `gB` open on GitHub), gitsigns gets visual-line staging, buffer blame, `ih` hunk text object, staged-sign colors
+- **LSP pickers**: `gd`/`gr`/`gi`/`gy`/`gD` open in snacks.picker with preview; `<leader>ss`/`sS` symbols; `<leader>cR` renames a file and updates imports (neo-tree renames do too)
+- **More servers**: basedpyright + ruff (Python), bashls, yamlls, marksman; JSON/YAML get SchemaStore schemas; Lua gets lazydev.nvim (faster, accurate Neovim API completion)
+- **Formatters**: ruff replaces black + isort, shfmt for shell, prettier now also covers JSX/TSX/Vue/Svelte/YAML/Markdown/SCSS
+- **`<leader>u` UI toggles** (format on save, wrap, spell, numbers, diagnostics, inlay hints, indent guides, treesitter, dim, zen) and **`:FormatToggle[!]`**
+- `:TokenCount` gives an **exact Claude count** through the Anthropic `count_tokens` endpoint when `ANTHROPIC_API_KEY` is set (tiktoken is only a labeled fallback), and works on a visual selection
+- New pickers: `<leader>fw` grep word, `<leader>fc` config files, `<leader>fk` keymaps, `<leader>fp` projects, `<leader>su` undo history, `<leader>sn` notifications, `<leader>st` TODOs
+- Quality-of-life autocommands: restore cursor position, reload files changed outside nvim, equalize splits on resize, close help/qf/etc. with `q`, wrap + spell for Markdown and commits, create missing folders on save
+- `<leader>l` (Lazy) and `<leader>m` (Mason) now exist (they were documented but never mapped); project `.nvim.lua` files work (`exrc`)
+- Lualine shows git diff and attached LSP servers; lazy.nvim checks for updates in the background so the update counter actually works
+
+**Changed**
+- Native Neovim 0.12 features instead of plugins: built-in `gc` commenting (Comment.nvim removed, ts-comments.nvim adds embedded-language support), built-in treesitter incremental selection, global `winborder`, linked HTML tag editing
+- snacks.indent replaces indent-blankline; snacks.input/picker replace dressing.nvim for Avante
+- `mason-org/*` repositories (moved from williamboman); mason-nvim-dap removed, debug adapters install through mason-tool-installer, so nvim-dap truly loads only on `<leader>d` keys
+- Codeium plugin is now **windsurf.vim** (same `codeium#` functions and keys)
+- Avante default model is now **claude-sonnet-5-5** with 16k max tokens
+- Mason, LSP and conform load on the first file instead of at startup: ~35ms startup, 6 plugins before the first screen
+- `cmp_extra_sources` in `lua/config/extras.lua` now takes blink.cmp providers: `{ name = { module = "...", ... } }`
+- Code comments rewritten to ASD-STE100 Simplified Technical English
+
+**Fixed**
+- Nerd Font icons for diagnostic signs, DAP breakpoints and gitsigns deletes had been stripped to blank spaces; they render again
+- Installer: Ubuntu Neovim version check broke on the `v` prefix, `curl | bash` made the "replace config?" prompt read from the script itself, macOS installed the tree-sitter *library* instead of the CLI, Fedora failed on `lazygit` (not in Fedora repos). Also arm64 support, a tarball Neovim install (no FUSE), and `unzip`/`make` dependencies for Mason and Avante
+- `]h`/`[h` and `]c`/`[c` keep their native meaning in diff mode
+- CI: real smoke test that fails on startup errors (the old one could not fail), StyLua and ShellCheck enforced, no em dashes allowed, actions updated (checkout v7, upload-artifact v7, stylua-action v5), nightly failures no longer block
+
 ## 2026-07-02
 
 - README overhauled; this changelog split out of it

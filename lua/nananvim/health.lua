@@ -1,6 +1,6 @@
 -- :checkhealth nananvim
--- Reports on the external tools this config leans on, so "why doesn't X work"
--- is answerable without reading the docs.
+-- This check reports the external tools that this config uses.
+-- Use it to find why a feature does not work.
 
 local M = {}
 
@@ -26,21 +26,45 @@ function M.check()
   local v = vim.version()
   local ver = string.format("%d.%d.%d", v.major, v.minor, v.patch)
   if vim.fn.has("nvim-0.12") == 1 then
-    health.ok("Neovim " .. ver .. " (0.12+ required by nvim-treesitter v2)")
+    health.ok("Neovim " .. ver .. " (0.12 or later is necessary)")
   else
-    health.error("Neovim 0.12+ required: nvim-treesitter v2 and parts of this config won't work on " .. ver)
+    health.error(
+      "Neovim 0.12 or later is necessary. nvim-treesitter (main) and parts of this config do not work on " .. ver
+    )
   end
 
-  check_exe("git", "required by lazy.nvim to install/update plugins", "error")
-  check_exe("rg", "powers live grep (<leader>fg)", "error")
-  check_exe("fd", "powers the file picker (<leader>f)", "warn")
-  check_exe("tree-sitter", "compiles treesitter parsers (nvim-treesitter v2)", "warn")
+  check_exe("git", "lazy.nvim uses it to install and update plugins", "error")
+  check_exe("curl", "nvim-treesitter, Mason and blink.cmp use it to download files", "error")
+  check_exe("rg", "live grep (<leader>fg) and search and replace (<leader>sr)", "error")
+  if has("fd") or has("fdfind") then
+    health.ok("fd: file picker (<leader>f)")
+  else
+    health.warn("fd missing: the file picker (<leader>f) is slower without it")
+  end
+  check_exe("tree-sitter", "nvim-treesitter (main) uses it to compile parsers", "warn")
+  check_exe("cc", "a C compiler is necessary to compile treesitter parsers", "warn")
+  check_exe("lazygit", "git interface (<leader>gg)", "warn")
+
+  health.start("nananvim: completion")
+
+  local ok_blink, blink_fuzzy = pcall(require, "blink.cmp.fuzzy.rust")
+  if ok_blink and blink_fuzzy then
+    health.ok("blink.cmp Rust fuzzy matcher is available")
+  else
+    health.warn("blink.cmp Rust fuzzy matcher is not available. The Lua matcher is slower. Run :checkhealth blink.cmp")
+  end
 
   health.start("nananvim: language tooling")
 
-  check_exe("node", "TypeScript/JavaScript LSP, prettier", "warn")
-  check_exe("python3", "pyright, black, isort, debugpy", "warn")
-  check_exe("clang", "C/C++ LSP (clangd ships with clang on most distros)", "warn")
+  check_exe("node", "TypeScript, HTML, CSS, JSON and YAML servers, prettier, JS debugging", "warn")
+  check_exe("python3", "Python provider and debugpy", "warn")
+  check_exe("clangd", "C and C++ LSP (Mason installs it if it is not on PATH)", "warn")
+  local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
+  if vim.fn.isdirectory(mason_bin) == 1 then
+    health.ok("Mason tools folder exists: " .. mason_bin)
+  else
+    health.info("Mason has not installed tools yet. Open a file and wait, or run :Mason")
+  end
 
   health.start("nananvim: appearance")
 
@@ -51,12 +75,20 @@ function M.check()
     or term:find("ghostty")
     or (vim.env.TERM_PROGRAM or ""):find("WezTerm")
   if kitty_graphics then
-    health.ok("terminal speaks the kitty graphics protocol, inline image previews available")
+    health.ok("the terminal supports the kitty graphics protocol. Inline image previews are available")
   else
-    health.warn("no kitty-graphics terminal detected (TERM=" .. term .. "), image previews in the picker won't render. Kitty, Ghostty, and WezTerm all work.")
+    health.warn(
+      "no kitty graphics terminal found (TERM="
+        .. term
+        .. "). Image previews in the picker do not show. Kitty, Ghostty and WezTerm work."
+    )
   end
-  check_exe("magick", "converts images for inline previews (ImageMagick)", "warn")
-  health.info("icons look broken? You need a Nerd Font set in your terminal: https://www.nerdfonts.com")
+  if has("magick") or has("convert") then
+    health.ok("ImageMagick: converts images for inline previews")
+  else
+    health.warn("ImageMagick missing: inline image previews need it")
+  end
+  health.info("If icons show as boxes, set a Nerd Font in your terminal: https://www.nerdfonts.com")
 
   health.start("nananvim: nanabrowser")
 
@@ -68,9 +100,9 @@ function M.check()
     end
   end
   if text_browser then
-    health.ok(text_browser .. ": in-editor text browser for the panel workspace (<leader>p)")
+    health.ok(text_browser .. ": text browser in the panel workspace (<leader>p)")
   else
-    health.warn("no text browser (w3m/lynx/elinks), the browser panel will fall back to your external browser")
+    health.warn("no text browser (w3m, lynx or elinks). The browser panel uses your external browser")
   end
 
   health.start("nananvim: extras (lua/config/extras.lua)")
@@ -81,21 +113,24 @@ function M.check()
       health.info(flag .. " = " .. tostring(extras[flag]))
     end
   else
-    health.error("lua/config/extras.lua failed to load; extras layer (cmp UI, lint, DAP) is disabled")
+    health.error("lua/config/extras.lua did not load. The extras layer (completion UI, lint, DAP) is off")
   end
 
   health.start("nananvim: AI (opt-in)")
 
   local local_lua = vim.fn.stdpath("config") .. "/lua/config/local.lua"
   if vim.fn.filereadable(local_lua) == 1 then
-    health.ok("lua/config/local.lua exists: Codeium + Avante enabled")
+    health.ok("lua/config/local.lua exists: Windsurf (Codeium) and Avante are on")
     if vim.env.ANTHROPIC_API_KEY or vim.env.GROQ_API_KEY or vim.env.OPENAI_API_KEY then
-      health.ok("provider API key found in environment")
+      health.ok("a provider API key is in the environment")
     else
-      health.info("no ANTHROPIC_API_KEY / GROQ_API_KEY in environment; Avante chat needs one (Codeium doesn't)")
+      health.info(
+        "no ANTHROPIC_API_KEY, GROQ_API_KEY or OPENAI_API_KEY found. Avante chat needs one. Windsurf does not"
+      )
     end
+    check_exe("make", "Avante uses it to build or download its binary", "warn")
   else
-    health.info("AI disabled (no lua/config/local.lua), create it to enable Codeium + Avante, see README")
+    health.info("AI is off (no lua/config/local.lua). Make that file to turn on Windsurf and Avante. See the README")
   end
 end
 

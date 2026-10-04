@@ -1,6 +1,5 @@
--- lua/plugins/colorscheme.lua
 return {
-  -- Rose Pine (installed but not auto-applied - use theme-switcher)
+  -- Rose Pine Moon is the default theme. Use <leader>th to select a different theme.
   {
     "rose-pine/neovim",
     name = "rose-pine",
@@ -9,9 +8,9 @@ return {
     config = function()
       require("rose-pine").setup({
         variant = "moon",
-        -- Don't disable background - let theme-switcher control it
+        -- Keep the background. theme-switcher controls the background mode.
       })
-      -- Defer to avoid getcompletion interrupt during ColorSchemePre phase
+      -- Apply the theme later. This prevents an interrupt in the ColorSchemePre event.
       vim.schedule(function()
         vim.cmd.colorscheme("rose-pine-moon")
       end)

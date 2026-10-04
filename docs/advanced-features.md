@@ -38,18 +38,7 @@ nananvim includes full debugging support with nvim-dap, dap-ui, and virtual text
 
 #### Python
 
-Install debugpy in your environment:
-
-```bash
-# Global install
-pip install debugpy
-
-# Or in your project's venv
-source .venv/bin/activate
-pip install debugpy
-```
-
-The config automatically detects virtual environments.
+debugpy is auto-installed via Mason into its own venv, so there is nothing to `pip install`. Your program still runs on your project interpreter: the active `$VIRTUAL_ENV`, else `python3` on your PATH.
 
 **Debug a Python script:**
 1. Open your Python file
@@ -59,16 +48,7 @@ The config automatically detects virtual environments.
 
 #### C/C++/Rust
 
-Debug adapter (codelldb) is auto-installed via Mason.
-
-For better experience:
-```bash
-# Arch
-sudo pacman -S lldb
-
-# Ubuntu
-sudo apt install lldb
-```
+Debug adapter (codelldb) is auto-installed via Mason. No system lldb needed.
 
 **Debug a C/C++ program:**
 1. Compile with debug symbols: `gcc -g main.c -o main`
@@ -94,7 +74,7 @@ Debug adapter (`js-debug-adapter` / vscode-js-debug, type `pwa-node`) is auto-in
 4. Select "Launch" to run current file
 
 **Debug with npm scripts:**
-Edit `lua/plugins/dap.lua` and add:
+Add a `.vscode/launch.json` to the project (nvim-dap reads it automatically), or edit `lua/plugins/dap.lua` and add this to the JS/TS configurations:
 
 ```lua
 {
@@ -256,46 +236,75 @@ Fuzzy-find lines in the buffer you're editing:
 <leader>:
 ```
 
+### Built-in Pickers
+
+| Key | Picker |
+|-----|--------|
+| `<leader>f` | Files (cwd) |
+| `<leader>fg` | Live grep |
+| `<leader>fw` | Grep word under cursor (or selection) |
+| `<leader>fc` | Config files |
+| `<leader>fk` | Keymaps |
+| `<leader>fp` | Projects |
+| `<leader>sb` | Lines in buffer |
+| `<leader>sd` | Diagnostics |
+| `<leader>su` | Undo history |
+| `<leader>st` | TODO comments |
+| `<leader>gs` | Git status |
+
 ### Custom Searches
 
 Add to `lua/config/keymaps.lua`:
 
 ```lua
-keymap("n", "<leader>fc", function()
-  Snacks.picker.files({ cwd = vim.fn.stdpath("config"), title = "Nvim Config Files" })
-end, { desc = "Find config files" })
+keymap("n", "<leader>fn", function()
+  Snacks.picker.files({ cwd = "~/notes", title = "Notes" })
+end, { desc = "Find notes" })
 ```
+
+## Search and Replace (grug-far)
+
+`<leader>sr` opens grug-far: a live, project-wide search and replace buffer with a preview of every change. It prefills the file filter with the current file type. In visual mode it searches for the selection.
+
+## Flash (Jump Anywhere)
+
+- `s` then 1-2 characters: labels appear on every match on screen, press the label to jump
+- `S`: select a treesitter node (function, block, argument) by label
+- `r` in operator mode: act on a remote spot, for example `yr` + jump + `iw` yanks a word without moving
+- `<C-s>` in a `/` search: toggle flash labels for the search
+
+`f`, `F`, `t` and `T` stay native.
 
 ## Treesitter Text Objects
 
 ### Selection
 
-Use these in visual mode:
+Incremental selection is built in to Neovim 0.12 (`an` / `in` in visual mode). nananvim maps it to:
 
-- `<C-space>` - Incrementally select node
-- `<BS>` - Decrease selection
+- `<C-space>` - Start selection (normal), expand to the parent node (visual)
+- `<BS>` - Shrink selection (visual)
 
-### Navigation
+### Text Objects (Already Included!)
 
-Jump between functions, classes, etc:
+| Key | Selects |
+|-----|---------|
+| `af` / `if` | Around / inside function |
+| `ac` / `ic` | Around / inside class |
+| `aa` / `ia` | Around / inside argument |
+| `ih` | Inside git hunk |
 
-```lua
--- Add to lua/plugins/treesitter.lua
-textobjects = {
-  select = {
-    enable = true,
-    lookahead = true,
-    keymaps = {
-      ["af"] = "@function.outer",
-      ["if"] = "@function.inner",
-      ["ac"] = "@class.outer",
-      ["ic"] = "@class.inner",
-    },
-  },
-},
-```
+Use them with any operator: `vif` selects inside a function, `daa` deletes an argument, `yac` yanks a class.
 
-Then use `vif` to select inside function, `vac` for class, etc.
+### Navigation (Already Included!)
+
+| Key | Jumps to |
+|-----|----------|
+| `]f` / `[f` | Next / previous function start |
+| `]F` / `[F` | Next / previous function end |
+| `]c` / `[c` | Next / previous class start (in diff mode: next / previous change) |
+| `]a` / `[a` | Next / previous argument |
+| `[x` | Top of the current context (the line pinned at the top of the window) |
+| `]]` / `[[` | Next / previous reference of the word under the cursor |
 
 ## LSP Advanced Features
 
@@ -321,66 +330,58 @@ Common actions:
 - Extract to function
 - Inline variable
 
+### LSP Pickers
+
+`gd`, `gr`, `gi`, `gy` and `gD` open in the snacks picker with a preview, so a symbol with many references is easy to filter. `<leader>xl` shows definitions and references in a Trouble side panel instead.
+
+### Rename a File
+
+`<leader>cR` renames the current file and tells the LSP servers, so imports in other files update. Renaming or moving a file in neo-tree does the same.
+
 ### Workspace Symbols
 
-Search for symbols across your entire project:
-
-```lua
-:lua Snacks.picker.lsp_workspace_symbols()
-```
+Search for symbols across your entire project: `<leader>sS`
 
 ### Document Symbols
 
-Search for symbols in current file:
-
-```lua
-:lua Snacks.picker.lsp_symbols()
-```
+Search for symbols in current file: `<leader>ss` (or `<leader>xs` for a Trouble outline)
 
 ## Snippets
 
 ### Using Snippets
 
-Snippets are provided by LuaSnip:
+blink.cmp expands snippets with Neovim's built-in `vim.snippet`. friendly-snippets supplies snippets for most languages.
 
 1. Start typing a snippet trigger
 2. Suggestions appear in completion menu
-3. Press `<CR>` to expand
-4. Use `<Tab>` to jump between placeholders
+3. Select it and press `<CR>` to expand
+4. Use `<Tab>` / `<S-Tab>` to jump between placeholders
 
 ### Adding Custom Snippets
 
-Create `lua/config/snippets.lua`:
+Put VS Code style JSON files in `~/.config/nvim/snippets/`, one per filetype (`all.json` applies everywhere). blink.cmp reads them automatically.
 
-```lua
-local ls = require("luasnip")
-local s = ls.snippet
-local t = ls.text_node
-local i = ls.insert_node
+`~/.config/nvim/snippets/lua.json`:
 
-ls.add_snippets("lua", {
-  s("req", {
-    t('local '),
-    i(1, "module"),
-    t(' = require("'),
-    i(2, "module"),
-    t('")'),
-  }),
-})
-
--- More languages:
-ls.add_snippets("python", {
-  s("ifmain", {
-    t({'if __name__ == "__main__":', '    '}),
-    i(1, "main()"),
-  }),
-})
+```json
+{
+  "require": {
+    "prefix": "req",
+    "body": ["local ${1:module} = require(\"${2:$1}\")"],
+    "description": "Require a module"
+  }
+}
 ```
 
-Then require it in `lua/config/init.lua`:
+`~/.config/nvim/snippets/python.json`:
 
-```lua
-require("config.snippets")
+```json
+{
+  "if main": {
+    "prefix": "ifmain",
+    "body": ["if __name__ == \"__main__\":", "    ${1:main()}"]
+  }
+}
 ```
 
 ## Macros and Registers
@@ -422,7 +423,7 @@ To use a specific register:
 
 ### Auto-Save Sessions
 
-Add to `lua/plugins/editor.lua`:
+Add to `lua/plugins/editor.lua` (`<leader>q` is already Quit, so this uses `<leader>S`):
 
 ```lua
 {
@@ -430,8 +431,8 @@ Add to `lua/plugins/editor.lua`:
   event = "BufReadPre",
   opts = {},
   keys = {
-    { "<leader>qs", function() require("persistence").load() end, desc = "Restore Session" },
-    { "<leader>ql", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
+    { "<leader>Ss", function() require("persistence").load() end, desc = "Restore Session" },
+    { "<leader>Sl", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
   },
 }
 ```
@@ -447,31 +448,29 @@ Add to `lua/plugins/editor.lua`:
 
 Two terminals are built in:
 
-- `<C-\>` — quick floating terminal (snacks.terminal), toggles from normal or terminal mode
-- `<leader>tt` — the nanabrowser panel terminal (lives in the Browser │ Terminal │ TODO workspace, `<leader>p`)
+- `<C-\>`: quick floating terminal (snacks.terminal), toggles from normal or terminal mode
+- `<leader>tt`: the nanabrowser panel terminal (lives in the Browser │ Terminal │ TODO workspace, `<leader>p`)
+
+Press `<Esc><Esc>` to leave terminal mode. One `<Esc>` still goes to the program (useful for shells in vi mode).
 
 ### Multiple Terminals
 
-snacks.terminal keys instances by command and cwd — different invocations get their own terminal:
+snacks.terminal keys instances by command and cwd, so different invocations get their own terminal:
 
 ```lua
 :lua Snacks.terminal.toggle()          -- default shell
 :lua Snacks.terminal.toggle("btop")    -- separate instance running btop
 ```
 
-### Lazygit Integration
+### Lazygit Integration (Already Included!)
 
-Add to `lua/plugins/git.lua`:
+| Key | Action |
+|-----|--------|
+| `<leader>gg` | Lazygit (floating, uses your colorscheme) |
+| `<leader>gl` | Lazygit log for the current file |
+| `<leader>gB` | Open the file/selection on GitHub (or GitLab, etc.) |
 
-```lua
-{
-  "kdheepak/lazygit.nvim",
-  cmd = "LazyGit",
-  keys = {
-    { "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
-  },
-}
-```
+Needs the `lazygit` binary (the installer adds it).
 
 ## Diff View
 
@@ -487,8 +486,9 @@ Add to `lua/plugins/git.lua`:
 Using gitsigns:
 
 ```vim
-<leader>hd  " Diff current file
-<leader>hp  " Preview hunk
+<leader>hd  " Diff current file against the index
+<leader>hD  " Diff current file against the last commit
+<leader>hp  " Preview hunk inline
 ```
 
 ## Marks
@@ -512,7 +512,12 @@ View all marks:
 
 ## Custom Commands
 
-The `TokenCount` command is included. Add more in `lua/config/commands.lua`:
+Built-in commands:
+
+- `:TokenCount [model]`: exact Claude token count for the buffer or a visual selection (uses the free Anthropic `count_tokens` endpoint when `ANTHROPIC_API_KEY` is set, default model `claude-opus-5-5`). Without a key it falls back to a rough tiktoken estimate and says so.
+- `:FormatToggle` / `:FormatToggle!`: format on save on or off, globally or for the current buffer.
+
+Add more in `lua/config/commands.lua`:
 
 ```lua
 -- Count words
@@ -526,9 +531,9 @@ vim.api.nvim_create_user_command("EditConfig", function()
   Snacks.picker.files({ cwd = vim.fn.stdpath("config") })
 end, {})
 
--- Format and save
+-- Format with conform, even when format on save is off
 vim.api.nvim_create_user_command("FormatAndSave", function()
-  vim.lsp.buf.format()
+  require("conform").format({ lsp_format = "fallback" })
   vim.cmd("write")
 end, {})
 ```
@@ -537,17 +542,12 @@ end, {})
 
 ### Disable Features for Large Files
 
-Bigfile detection is enabled, but you can customize it in `lua/plugins/ui.lua`:
+Bigfile detection is enabled. Customize the size limit in `lua/plugins/ui.lua`:
 
 ```lua
 bigfile = {
   enabled = true,
   size = 1024 * 1024, -- 1MB
-  features = {
-    "treesitter",
-    "lsp",
-    "syntax",
-  },
 },
 ```
 
@@ -577,10 +577,11 @@ Most plugins are lazy-loaded. To make a plugin load faster:
 :!git rebase -i HEAD~3
 ```
 
-### Git Blame (Line-by-Line)
+### Git Blame
 
 ```vim
-<leader>hb  " Blame current line
+<leader>hb  " Blame current line (full commit message)
+<leader>hB  " Blame the whole buffer in a side window
 ```
 
 ### Diff Against Branch

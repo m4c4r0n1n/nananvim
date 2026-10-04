@@ -1,5 +1,7 @@
--- Graphical debugger (nvim-dap + dap-ui). Gated by the extras switch; returns
--- an empty spec when disabled. Loads only on the <leader>d* keys.
+-- Graphical debugger (nvim-dap and dap-ui).
+-- The extras.dap flag controls this file. When the flag is false, this file
+-- returns an empty spec. The debugger loads only when you push a <leader>d key.
+-- mason-tool-installer installs the debug adapters (see lua/plugins/lsp.lua).
 if not require("config.extras").dap then
   return {}
 end
@@ -11,9 +13,9 @@ return {
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
       "nvim-neotest/nvim-nio",
-      -- Lua adapter for debugging Neovim config/plugin code (anything using the
-      -- vim API). It runs a DAP server you attach to; see the nlua adapter and
-      -- the <leader>dL launch key below for the two-instance workflow.
+      -- Lua adapter for Neovim config code and plugin code (all code that uses
+      -- the vim API). It runs a DAP server. You attach to that server.
+      -- See the nlua adapter and the <leader>dL key below.
       "jbyuki/one-small-step-for-vimkind",
     },
     keys = {
@@ -107,13 +109,13 @@ return {
       local dap = require("dap")
       local dapui = require("dapui")
 
-      -- Panel sizes. Bump these two numbers if the default panels feel too
-      -- cramped: left is the sidebar width (columns), bottom is the repl/console
-      -- height (rows). This is the one place to change them.
+      -- Panel sizes. Change these two numbers to make the panels larger.
+      -- left_panel_width is the width of the sidebar (columns).
+      -- bottom_panel_height is the height of the REPL and console (rows).
       local left_panel_width = 40
       local bottom_panel_height = 10
 
-      -- Setup DAP UI
+      -- DAP UI
       dapui.setup({
         icons = { expanded = "▾", collapsed = "▸", current_frame = "▸" },
         mappings = {
@@ -154,7 +156,7 @@ return {
         },
       })
 
-      -- Setup virtual text
+      -- Variable values as virtual text
       require("nvim-dap-virtual-text").setup({
         enabled = true,
         enabled_commands = true,
@@ -171,7 +173,7 @@ return {
         virt_text_win_col = nil,
       })
 
-      -- Auto-open UI on debugging
+      -- Open the UI when a debug session starts. Close it when the session stops.
       dap.listeners.after.event_initialized["dapui_config"] = function()
         dapui.open()
       end
@@ -182,29 +184,35 @@ return {
         dapui.close()
       end
 
-      -- Breakpoint icons
-      -- numhl reddens the line number too, so a breakpoint is obvious even if the
-      -- Nerd Font gutter glyph doesn't render in a given terminal/font.
+      -- Breakpoint icons.
+      -- numhl makes the line number red. Thus you can see the breakpoint when
+      -- the terminal font does not show the Nerd Font icon.
       vim.fn.sign_define(
         "DapBreakpoint",
-        { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "DiagnosticError" }
+        { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "DiagnosticError" }
       )
-      vim.fn.sign_define("DapBreakpointCondition", { text = " ", texthl = "DiagnosticWarn", linehl = "", numhl = "" })
-      vim.fn.sign_define("DapBreakpointRejected", { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "" })
+      vim.fn.sign_define(
+        "DapBreakpointCondition",
+        { text = " ", texthl = "DiagnosticWarn", linehl = "", numhl = "" }
+      )
+      vim.fn.sign_define(
+        "DapBreakpointRejected",
+        { text = " ", texthl = "DiagnosticError", linehl = "", numhl = "" }
+      )
       vim.fn.sign_define(
         "DapStopped",
         { text = "󰁕 ", texthl = "DiagnosticInfo", linehl = "DapStoppedLine", numhl = "" }
       )
       vim.fn.sign_define("DapLogPoint", { text = ".>", texthl = "DiagnosticInfo", linehl = "", numhl = "" })
 
-      -- Highlight groups for stopped line
+      -- Highlight for the line where the debugger stopped
       vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
 
-      -- Language-specific adapters
-      -- Python
-      -- Run the debugpy adapter from Mason's own venv. Bare "python3" only works
-      -- if the system interpreter happens to have debugpy installed, which it
-      -- usually does not; Mason installs debugpy into an isolated venv.
+      -- Adapters for each language.
+
+      -- Python.
+      -- Run the debugpy adapter from the Mason venv. Mason installs debugpy in
+      -- its own venv. The system python3 usually does not have debugpy.
       local debugpy_python = vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python"
       dap.adapters.python = {
         type = "executable",
@@ -218,19 +226,20 @@ return {
           request = "launch",
           name = "Launch file",
           program = "${file}",
-          -- The program itself runs under the project's interpreter (venv if
-          -- active), NOT the debugpy venv above.
+          -- Your program runs with the project interpreter (the active venv,
+          -- if there is one). It does not run in the debugpy venv.
           pythonPath = function()
             local venv_path = os.getenv("VIRTUAL_ENV")
             if venv_path then
               return venv_path .. "/bin/python"
             end
-            return "/usr/bin/python3"
+            local python = vim.fn.exepath("python3")
+            return python ~= "" and python or "python3"
           end,
         },
       }
 
-      -- C/C++/Rust via codelldb (installed by mason-nvim-dap below)
+      -- C, C++ and Rust with codelldb.
       dap.adapters.codelldb = {
         type = "server",
         port = "${port}",
@@ -257,9 +266,7 @@ return {
       dap.configurations.c = dap.configurations.cpp
       dap.configurations.rust = dap.configurations.cpp
 
-      -- ==========================================
-      -- Shell / Bash Configuration
-      -- ==========================================
+      -- Shell (sh and bash) with bash-debug-adapter.
       dap.adapters.bashdb = {
         type = "executable",
         command = vim.fn.stdpath("data") .. "/mason/packages/bash-debug-adapter/bash-debug-adapter",
@@ -289,21 +296,18 @@ return {
       }
       dap.configurations.bash = dap.configurations.sh
 
-      -- ==========================================
-      -- Lua (Neovim config/plugins) via osv
-      -- ==========================================
-      -- osv debugs Lua that runs INSIDE Neovim (anything using the vim API), so
-      -- it uses a two-instance workflow, same as debugging nvim Lua in any
-      -- editor:
-      --   1. In the nvim running the code you want to debug (the "debuggee"),
-      --      press <leader>dL to start the server (osv.launch on port 8086).
-      --   2. In a SECOND nvim with the source open (your "client"/editor), set
-      --      breakpoints with <leader>db and press <leader>dc to attach.
-      --   3. Trigger the code in the debuggee; the breakpoint hits and you step
-      --      from the client.
-      -- The adapter is a pure server callback: attaching must NOT also launch, or
-      -- one instance becomes both debuggee and client and deadlocks on the first
-      -- breakpoint (the old ECONNREFUSED/freeze bug).
+      -- Lua (Neovim config and plugins) with osv.
+      -- osv debugs Lua that runs inside Neovim. Thus you must use two Neovim
+      -- instances:
+      --   1. In the instance that runs the code (the debuggee), push <leader>dL.
+      --      This starts the server (osv.launch on port 8086).
+      --   2. In a second instance with the source file open (the client), set
+      --      breakpoints with <leader>db. Then push <leader>dc to attach.
+      --   3. Run the code in the debuggee. The debugger stops at the breakpoint.
+      --      Step through the code from the client.
+      -- The adapter only connects to the server. It must not also launch the
+      -- server. If it does, one instance is the debuggee and the client, and it
+      -- stops at the first breakpoint with no client to control it.
       dap.adapters.nlua = function(callback, config)
         callback({
           type = "server",
@@ -320,12 +324,9 @@ return {
         },
       }
 
-      -- ==========================================
-      -- JavaScript / TypeScript via vscode-js-debug (js-debug-adapter)
-      -- ==========================================
-      -- Replaces the archived node-debug2. The mason package js-debug-adapter
-      -- ships a launcher that speaks DAP over a server port. Needs node on PATH
-      -- (used to run the adapter itself).
+      -- JavaScript and TypeScript with vscode-js-debug (js-debug-adapter).
+      -- The adapter is a DAP server on a port. It runs with node, thus node
+      -- must be on your PATH.
       dap.adapters["pwa-node"] = {
         type = "server",
         host = "localhost",
@@ -356,41 +357,13 @@ return {
           },
         }
       end
-      -- React/Vue/etc. single-file components reuse the JS/TS launch configs.
+      -- JSX and TSX files use the same configurations.
       dap.configurations.javascriptreact = dap.configurations.javascript
       dap.configurations.typescriptreact = dap.configurations.typescript
 
-      -- Zero-boilerplate per-project debugging: any project that ships a
-      -- .vscode/launch.json has its configs read automatically on dap.continue()
-      -- / :DapNew (nvim-dap's built-in launch.json provider), matched to the
-      -- adapters above by each config's "type". No call or Lua editing needed;
-      -- the old dap.ext.vscode.load_launchjs() is deprecated for exactly this.
-    end,
-  },
-
-  -- Mason integration for debug adapters
-  {
-    "jay-babu/mason-nvim-dap.nvim",
-    dependencies = { "williamboman/mason.nvim", "mfussenegger/nvim-dap" },
-    event = "VeryLazy",
-    config = function()
-      -- Defer setup to avoid race conditions
-      vim.defer_fn(function()
-        require("mason-nvim-dap").setup({
-          ensure_installed = {
-            "python",
-            "codelldb", -- C/C++/Rust
-            "bash", -- bash-debug-adapter (shell / sh / bash)
-            "js", -- js-debug-adapter (JavaScript / TypeScript)
-          },
-          -- Install a debug adapter on demand the first time it's needed, so
-          -- debugging a new language works without hand-wiring mason.
-          automatic_installation = true,
-          -- No `handlers`: mason-nvim-dap's automatic setup overwrites the
-          -- adapters defined above and list_extend-appends its own configs,
-          -- which duplicated every entry in the dap.continue() picker.
-        })
-      end, 1000) -- Wait 1 second after Mason is ready
+      -- Project configurations: nvim-dap reads .vscode/launch.json
+      -- automatically when you start a session (dap.continue or :DapNew).
+      -- The "type" of each configuration selects one of the adapters above.
     end,
   },
 }

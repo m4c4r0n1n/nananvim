@@ -13,7 +13,7 @@ nananvim includes a theme switcher that lets you browse and preview all installe
 3. Themes preview automatically as you navigate
 4. Press `<Space>` or `<Enter>` to apply a theme
 5. Use `/` to search for specific themes
-6. Press `<leader>tb` to toggle between Terminal and Blackout backgrounds
+6. Press `<leader>tb` to toggle between Blackout and the theme's own background
 
 **Built-in themes you can try:**
 - Rose Pine (Moon/Main/Dawn variants)
@@ -114,31 +114,35 @@ return {
 To add support for more languages:
 
 1. Edit `lua/plugins/lsp.lua`
-2. Add your language server to the `ensure_installed` list:
+2. Add the server's lspconfig name to the `servers` list at the top of the file:
 
 ```lua
-ensure_installed = {
+local servers = {
   "lua_ls",
-  "pyright",
-  "ts_ls",
+  "basedpyright",
+  "ruff",
+  -- ...
   -- Add your servers here:
-  "rust_analyzer",  -- Rust
-  "gopls",          -- Go
-  "jdtls",          -- Java
-  "omnisharp",      -- C#
-},
-```
-
-3. Register the server below in the config:
-
-```lua
-local simple_servers = { 
-  "pyright", "ts_ls", "html", "cssls", "tailwindcss", "jsonls",
-  "rust_analyzer", "gopls"  -- Add yours here
+  "rust_analyzer", -- Rust
+  "gopls", -- Go
+  "jdtls", -- Java
+  "omnisharp", -- C#
 }
 ```
 
-4. Restart nvim - Mason will auto-install the servers
+3. Restart nvim. Mason installs each server, and `vim.lsp.enable()` turns them all on. Nothing else to register.
+
+4. Need custom settings? Add a `vim.lsp.config()` call next to the others in the same file:
+
+```lua
+vim.lsp.config("rust_analyzer", {
+  settings = {
+    ["rust-analyzer"] = { check = { command = "clippy" } },
+  },
+})
+```
+
+Every server already gets blink.cmp's completion capabilities through `vim.lsp.config("*", ...)`, so you never pass `capabilities` yourself.
 
 ### Popular Language Servers:
 
@@ -146,9 +150,20 @@ local simple_servers = {
 - **Go:** `gopls`
 - **Java:** `jdtls`
 - **C#:** `omnisharp`
-- **Ruby:** `solargraph`
+- **Ruby:** `ruby_lsp`
 - **PHP:** `intelephense`
 - **Kotlin:** `kotlin_language_server`
+- **Zig:** `zls`
+
+### More Treesitter Parsers
+
+Parsers install on demand the first time you open a file of that type. To pre-install some, add a spec anywhere in `lua/plugins/` (the list merges with the built-in one):
+
+```lua
+return {
+  { "nvim-treesitter/nvim-treesitter", opts = { ensure_installed = { "rust", "go" } } },
+}
+```
 
 ## Adding Formatters
 
@@ -161,22 +176,28 @@ To add formatters for auto-format on save:
 ```lua
 formatters_by_ft = {
   lua = { "stylua" },
-  python = { "isort", "black" },
+  python = { "ruff_organize_imports", "ruff_format" },
   -- Add yours:
   rust = { "rustfmt" },
-  go = { "gofmt", "goimports" },
+  go = { "goimports", "gofmt" },
   ruby = { "rubocop" },
 },
 ```
 
-4. Add the formatter to mason-tool-installer:
+4. Add the formatter to the mason-tool-installer list in the same file:
 
 ```lua
-ensure_installed = {
-  "prettierd", "prettier", "black", "isort", "clang-format",
-  "rustfmt", "gofmt", "goimports",  -- Add yours
-},
+local tools = {
+  "stylua",
+  "prettierd",
+  "prettier",
+  "shfmt",
+  "clang-format",
+  "goimports", -- Add yours
+}
 ```
+
+Format on save is on by default. Turn it off with `<leader>uf` or `:FormatToggle` (add `!` to change only the current buffer).
 
 ## Changing Keybindings
 
@@ -189,24 +210,24 @@ Edit `lua/config/keymaps.lua`:
 keymap("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find files" })
 
 -- Add your own:
-keymap("n", "<leader>gg", ":!lazygit<cr>", { desc = "LazyGit" })
+keymap("n", "<leader>cm", "<cmd>make<cr>", { desc = "Run make" })
 ```
 
 ### Plugin-Specific Keymaps
 
 Most plugins define their keymaps in their respective files in `lua/plugins/`.
 
-**Example - Change Codeium accept key:**
+**Example - Change the Windsurf (Codeium) accept key:**
 
-Edit `lua/plugins/coding.lua`, find the Codeium section:
+Edit `lua/plugins/coding.lua`, find the Windsurf section:
 
 ```lua
-vim.keymap.set("i", "<C-y>", function()
+vim.keymap.set("i", "<Tab>", function()
   return vim.fn["codeium#Accept"]()
-end, { expr = true, silent = true })
+end, { expr = true, silent = true, replace_keycodes = false, desc = "Accept AI suggestion" })
 ```
 
-Change `"<C-y>"` to whatever key you prefer.
+Change `"<Tab>"` to whatever key you prefer, for example `"<C-g>"`.
 
 **Example - Customize Avante keybindings:**
 
@@ -238,28 +259,31 @@ return {
   {
     "folke/trouble.nvim",
     enabled = false,  -- Add this line
-    cmd = { "TroubleToggle", "Trouble" },
+    cmd = "Trouble",
     -- rest of config...
   },
 }
 ```
 
-**Disable Codeium:**
+**Disable a feature layer:**
 
-Edit `lua/plugins/coding.lua` and add:
+Completion UI, linting and DAP each have a flag in `lua/config/extras.lua`. Set one to `false` and that layer is gone.
+
+**Disable Windsurf (Codeium):**
+
+Edit `lua/plugins/coding.lua` and set `enabled = false` on the windsurf spec:
 
 ```lua
 {
-  "Exafunction/codeium.vim",
-  enabled = false,  -- Disables Codeium
-  event = "InsertEnter",
+  "Exafunction/windsurf.vim",
+  enabled = false, -- Disables Windsurf
   ...
 }
 ```
 
-**Disable Avante and Codeium (all AI):**
+**Disable Avante and Windsurf (all AI):**
 
-Both are gated behind `lua/config/local.lua`, delete that file and no AI plugin loads at all. To keep Codeium but drop Avante, keep `local.lua` as `return {}` and add `enabled = false` to the avante spec in `lua/plugins/coding.lua`.
+Both are gated behind `lua/config/local.lua`. Delete that file and no AI plugin loads at all. To keep Windsurf but drop Avante, keep `local.lua` as `return {}` and set `enabled = false` on the avante spec in `lua/plugins/coding.lua`.
 
 ## Adding New Plugins
 
@@ -289,18 +313,7 @@ return {
 
 ### Popular Plugins to Add:
 
-**LazyGit (Git UI in Neovim):**
-```lua
-{
-  "kdheepak/lazygit.nvim",
-  cmd = "LazyGit",
-  keys = {
-    { "<leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
-  },
-}
-```
-
-**Note:** lazygit must be installed on your system first. It's included in the nananvim installer.
+**LazyGit** is already built in (`<leader>gg`, through snacks.nvim). You only need the `lazygit` binary, which the installer adds.
 
 **Harpoon (Quick file navigation):**
 ```lua
@@ -319,7 +332,7 @@ return {
 {
   "folke/noice.nvim",
   event = "VeryLazy",
-  dependencies = { "MunifTanjim/nui.nvim", "rcarriga/nvim-notify" },
+  dependencies = { "MunifTanjim/nui.nvim" },
   opts = {},
 }
 ```
@@ -345,17 +358,17 @@ opt.spell = true
 
 ## Customizing AI Features
 
-### Customizing Codeium
+### Customizing Windsurf (Codeium)
 
-Edit `lua/plugins/coding.lua` to customize Codeium behavior:
+Edit `lua/plugins/coding.lua` to customize Windsurf behavior:
 
 ```lua
 -- Change keybindings
-vim.keymap.set("i", "<C-g>", function()  -- Changed from Tab
+vim.keymap.set("i", "<C-g>", function() -- Changed from Tab
   return vim.fn["codeium#Accept"]()
-end, { expr = true, silent = true })
+end, { expr = true, silent = true, replace_keycodes = false })
 
--- Disable Codeium for certain filetypes
+-- Disable Windsurf for certain filetypes
 vim.g.codeium_filetypes = {
   markdown = false,
   text = false,
@@ -373,10 +386,10 @@ return {
     providers = {
       claude = {
         endpoint = "https://api.anthropic.com",
-        model = "claude-sonnet-5",
+        model = "claude-sonnet-5-5", -- or "claude-opus-5-5" for harder tasks
         extra_request_body = {
-          -- don't set temperature: claude-sonnet-5 rejects non-default sampling params
-          max_tokens = 8000,  -- Increase for longer responses
+          -- don't set temperature: Sonnet 5.5 rejects non-default sampling params
+          max_tokens = 32000, -- Increase for longer responses
         },
       },
     },
@@ -409,25 +422,21 @@ return {
 
 Or edit `lua/plugins/ui.lua` directly and replace the header.
 
-### Adjust Transparency
+### Background Mode (Blackout / Theme / Transparent)
 
-Enabled by default. If you want to disable it:
+theme-switcher.nvim owns the background. Blackout (pure black) is the default.
 
-Edit `lua/plugins/colorscheme.lua`:
-
-```lua
-config = function()
-  require("rose-pine").setup({
-    variant = "moon",
-    disable_background = false,  -- Change to false
-  })
-  vim.cmd.colorscheme("rose-pine-moon")
-end,
-```
+- `<leader>tb` toggles Blackout and the theme's own background
+- Transparent (your terminal shows through): `:lua require("theme-switcher").set_background("terminal")`
+- Change the startup mode in `lua/plugins/theme-switcher.lua`: `default_bg = "blackout"`
 
 ### Change Status Line
 
-Edit `lua/plugins/ui.lua`, find the lualine config and customize sections.
+Edit `lua/plugins/ui.lua`, find the lualine config and customize sections. It already shows the git branch and diff, diagnostics, attached LSP servers and pending plugin updates.
+
+### UI Toggles
+
+Press `<leader>u` and wait: which-key lists toggles for spelling, wrap, line numbers, diagnostics, inlay hints, indent guides, treesitter, dim, zen mode and format on save. Each toggle shows its current state.
 
 ## Project-Specific Settings
 
@@ -441,11 +450,11 @@ vim.opt.shiftwidth = 4
 -- Project-specific keymaps
 vim.keymap.set("n", "<leader>r", ":!cargo run<CR>")
 
--- Disable Codeium for this project
+-- Disable Windsurf for this project
 vim.g.codeium_enabled = false
 ```
 
-Then trust it with `:trust`
+nananvim turns on `exrc`, so Neovim reads this file. The first time, Neovim asks you to trust it (you can also run `:trust` on the file).
 
 ## Need More Help?
 

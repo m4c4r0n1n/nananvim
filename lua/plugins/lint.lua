@@ -1,6 +1,6 @@
--- Standalone linters (layered on top of LSP diagnostics) via nvim-lint.
--- Gated by the extras switch; returns an empty spec when disabled so lazy
--- simply skips it.
+-- Linters with nvim-lint. Their diagnostics show with the LSP diagnostics.
+-- The extras.lint flag controls this file. When the flag is false, this file
+-- returns an empty spec and lazy.nvim ignores it.
 if not require("config.extras").lint then
   return {}
 end
@@ -12,21 +12,21 @@ return {
     config = function()
       local lint = require("lint")
 
-      -- Data-driven: add a `filetype = { "linter", ... }` entry and you're done.
-      -- Linters whose executable isn't installed are skipped silently (see the
-      -- guard below), so this list is safe to grow on any machine.
+      -- To add a linter, add an entry: filetype = { "linter" }.
+      -- If a linter is not installed, try_lint ignores it (see below).
+      -- Thus you can add linters safely on all computers.
       lint.linters_by_ft = {
         sh = { "shellcheck" },
         bash = { "shellcheck" },
-        -- zsh intentionally absent: shellcheck refuses zsh (SC1071 on every file)
+        -- zsh is not in this list. shellcheck does not support zsh (SC1071).
         markdown = { "markdownlint" },
         dockerfile = { "hadolint" },
         yaml = { "yamllint" },
-        -- python / js / lua etc. are largely covered by their LSP; add here if
-        -- you want a standalone linter on top.
+        -- The LSP servers check Python, JavaScript and Lua.
+        -- Add a linter here if you want more checks.
       }
 
-      -- Merge user-provided linters from lua/config/local.lua if present.
+      -- Add the linters from lua/config/local.lua, if that file exists.
       local ok, personal = pcall(require, "config.local")
       if ok and type(personal.linters_by_ft) == "table" then
         for ft, linters in pairs(personal.linters_by_ft) do

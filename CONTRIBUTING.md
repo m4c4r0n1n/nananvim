@@ -42,8 +42,9 @@ Open an issue with:
 
 2. **Make your changes**
    - Follow existing code style
-   - Comment complex logic
-   - Update docs if needed
+   - Comment complex logic. Write code comments in ASD-STE100 Simplified Technical English: short sentences, active voice, one instruction per sentence
+   - No em dashes anywhere (CI checks this). Use a comma, a colon or a period
+   - Update docs if needed (README, KEYBINDINGS.md, CHANGELOG.md)
 
 3. **Test thoroughly**
    ```bash
@@ -53,8 +54,8 @@ Open an issue with:
    nvim
    
    # Run health check
-   nvim +":checkhealth"
-   
+   nvim +":checkhealth nananvim"
+
    # Test your specific feature
    ```
 
@@ -116,14 +117,18 @@ return {
 Run these before submitting PR:
 
 ```bash
-# Lua linting
-luacheck lua/
+# Format check (CI fails if this fails)
+stylua --check lua/ init.lua .github/smoke.lua
 
-# Format check
-stylua --check lua/
+# Installer check (CI fails if this fails)
+shellcheck install.sh
 
-# Test on fresh config
-./scripts/test-fresh-install.sh
+# Smoke test: loads every plugin and fails on any startup error (CI runs this)
+nvim --headless -c "luafile .github/smoke.lua"
+
+# Test without touching your own config
+git clone . ~/.config/nananvim-test
+NVIM_APPNAME=nananvim-test nvim
 
 # Test specific language servers
 nvim test.py  # Python

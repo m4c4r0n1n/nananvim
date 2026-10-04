@@ -2,7 +2,7 @@
 
 <img width="1718" height="1362" alt="image" src="https://github.com/user-attachments/assets/de3c5790-93db-410b-bb40-52619dfa93ee" />
 
-A fast, minimal, fully documented Neovim config that actually works. ~45ms startup, 40 plugins with only 17 loaded at boot, CI-tested against Neovim **stable and nightly**. Batteries included, bloat optional.
+A fast, minimal, fully documented Neovim config that actually works. ~35ms startup, 40 plugins with only 6 loaded before the first screen draws, CI-tested against Neovim **stable and nightly** with a smoke test that fails on any startup error. Batteries included, bloat optional.
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
@@ -14,11 +14,12 @@ What's changed lately lives in the [CHANGELOG](CHANGELOG.md).
 
 There are a hundred "minimal nvim configs" out there. Here's what this one does differently:
 
-- **Actually fast**: ~45ms startup. 40 plugins total, only 17 load at startup, everything else waits for its trigger.
+- **Actually fast**: ~35ms startup. 40 plugins total, only 6 load before the first screen draws, everything else waits for its trigger. Completion runs on blink.cmp's Rust fuzzy matcher.
+- **Built on Neovim 0.12, not around it**: native `vim.lsp.config`/`vim.lsp.enable`, native commenting, native treesitter incremental selection, global rounded borders (`winborder`), linked HTML tag editing. Less plugin glue, fewer things to break.
 - **Two first-party plugins you won't find anywhere else** (see below): a Browser│Terminal│TODO panel workspace, and a live-preview theme switcher with a blackout mode.
 - **An IDE when you want one, not when you don't**: rich completion UI, a full linting layer, and the entire DAP debugging stack sit behind per-feature flags in one file (`lua/config/extras.lua`). On by default, one `false` to genuinely remove any of them.
-- **AI is opt-in, not opt-out**: no Codeium, no Avante, no binary downloads, no `make` step, until you create one file. Delete the file, it's all gone.
-- **Tested, not vibes**: CI runs the whole config headless on stable *and* nightly Neovim on every push. `:checkhealth nananvim` diagnoses your machine.
+- **AI is opt-in, not opt-out**: no Windsurf, no Avante, no binary downloads, no `make` step, until you create one file. Delete the file, it's all gone.
+- **Tested, not vibes**: CI loads every plugin headless on stable *and* nightly Neovim on every push and fails on any startup error, then checks formatting (StyLua), the installer (ShellCheck) and the docs. `:checkhealth nananvim` diagnoses your machine.
 - **Documented like someone might actually read it**: full [keybinding reference](KEYBINDINGS.md), [customization guide](docs/customization-guide.md), [troubleshooting](docs/troubleshooting.md), [advanced features](docs/advanced-features.md).
 
 ## First-party plugins
@@ -33,15 +34,18 @@ One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser 
 
 ## What else is in it?
 
-- **Snacks.nvim**: Dashboard on startup, plus the fuzzy finder/file picker that can preview images, PDFs, and more right in your terminal (Kitty or Ghostty, anything with the kitty graphics protocol)
-- **Treesitter**: Better syntax highlighting and code navigation for 20+ languages
-- **LSP**: Language servers auto-install through Mason (Lua, Python, TypeScript, C/C++, HTML/CSS/JSON out of the box)
-- **Completion**: nvim-cmp with kind icons, bordered menu/docs, and inline ghost text, plus a hook to append your own sources
+- **Snacks.nvim**: Dashboard, fuzzy picker (files, grep, LSP, git, undo history, keymaps...) that can preview images, PDFs and more right in your terminal (Kitty or Ghostty, anything with the kitty graphics protocol), notifications, indent guides, lazygit, terminal, zen mode and `<leader>u` UI toggles
+- **Treesitter** (`main` branch): highlighting and indent for 25+ languages out of the box, and any other parser installs itself the first time you open that file type. Function/class/argument text objects and motions, plus a sticky context line
+- **LSP**: Native Neovim 0.12 LSP, servers auto-install through Mason (Lua, Python via basedpyright + ruff, TypeScript, HTML/CSS/Tailwind, JSON/YAML with SchemaStore, Bash, Markdown, C/C++). Definitions and references open in a picker with preview
+- **Completion**: blink.cmp with kind icons, bordered menu/docs, ghost text, signature help, friendly-snippets, cmdline completion, and a hook to append your own sources
+- **Formatting**: conform.nvim formats on save (ruff, stylua, prettier, shfmt, clang-format); `<leader>uf` toggles it
 - **Linting**: nvim-lint layered on top of LSP (shellcheck, markdownlint, hadolint, yamllint auto-installed); add a linter by adding one table entry
 - **DAP**: Debug Adapter Protocol support for Python, C/C++/Rust (via codelldb), Bash/sh, JavaScript/TypeScript, and Lua (Neovim config/plugins, via osv) with DAP UI, and automatic `.vscode/launch.json` loading per project
+- **Motion and search**: flash.nvim jumps (`s`), grug-far project-wide search and replace with live preview (`<leader>sr`)
+- **Git**: gitsigns (stage lines, blame, hunk text object), lazygit (`<leader>gg`), git pickers, open on GitHub
 - **Rose Pine Moon**: Default theme, blacked out by default
-- **AI (opt-in)**: Codeium inline suggestions + Avante chat, both off by default, flip them on with a `lua/config/local.lua` (see AI setup below)
-- **Other stuff**: Bufferline for tabs, gitsigns for git integration, trouble for diagnostics, todo-comments, autopairs, surround motions, conform for formatting, snacks terminal, lualine status bar, which-key with labeled groups
+- **AI (opt-in)**: Windsurf (Codeium) inline suggestions + Avante chat (Claude Sonnet 5.5 by default), both off by default, flip them on with a `lua/config/local.lua` (see AI setup below)
+- **Other stuff**: Bufferline for tabs, trouble for diagnostics, todo-comments, autopairs, surround motions, lualine status bar (git diff, LSP servers, plugin updates), which-key with labeled groups, `:TokenCount` with exact Claude token counts
 
 ### Extras switch
 
@@ -53,10 +57,10 @@ genuinely gone on a lean machine:
 
 ```lua
 return {
-  cmp_rich = true, -- kind icons, bordered menus, ghost text
+  cmp_rich = true, -- kind icons, bordered menus, ghost text, auto docs
   lint = true,     -- nvim-lint linters + auto-installed tools
   dap = true,      -- nvim-dap + dap-ui + .vscode/launch.json
-  cmp_extra_sources = {}, -- append your own cmp sources here
+  cmp_extra_sources = {}, -- append your own blink.cmp sources here
 }
 ```
 
@@ -98,9 +102,9 @@ curl -fsSL https://raw.githubusercontent.com/m4c4r0n1n/nananvim/main/install.sh 
 ```
 
 The installer will:
-- Detect your distro (Arch, Ubuntu, Fedora, Gentoo, MacOS)
-- Install all required dependencies
-- Download Neovim 0.12.0+ if needed
+- Detect your distro (Arch, Ubuntu, Fedora, Gentoo, MacOS), x86_64 and arm64
+- Install all required dependencies (including lazygit and the tree-sitter CLI)
+- Download the latest stable Neovim (0.12+) if yours is too old
 - Clone this config to `~/.config/nvim`
 - Backup your existing config if present
 
@@ -120,12 +124,12 @@ mv ~/.config/nvim ~/.config/nvim.bak
 
 **For Arch:**
 ```bash
-sudo pacman -S git ripgrep fd imagemagick kitty nodejs npm python clang tree-sitter-cli
+sudo pacman -S git curl unzip ripgrep fd imagemagick kitty nodejs npm python clang tree-sitter-cli lazygit
 ```
 
 **For Ubuntu/Debian:**
 ```bash
-sudo apt install git ripgrep fd-find imagemagick kitty nodejs npm python3 clang
+sudo apt install git curl unzip ripgrep fd-find imagemagick kitty nodejs npm python3 python3-venv clang build-essential
 # fd-find is called fdfind on Ubuntu, so symlink it:
 ln -s $(which fdfind) ~/.local/bin/fd
 # tree-sitter-cli only lands in apt from 23.10+; otherwise grab the binary:
@@ -138,9 +142,11 @@ ln -s $(which fdfind) ~/.local/bin/fd
 ### 3. Install Neovim 0.12.0+
 
 ```bash
-curl -fLO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
-chmod u+x nvim-linux-x86_64.appimage
-sudo mv nvim-linux-x86_64.appimage /usr/local/bin/nvim
+# Use nvim-linux-arm64 on ARM machines
+curl -fLO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+sudo rm -rf /opt/nvim && sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+sudo mv /opt/nvim-linux-x86_64 /opt/nvim
+sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
 ```
 
 ### 4. Clone this config
@@ -191,7 +197,8 @@ Honestly using WSL2 is your best option.
 
 - **Neovim 0.12+**: The editor itself (nvim-treesitter v2 requires this; earlier versions won't work)
 - **tree-sitter CLI**: Needed by nvim-treesitter v2 to compile parsers. The installer handles this.
-- **Git**: For lazy.nvim to work
+- **Git, curl, unzip**: For lazy.nvim, Mason and parser downloads
+- **A C compiler**: For treesitter parsers (`build-essential` / `base-devel` / Xcode tools)
 - **Ripgrep & fd**: Makes file searching pretty fast
 - **A Nerd Font**: For icons to display properly
 
@@ -200,12 +207,13 @@ Honestly using WSL2 is your best option.
 - **ImageMagick**: Required for inline image previews in Snacks picker
 - **A kitty-graphics terminal**: Kitty, Ghostty, or WezTerm, anything that speaks the kitty graphics protocol (needed for inline image previews)
 - **w3m** (or lynx/elinks): The in-editor text browser for the panel workspace, auto-detected, falls back to your external browser if absent
+- **lazygit**: The git UI on `<leader>gg`
 
 **For language servers and formatters:**
 
-- **Node.js 18+**: For TypeScript/JavaScript LSP and prettier
-- **Python 3.10+**: For pyright, black, isort
-- **clang**: For C/C++ LSP
+- **Node.js 20+**: For the TypeScript/HTML/CSS/JSON/YAML servers and prettier
+- **Python 3.10+**: For basedpyright and ruff (Mason installs both)
+- **clang**: For C/C++ (Mason installs clangd if you don't have it)
 
 **For debugging (DAP):**
 
@@ -217,21 +225,21 @@ After setup, run `:checkhealth nananvim` to see what's working and what's missin
 
 ## AI Features Setup
 
-AI is **off by default** to keep startup lean and reliable, no binary downloads, no `make` build, nothing loads until you opt in. Both Codeium (inline suggestions) and Avante (chat) are gated behind a single file: `lua/config/local.lua`. Create it and they turn on.
+AI is **off by default** to keep startup lean and reliable, no binary downloads, no `make` build, nothing loads until you opt in. Both Windsurf (formerly Codeium, inline suggestions) and Avante (chat) are gated behind a single file: `lua/config/local.lua`. Create it and they turn on.
 
-**Just want free Codeium suggestions?** That's the whole setup:
+**Just want free Windsurf suggestions?** That's the whole setup (then run `:Codeium Auth` once to log in):
 
 ```bash
 mkdir -p ~/.config/nvim/lua/config
 echo 'return {}' > ~/.config/nvim/lua/config/local.lua
 ```
 
-For Avante chat, put your provider config in that same file (see below).
+With an empty `local.lua`, Avante uses Claude Sonnet 5.5 and reads `ANTHROPIC_API_KEY`. For a different provider, put its config in that same file (see below).
 
-### Codeium (Inline Suggestions)
+### Windsurf / Codeium (Inline Suggestions)
 
 **Keybindings** (once enabled):
-- `<Tab>` - Accept suggestion (falls back to the completion menu when it's open, so cmp keeps `<Tab>`)
+- `<Tab>` - Accept suggestion (while the completion menu is open, `<Tab>` moves in the menu instead)
 - `<M-]>` - Next suggestion
 - `<M-[>` - Previous suggestion
 - `<C-]>` - Dismiss suggestion
@@ -288,20 +296,20 @@ For AI chat (like ChatGPT in nvim), you'll need to configure a provider:
        providers = {
          claude = {
            endpoint = "https://api.anthropic.com",
-           model = "claude-sonnet-5",
+           model = "claude-sonnet-5-5", -- or "claude-opus-5-5" for harder tasks
            extra_request_body = {
-             max_tokens = 4096,
+             max_tokens = 16000,
            },
          },
        },
      },
    }
 ```
-(Don't set `temperature` for Claude Sonnet 5, it rejects non-default sampling params.)
+(Don't set `temperature` for Claude Sonnet 5.5, it rejects non-default sampling params.) This is also the built-in default, so `return {}` gets you the same thing.
 
 #### Option 3: Skip AI entirely
 
-Just don't create `local.lua` - no AI plugins load at all (no Codeium, no Avante, no build step). You still get:
+Just don't create `local.lua`, no AI plugins load at all (no Windsurf, no Avante, no build step). You still get:
 - ✅ LSP autocomplete
 - ✅ Everything else in the config
 
@@ -318,7 +326,7 @@ Just don't create `local.lua` - no AI plugins load at all (no Codeium, no Avante
 <img width="3438" height="1400" alt="image" src="https://github.com/user-attachments/assets/4605dfd2-5450-4466-b242-79402f5ce90e" />
 
 
-nananvim includes full debugging support via nvim-dap. Debug adapters are auto-installed through Mason.
+nananvim includes full debugging support via nvim-dap. Debug adapters are auto-installed through Mason in the background, and nvim-dap itself only loads the first time you press a `<leader>d` key.
 
 ### Quick Start
 
@@ -378,8 +386,9 @@ If you want to understand how this is organized or modify it:
 ```
 ~/.config/nvim/
 ├── .github/
+│   ├── smoke.lua          # CI smoke test: loads every plugin, fails on errors
 │   └── workflows/
-│       └── ci.yml         # CI: headless boot on stable + nightly nvim
+│       └── ci.yml         # CI: smoke test on stable + nightly nvim, StyLua, ShellCheck
 ├── docs/                  # Documentation
 │   ├── troubleshooting.md
 │   ├── customization-guide.md
@@ -391,7 +400,7 @@ If you want to understand how this is organized or modify it:
 │   │   ├── options.lua    # Vim options
 │   │   ├── keymaps.lua    # Global keymaps
 │   │   ├── autocmds.lua   # Autocommands
-│   │   ├── commands.lua   # Custom commands
+│   │   ├── commands.lua   # :TokenCount, :FormatToggle
 │   │   ├── extras.lua     # Master switch: cmp UI / lint / DAP flags
 │   │   └── local.lua      # (optional, gitignored) AI opt-in + overrides
 │   ├── nananvim/
@@ -400,13 +409,13 @@ If you want to understand how this is organized or modify it:
 │       ├── colorscheme.lua    # Rose Pine Moon theme
 │       ├── theme-switcher.lua # Live theme preview + blackout toggle
 │       ├── nanabrowser.lua    # Browser │ Terminal │ TODO workspace
-│       ├── ui.lua             # Snacks (dashboard/picker/terminal), bufferline, lualine
-│       ├── editor.lua         # neo-tree, which-key, sleuth
-│       ├── coding.lua         # Completion, autopairs, Codeium, Avante
-│       ├── lsp.lua            # LSP servers, Mason, conform formatters
+│       ├── ui.lua             # Snacks (dashboard/picker/terminal/toggles), bufferline, lualine
+│       ├── editor.lua         # neo-tree, which-key, flash, grug-far, sleuth
+│       ├── coding.lua         # blink.cmp, autopairs, ts-comments, surround, Windsurf, Avante
+│       ├── lsp.lua            # LSP servers, Mason, lazydev, SchemaStore, conform formatters
 │       ├── lint.lua           # nvim-lint (gated by extras.lint)
-│       ├── treesitter.lua     # Syntax highlighting
-│       ├── git.lua            # Gitsigns
+│       ├── treesitter.lua     # Parsers, text objects, sticky context
+│       ├── git.lua            # Gitsigns, lazygit and git pickers
 │       ├── diagnostics.lua    # Trouble, todo-comments
 │       └── dap.lua            # Debug Adapter Protocol (gated by extras.dap)
 ├── init.lua               # Main entry point
@@ -435,6 +444,9 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 - `<leader>fb` - Switch buffers
 - `<leader>fo` - Recent files
 - `<leader>fr` - Resume last picker
+- `<leader>fw` - Grep the word under the cursor
+- `<leader>sr` - Search and replace across the project (grug-far)
+- `s` - Flash jump: type 1-2 characters, then the label
 - `<leader>e` - Toggle file explorer (Neo-tree)
 - `H` in Neo-tree to toggle hidden files
 - `<leader>o` - Focus file explorer
@@ -457,13 +469,14 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 
 ### LSP (Language Server)
 
-- `gd` - Go to definition
-- `gr` - Find references
+- `gd` - Go to definition (picker with preview)
+- `gr` - Find references (picker with preview)
 - `K` - Show hover documentation
-- `gi` - Go to implementation
+- `gi` / `gy` - Go to implementation / type definition
 - `<leader>ca` - Code actions (quick fixes)
 - `<leader>rn` - Rename symbol
-- `<leader>cf` - Format current buffer
+- `<leader>cf` - Format current buffer (`<leader>uf` toggles format on save)
+- `<leader>cR` - Rename the file (imports update)
 - `<leader>ih` - Toggle inlay hints
 
 ### Debugging (DAP)
@@ -490,10 +503,14 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 - `<leader>hp` - Preview hunk
 - `<leader>hb` - Git blame for current line
 - `<leader>hd` - Diff this
+- `<leader>gg` - Lazygit
+- `<leader>gs` / `<leader>gc` / `<leader>gb` - Git status / commits / branches pickers
+- `<leader>gB` - Open the file on GitHub
 
 ### Buffer Management
 
 - `[b` / `]b` - Previous/next buffer (bare `H`/`L` are left as their native top/bottom-of-screen motions)
+- `<leader>bd` - Delete buffer (keeps your window layout)
 - `<leader>bp` - Pin buffer
 - `<leader>bo` - Close all other buffers
 - `<leader>bP` - Close all non-pinned buffers
@@ -513,8 +530,8 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 
 ### AI Features
 
-**Codeium (only when AI is enabled via `local.lua`):**
-- `<Tab>` - Accept suggestion (yields to the completion menu when it's open)
+**Windsurf / Codeium (only when AI is enabled via `local.lua`):**
+- `<Tab>` - Accept suggestion (the completion menu gets `<Tab>` first while it's open)
 - `<M-]>` - Next suggestion
 - `<M-[>` - Previous suggestion
 - `<C-]>` - Dismiss
@@ -528,6 +545,9 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 
 - `gcc` - Comment/uncomment line
 - `gc` (in visual mode) - Comment selection
+- `af` / `if`, `ac` / `ic`, `aa` / `ia` - Function / class / argument text objects (`]f` / `[f` to jump between functions)
+- `<C-Space>` - Expand selection by syntax node (`<BS>` shrinks)
+- `<leader>u` - UI toggles (wrap, spell, diagnostics, zen...)
 - `<C-s>` - Save file
 - `<leader>q` - Quit
 - `<leader>Q` - Quit all
@@ -550,7 +570,8 @@ If you find something broken or weird:
 
 Some known quirks:
 
-- LSP might throw some errors on first startup (especially on Ubuntu/Pop!_OS) - they usually go away after Mason finishes installing everything
+- LSP servers start a minute late on first startup, Mason installs them in the background. Watch progress in `:Mason`
+- Treesitter parsers compile on first launch; if highlighting is missing, check that `tree-sitter` and a C compiler are installed (`:checkhealth nananvim`)
 - On some systems, fd might be called `fdfind` - the Ubuntu install command handles this but if you install manually you might need to symlink it
 
 ## Making This Config Your Own
@@ -576,9 +597,12 @@ This config wouldn't exist without these amazing projects:
 - [rose-pine](https://github.com/rose-pine/neovim) - Theme
 - [nvim-treesitter](https://github.com/nvim-treesitter/nvim-treesitter) - Syntax highlighting
 - [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) - LSP configs
-- [mason.nvim](https://github.com/williamboman/mason.nvim) - LSP installer
+- [mason.nvim](https://github.com/mason-org/mason.nvim) - LSP installer
+- [blink.cmp](https://github.com/Saghen/blink.cmp) - Completion
 - [nvim-dap](https://github.com/mfussenegger/nvim-dap) - Debug Adapter Protocol
-- [codeium.vim](https://github.com/Exafunction/codeium.vim) - Free AI suggestions
+- [flash.nvim](https://github.com/folke/flash.nvim) - Jump anywhere
+- [grug-far.nvim](https://github.com/MagicDuck/grug-far.nvim) - Search and replace
+- [windsurf.vim](https://github.com/Exafunction/windsurf.vim) - Free AI suggestions
 - [avante.nvim](https://github.com/yetone/avante.nvim) - AI chat
 - And many more listed in the plugin files
 

@@ -1,4 +1,4 @@
--- Theme Switcher - Browse and apply colorschemes
+-- Theme switcher: look at and apply colorschemes.
 return {
   {
     "m4c4r0n1n/theme-switcher.nvim",
@@ -8,12 +8,24 @@ return {
         width = 50,
         height = 25,
         border = "rounded",
-        default_bg = "blackout", -- start blacked out (theme text on pure black)
+        default_bg = "blackout", -- Start in blackout mode (theme text on a black background)
       })
     end,
     keys = {
-      { "<leader>th", function() require("theme-switcher").toggle() end, desc = "Theme switcher" },
-      { "<leader>tb", function() require("theme-switcher").toggle_background() end, desc = "Toggle blackout / theme background" },
+      {
+        "<leader>th",
+        function()
+          require("theme-switcher").toggle()
+        end,
+        desc = "Theme switcher",
+      },
+      {
+        "<leader>tb",
+        function()
+          require("theme-switcher").toggle_background()
+        end,
+        desc = "Toggle blackout / theme background",
+      },
     },
   },
 }

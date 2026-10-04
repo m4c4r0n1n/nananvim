@@ -1,20 +1,36 @@
 # nananvim Keybindings Reference
 
-Leader key is `<Space>`.
+Leader key is `<Space>`. Press it and wait: which-key shows every group. `<leader>?` shows the keys for the current buffer, `<leader>fk` searches all keymaps.
 
 ## Navigation
 
 ### File & Buffer Navigation
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<leader>f` | Find files | Normal | Snacks picker (bare `f` stays the native find-in-line motion) |
+| `<leader>f` | Find files | Normal | Snacks picker in cwd (bare `f` stays the native find-in-line motion) |
+| `<leader>ff` | Find files (home) | Normal | Search files under `~` |
+| `<leader>fa` | Find all files (home) | Normal | Include hidden/ignored files under `~` |
+| `<leader>fc` | Find config file | Normal | Search your nvim config |
 | `<leader>fg` | Live grep | Normal | Search text in all files |
+| `<leader>fw` | Grep word | Normal/Visual | Grep the word under the cursor or the selection |
 | `<leader>fb` | Buffer list | Normal | Show open buffers |
 | `<leader>fo` | Recent files | Normal | Show recently opened files |
-| `<leader>fa` | Find all files (home) | Normal | Include hidden/ignored files under `~` |
+| `<leader>fp` | Projects | Normal | Switch between recent projects |
 | `<leader>fh` | Help tags | Normal | Search Neovim help |
+| `<leader>fk` | Keymaps | Normal | Search all keymaps |
 | `<leader>fr` | Resume | Normal | Resume last picker |
 | `<leader>:` | Command history | Normal | Browse command history |
+
+### Jump Anywhere (Flash)
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `s` | Flash jump | Normal/Visual/Operator | Type 1-2 characters, then the label to jump |
+| `S` | Flash treesitter | Normal/Operator | Select a syntax node by label |
+| `r` | Remote flash | Operator | Act on a far spot without moving (`yr`...) |
+| `R` | Treesitter search | Operator/Visual | Search, then select the matching node |
+| `<C-s>` | Toggle flash | Command (`/`) | Show flash labels on search matches |
+
+`f`, `F`, `t`, `T` are the native motions.
 
 ### Window Navigation
 | Key | Action | Mode | Description |
@@ -23,6 +39,8 @@ Leader key is `<Space>`.
 | `<C-j>` | Go down | Normal | Move to lower window |
 | `<C-k>` | Go up | Normal | Move to upper window |
 | `<C-l>` | Go right | Normal | Move to right window |
+| `<C-Up>` / `<C-Down>` | Resize height | Normal | Decrease / increase window height |
+| `<C-Left>` / `<C-Right>` | Resize width | Normal | Decrease / increase window width |
 | `<C-w>v` | Split vertical | Normal | Create vertical split |
 | `<C-w>s` | Split horizontal | Normal | Create horizontal split |
 | `<C-w>q` | Close window | Normal | Close current window |
@@ -30,8 +48,9 @@ Leader key is `<Space>`.
 ### Buffer Management
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `[b` | Previous buffer | Normal | Cycle to previous buffer |
-| `]b` | Next buffer | Normal | Cycle to next buffer |
+| `[b` / `]b` | Previous / next buffer | Normal | Cycle buffers |
+| `[B` / `]B` | Move buffer | Normal | Move the buffer left / right in the bufferline |
+| `<leader>bd` | Delete buffer | Normal | Close the buffer and keep the window layout |
 | `<leader>bp` | Pin buffer | Normal | Pin/unpin buffer |
 | `<leader>bP` | Delete non-pinned | Normal | Close all unpinned buffers |
 | `<leader>bo` | Delete others | Normal | Close all other buffers |
@@ -40,36 +59,42 @@ Leader key is `<Space>`.
 
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<leader>e` | Toggle explorer | Normal | Open/close file tree |
+| `<leader>e` | Toggle explorer | Normal | Open/close file tree (also opens on `nvim .`) |
 | `<leader>o` | Focus explorer | Normal | Focus file tree |
 | `H` | Toggle hidden | Neo-tree | Show/hide hidden files |
-| `a` | Add file | Neo-tree | Create new file |
+| `a` | Add file | Neo-tree | Create new file (end with `/` for a directory) |
 | `A` | Add directory | Neo-tree | Create new directory |
 | `d` | Delete | Neo-tree | Delete file/directory |
-| `r` | Rename | Neo-tree | Rename file/directory |
+| `r` | Rename | Neo-tree | Rename file/directory (LSP imports update) |
 | `y` | Copy | Neo-tree | Copy file/directory |
 | `x` | Cut | Neo-tree | Cut file/directory |
 | `p` | Paste | Neo-tree | Paste file/directory |
-| `c` | Copy to clipboard | Neo-tree | Copy path to clipboard |
+| `c` | Copy to | Neo-tree | Copy to a path you type |
 | `<CR>` | Open | Neo-tree | Open file/directory |
 
 ## Language Server (LSP)
 
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `gd` | Go to definition | Normal | Jump to symbol definition |
-| `gD` | Go to declaration | Normal | Jump to symbol declaration |
-| `gr` | Find references | Normal | List all references |
-| `gi` | Go to implementation | Normal | Jump to implementation |
-| `gt` | Go to type definition | Normal | Jump to type definition |
+| `gd` | Go to definition | Normal | Picker with preview |
+| `gD` | Go to declaration | Normal | Picker with preview |
+| `gr` | Find references | Normal | Picker with preview |
+| `gi` | Go to implementation | Normal | Picker with preview |
+| `gy` | Go to type definition | Normal | Picker with preview |
 | `K` | Hover | Normal | Show hover documentation |
 | `<C-k>` | Signature help | Insert | Show function signature (insert-only so it doesn't shadow window-up nav) |
 | `<leader>ca` | Code action | Normal/Visual | Show available code actions |
 | `<leader>rn` | Rename | Normal | Rename symbol |
+| `<leader>cR` | Rename file | Normal | Rename the file and update imports |
 | `<leader>cf` | Format | Normal/Visual | Format code |
+| `<leader>cd` | Line diagnostics | Normal | Show diagnostics for the line in a float |
+| `<leader>ss` | Symbols | Normal | Symbols in the buffer |
+| `<leader>sS` | Workspace symbols | Normal | Symbols in the project |
 | `<leader>ih` | Toggle inlay hints | Normal | Toggle LSP inlay hints |
-| `]d` | Next diagnostic | Normal | Jump to next error/warning |
-| `[d` | Previous diagnostic | Normal | Jump to previous error/warning |
+| `]d` / `[d` | Next / previous diagnostic | Normal | Jump to next/previous error or warning |
+| `]]` / `[[` | Next / previous reference | Normal | Jump between uses of the word under the cursor |
+
+Neovim's built-in LSP keys also work: `grn` rename, `gra` code action, `grr` references, `gri` implementation, `grt` type definition, `gO` document symbols, `<C-s>` signature help (insert).
 
 ## Debugging (DAP)
 
@@ -90,44 +115,57 @@ Leader key is `<Space>`.
 
 ## Git Integration
 
+### Hunks (gitsigns)
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `]h` | Next hunk | Normal | Jump to next git change |
-| `[h` | Previous hunk | Normal | Jump to previous git change |
-| `<leader>hs` | Stage/unstage hunk | Normal | Toggle staging (run again on a staged hunk to unstage) |
-| `<leader>hr` | Reset hunk | Normal | Undo changes in hunk |
+| `]h` / `[h` | Next / previous hunk | Normal | Jump to next/previous git change |
+| `]H` / `[H` | Last / first hunk | Normal | Jump to the last/first change |
+| `<leader>hs` | Stage/unstage hunk | Normal/Visual | Toggle staging (visual: stage only the selected lines) |
+| `<leader>hr` | Reset hunk | Normal/Visual | Undo changes in hunk (visual: selected lines) |
 | `<leader>hS` | Stage buffer | Normal | Stage entire file |
 | `<leader>hR` | Reset buffer | Normal | Undo all changes in file |
-| `<leader>hp` | Preview hunk | Normal | Preview changes in hunk |
+| `<leader>hp` | Preview hunk | Normal | Preview the change inline |
 | `<leader>hb` | Blame line | Normal | Show git blame for line |
-| `<leader>hd` | Diff this | Normal | Show diff view |
+| `<leader>hB` | Blame buffer | Normal | Blame the whole file in a side window |
+| `<leader>hd` | Diff this | Normal | Diff against the index |
+| `<leader>hD` | Diff this ~ | Normal | Diff against the last commit |
+| `ih` | Inside hunk | Visual/Operator | Text object for the hunk (`dih`, `vih`) |
 
-## Completion & Snippets
+### Git Tools
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<leader>gg` | Lazygit | Normal | Full git UI in a float (needs `lazygit`) |
+| `<leader>gl` | Lazygit log | Normal | Commit log for the current file |
+| `<leader>gs` | Git status | Normal | Changed files picker |
+| `<leader>gc` | Git commits | Normal | Commit log picker |
+| `<leader>gb` | Git branches | Normal | Branch picker |
+| `<leader>gB` | Git browse | Normal/Visual | Open the file/selection on GitHub |
+
+## Completion & Snippets (blink.cmp)
 
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<C-Space>` | Trigger completion | Insert | Manually trigger completion |
-| `<C-n>` | Next item | Insert | Select next completion item |
-| `<C-p>` | Previous item | Insert | Select previous completion item |
-| `<C-d>` | Scroll docs down | Insert | Scroll completion docs down |
-| `<C-f>` | Scroll docs up | Insert | Scroll completion docs up |
-| `<CR>` | Confirm | Insert | Accept selected completion |
-| `<C-y>` | Confirm | Insert | Accept selected completion (alt) |
-| `<Tab>` | Next item | Insert | Next completion item |
-| `<S-Tab>` | Previous | Insert | Previous completion item |
-| `<C-e>` | Close | Insert | Close completion menu |
+| `<C-Space>` | Trigger completion | Insert | Show the menu (again: toggle docs) |
+| `<C-n>` / `<C-p>` | Next / previous item | Insert | Move in the menu |
+| `<Tab>` / `<S-Tab>` | Next / previous item | Insert | Move in the menu, then jump in snippets |
+| `<CR>` | Confirm | Insert | Accept the selected item (nothing selected: new line) |
+| `<C-y>` | Select and accept | Insert | Accept the first item at once |
+| `<C-e>` | Close | Insert | Close the completion menu |
+| `<C-f>` / `<C-d>` | Scroll docs | Insert | Scroll the documentation down / up |
+
+The command line (`:`, `/`) has completion too.
 
 ## AI Features
 
-### Codeium (Inline Suggestions — opt-in via `lua/config/local.lua`)
+### Windsurf / Codeium (Inline Suggestions, opt-in via `lua/config/local.lua`)
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<Tab>` | Accept suggestion | Insert | Accept Codeium suggestion (yields to the completion menu when it's open) |
+| `<Tab>` | Accept suggestion | Insert | Accept the suggestion (the completion menu gets `<Tab>` first while it is open) |
 | `<M-]>` | Next suggestion | Insert | Show next suggestion |
 | `<M-[>` | Previous suggestion | Insert | Show previous suggestion |
 | `<C-]>` | Dismiss | Insert | Dismiss suggestion |
 
-### Avante (AI Chat - Optional)
+### Avante (AI Chat, opt-in)
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
 | `<leader>aa` | Ask AI | Normal/Visual | Ask Avante a question |
@@ -137,22 +175,23 @@ Leader key is `<Space>`.
 | `<leader>ac` | Open chat | Normal | Open Avante chat |
 | `<leader>af` | Focus window | Normal | Focus Avante window |
 
-**Note:** Avante only works if you've configured an AI provider in `lua/config/local.lua`
+**Note:** Avante defaults to Claude (`ANTHROPIC_API_KEY`); configure a different provider in `lua/config/local.lua`.
 
 ## Code Editing
 
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `gcc` | Comment line | Normal | Toggle comment on line |
-| `gc` | Comment | Visual | Toggle comment on selection |
-| `gbc` | Block comment | Normal | Toggle block comment |
-| `>` | Indent | Visual | Indent selection |
-| `<` | Unindent | Visual | Unindent selection |
-| `<A-j>` | Move line down | Normal/Visual | Move line/selection down |
-| `<A-k>` | Move line up | Normal/Visual | Move line/selection up |
+| `gcc` | Comment line | Normal | Toggle comment on line (built in, treesitter-aware) |
+| `gc` | Comment | Visual/Operator | Toggle comment (`gcip` comments a paragraph) |
+| `>` / `<` | Indent / unindent | Visual | Indent and keep the selection |
+| `<A-j>` / `<A-k>` | Move line down / up | Normal/Visual | Move line/selection |
+| `<leader>P` | Paste and keep | Visual | Paste over the selection without losing the register |
 | `ys` | Add surround | Normal | Add surround (quotes, brackets) |
 | `ds` | Delete surround | Normal | Remove surround |
 | `cs` | Change surround | Normal | Change surround |
+| `S` | Surround selection | Visual | Wrap the selection |
+| `<leader>sr` | Search and replace | Normal/Visual | Project-wide replace with live preview (grug-far) |
+| `<C-z>,` | Expand Emmet | Insert | Expand an Emmet abbreviation (HTML/CSS/JSX) |
 
 ## Diagnostics & Problems
 
@@ -160,12 +199,43 @@ Leader key is `<Space>`.
 |-----|--------|------|-------------|
 | `<leader>xx` | Diagnostics | Normal | All diagnostics (Trouble) |
 | `<leader>xX` | Buffer diagnostics | Normal | Current buffer only (Trouble) |
-| `<leader>xL` | Location list | Normal | Open location list |
-| `<leader>xQ` | Quickfix list | Normal | Open quickfix list |
-| `<leader>xt` | Todo list | Normal | Show all TODOs |
-| `<leader>xT` | Todo/Fix list | Normal | Show TODOs and FIXMEs |
-| `]t` | Next todo | Normal | Jump to next TODO |
-| `[t` | Previous todo | Normal | Jump to previous TODO |
+| `<leader>xs` | Symbols | Normal | Symbol outline (Trouble) |
+| `<leader>xl` | LSP | Normal | Definitions/references side panel (Trouble) |
+| `<leader>xL` | Location list | Normal | Open location list (Trouble) |
+| `<leader>xQ` | Quickfix list | Normal | Open quickfix list (Trouble) |
+| `<leader>xt` | Todo list | Normal | All TODOs (Trouble) |
+| `<leader>xT` | Todo/Fix list | Normal | TODO, FIX and FIXME only (Trouble) |
+| `<leader>st` | Todo picker | Normal | Search TODO comments |
+| `<leader>sd` | Diagnostics picker | Normal | Search diagnostics |
+| `]q` / `[q` | Next / previous item | Normal | Trouble item, or quickfix item when Trouble is closed |
+| `]t` / `[t` | Next / previous todo | Normal | Jump to next/previous TODO |
+
+## Search
+
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<leader>sb` | Buffer lines | Normal | Fuzzy search lines in the buffer |
+| `<leader>su` | Undo history | Normal | Browse and restore undo states |
+| `<leader>sn` | Notifications | Normal | Notification history |
+| `<leader>s/` | Search history | Normal | Browse `/` history |
+
+## UI Toggles
+
+which-key shows the current state of each toggle.
+
+| Key | Toggle |
+|-----|--------|
+| `<leader>uf` | Format on save |
+| `<leader>us` | Spelling |
+| `<leader>uw` | Wrap |
+| `<leader>ul` | Line numbers |
+| `<leader>uL` | Relative numbers |
+| `<leader>ud` | Diagnostics |
+| `<leader>uh` | Inlay hints |
+| `<leader>ug` | Indent guides |
+| `<leader>uT` | Treesitter highlight |
+| `<leader>uD` | Dim inactive code |
+| `<leader>uz` | Zen mode |
 
 ## Terminal
 
@@ -175,7 +245,7 @@ Leader key is `<Space>`.
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
 | `<C-\>` | Toggle terminal | Normal/Terminal | Toggle floating terminal (Ctrl+Backslash) |
-| `<Esc>` | Exit terminal mode | Terminal | Return to normal mode |
+| `<Esc><Esc>` | Exit terminal mode | Terminal | Return to normal mode (one `<Esc>` goes to the program) |
 
 ### Nanabrowser Terminal Panel
 | Key | Action | Mode | Description |
@@ -235,8 +305,11 @@ Leader key is `<Space>`.
 | `<leader>q` | Quit | Normal | Quit current window |
 | `<leader>Q` | Quit all | Normal | Quit Neovim |
 | `<Esc>` | Clear search | Normal | Clear search highlighting |
+| `n` / `N` | Next / previous match | Normal | Jump and center the match |
 | `<leader>l` | Lazy | Normal | Open plugin manager |
-| `<leader>m` | Mason | Normal | Open LSP installer |
+| `<leader>m` | Mason | Normal | Open LSP/tool installer |
+| `<leader>?` | Buffer keymaps | Normal | which-key for the current buffer |
+| `q` | Close | Help/quickfix/tool windows | Close the window |
 | `u` | Undo | Normal | Undo last change |
 | `<C-r>` | Redo | Normal | Redo last undo |
 | `.` | Repeat | Normal | Repeat last command |
@@ -254,34 +327,40 @@ Leader key is `<Space>`.
 
 ## Treesitter Selection
 
-Smart node-aware selection. Walks the syntax tree, so each press expands to the enclosing node (expression → statement → block → function → ...).
+Smart node-aware selection, built in to Neovim 0.12 (`an` / `in`). Each press expands to the enclosing node (expression → statement → block → function → ...).
 
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
 | `<C-Space>` | Start selection | Normal | Select the node under cursor |
 | `<C-Space>` | Expand selection | Visual | Grow selection to parent node |
-| `<BS>` | Shrink selection | Visual | Step back to previous node |
+| `<BS>` | Shrink selection | Visual | Step back to a child node |
+| `]n` / `[n` | Next / previous node | Visual | Move the selection to a sibling node |
 
 ## Text Objects
 
+### Treesitter (code-aware)
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `iw` | Inner word | Visual/Operator | Select inner word |
-| `aw` | A word | Visual/Operator | Select a word |
-| `is` | Inner sentence | Visual/Operator | Select inner sentence |
-| `as` | A sentence | Visual/Operator | Select a sentence |
-| `ip` | Inner paragraph | Visual/Operator | Select inner paragraph |
-| `ap` | A paragraph | Visual/Operator | Select a paragraph |
-| `i"` | Inner quotes | Visual/Operator | Select inside quotes |
-| `a"` | Around quotes | Visual/Operator | Select around quotes |
-| `i(` | Inner parens | Visual/Operator | Select inside parentheses |
-| `a(` | Around parens | Visual/Operator | Select around parentheses |
-| `i{` | Inner braces | Visual/Operator | Select inside braces |
-| `a{` | Around braces | Visual/Operator | Select around braces |
-| `i[` | Inner brackets | Visual/Operator | Select inside brackets |
-| `a[` | Around brackets | Visual/Operator | Select around brackets |
-| `it` | Inner tag | Visual/Operator | Select inside HTML tag |
-| `at` | Around tag | Visual/Operator | Select around HTML tag |
+| `af` / `if` | Function | Visual/Operator | Around / inside function |
+| `ac` / `ic` | Class | Visual/Operator | Around / inside class |
+| `aa` / `ia` | Argument | Visual/Operator | Around / inside argument |
+| `]f` / `[f` | Function start | Normal/Visual/Operator | Next / previous function |
+| `]F` / `[F` | Function end | Normal/Visual/Operator | Next / previous function end |
+| `]c` / `[c` | Class start | Normal/Visual/Operator | Next / previous class (diff mode: next / previous change) |
+| `]a` / `[a` | Argument | Normal/Visual/Operator | Next / previous argument |
+| `[x` | Context | Normal | Jump to the context line pinned at the top |
+
+### Built-in
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `iw` / `aw` | Word | Visual/Operator | Inner word / a word |
+| `is` / `as` | Sentence | Visual/Operator | Inner sentence / a sentence |
+| `ip` / `ap` | Paragraph | Visual/Operator | Inner paragraph / a paragraph |
+| `i"` / `a"` | Quotes | Visual/Operator | Inside / around quotes |
+| `i(` / `a(` | Parens | Visual/Operator | Inside / around parentheses |
+| `i{` / `a{` | Braces | Visual/Operator | Inside / around braces |
+| `i[` / `a[` | Brackets | Visual/Operator | Inside / around brackets |
+| `it` / `at` | Tag | Visual/Operator | Inside / around HTML tag |
 
 ## Custom Commands
 
@@ -289,24 +368,26 @@ Smart node-aware selection. Walks the syntax tree, so each press expands to the 
 |---------|-------------|
 | `:Lazy` | Open plugin manager |
 | `:Mason` | Open LSP/formatter installer |
-| `:LspInfo` | Show LSP status for current buffer |
-| `:TSUpdate` | Update / install all configured parsers |
+| `:checkhealth nananvim` | Check every external tool the config uses |
+| `:checkhealth vim.lsp` | Show LSP status for current buffer (`:LspInfo` is an alias) |
+| `:lsp restart` | Restart the LSP servers |
+| `:ConformInfo` | Show which formatter runs for this buffer |
+| `:FormatToggle` | Toggle format on save (`!` for the current buffer only) |
+| `:TokenCount [model]` | Exact Claude token count of the buffer or selection (needs `ANTHROPIC_API_KEY`, else a rough estimate) |
+| `:TSUpdate` | Update installed treesitter parsers |
 | `:TSInstall <lang>` | Install a specific parser |
 | `:TSUninstall <lang>` | Remove a parser |
 | `:TSLog` | Show treesitter install log |
-| `:checkhealth` | Run health checks |
-| `:TokenCount` | Count tokens in current buffer |
+| `:GrugFar` | Open search and replace |
 | `:AvanteToggle` | Toggle Avante window (if configured) |
 | `:AvanteChat` | Open Avante chat (if configured) |
-| `:TodoTrouble` | Show all project TODOs |
 | `:Neotree reveal` | Reveal current file in tree |
 
 ## Tips
 
 - Most commands work with counts: `3dd` deletes 3 lines
-- Commands can be combined: `ci"` changes text inside quotes
+- Commands can be combined: `ci"` changes text inside quotes, `daa` deletes an argument, `yif` yanks a function body
 - Use `:` to enter command mode for more options
-- Press `g?` in any mode for context-specific help
 - The which-key plugin shows available keys when you pause
-- AI is opt-in: create `lua/config/local.lua` to enable Codeium suggestions (`return {}` is enough) and Avante chat
+- AI is opt-in: create `lua/config/local.lua` to enable Windsurf suggestions and Avante chat (`return {}` is enough)
 - Configure Avante's provider in that same `lua/config/local.lua`

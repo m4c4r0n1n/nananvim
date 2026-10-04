@@ -5,56 +5,62 @@ opt.number = true
 opt.relativenumber = true
 opt.numberwidth = 4
 
--- Tabs & indentation (fallbacks only: vim-sleuth auto-detects and overrides
--- tabstop/shiftwidth/expandtab per-buffer from file contents)
+-- Tabs and indentation.
+-- These values are fallbacks. vim-sleuth reads each file and sets
+-- tabstop, shiftwidth and expandtab for that buffer.
 opt.tabstop = 2
 opt.shiftwidth = 2
 opt.expandtab = true
 opt.autoindent = true
 opt.smartindent = true
 opt.breakindent = true
+opt.shiftround = true
 
--- Line wrapping
+-- Line wrap
 opt.wrap = false
 opt.linebreak = true
 
--- Search settings
+-- Search
 opt.ignorecase = true
 opt.smartcase = true
 opt.hlsearch = true
 opt.incsearch = true
 
--- Cursor line (disabled globally; the theme-switcher enables it in its picker)
+-- The cursor line is off. The theme switcher sets it in its picker.
 opt.cursorline = false
 
 -- Appearance
 opt.termguicolors = true
 opt.background = "dark"
 opt.signcolumn = "yes"
+-- All floating windows get a rounded border (Neovim 0.11 and later).
+opt.winborder = "rounded"
 
--- Terminal window/tab title: name the terminal after the file being edited, so
--- Ghostty's tab shows e.g. "nvim · init.lua" instead of a generic title (picked
--- up via the OSC title escape). Unnamed/scratch buffers fall back to the folder
--- name rather than a blank "[No Name]".
+-- The terminal title shows the name of the file that you edit.
+-- Example: the Ghostty tab shows "nvim · init.lua".
+-- A buffer without a name shows the name of the current folder.
 opt.title = true
 opt.titlestring = [[nvim · %{empty(expand('%:t')) ? fnamemodify(getcwd(), ':t') : expand('%:t')}]]
 
--- Transparency (works with terminals that support it)
+-- Transparency for menus
 opt.pumblend = 10
 opt.winblend = 0
 
 -- Backspace
 opt.backspace = "indent,eol,start"
 
--- Clipboard
-opt.clipboard:append("unnamedplus")
+-- Clipboard. Set it after startup. Thus startup does not wait for the
+-- clipboard provider (this provider is slow over SSH).
+vim.schedule(function()
+  opt.clipboard:append("unnamedplus")
+end)
 
 -- Split windows
 opt.splitright = true
 opt.splitbelow = true
 opt.splitkeep = "screen"
 
--- Disable swap files
+-- No swap files and no backup files
 opt.swapfile = false
 opt.backup = false
 opt.writebackup = false
@@ -64,12 +70,12 @@ opt.undofile = true
 opt.undolevels = 10000
 opt.undodir = os.getenv("HOME") .. "/.vim/undodir"
 
--- Performance
+-- Timing
 opt.updatetime = 200
 opt.timeoutlen = 300
 opt.redrawtime = 10000
 
--- Scrolling
+-- Scroll
 opt.scrolloff = 8
 opt.sidescrolloff = 8
 opt.smoothscroll = true
@@ -83,7 +89,7 @@ opt.showcmd = true
 opt.showmode = false
 opt.laststatus = 3
 
--- Completion
+-- Completion menu
 opt.completeopt = "menu,menuone,noselect"
 opt.pumheight = 10
 
@@ -94,17 +100,18 @@ opt.showbreak = "↪ "
 -- Mouse
 opt.mouse = "a"
 
--- Line length indicator (off by default, uncomment if you want it)
+-- Line length guide. It is off. Remove the comment marks to show it.
 -- opt.colorcolumn = "80"
 
--- Folding (using treesitter)
+-- Folds use treesitter. All folds are open when you open a file.
 opt.foldmethod = "expr"
 opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+opt.foldtext = ""
 opt.foldenable = false
 opt.foldlevel = 99
 opt.foldlevelstart = 99
 
--- Spelling
+-- Spell check
 opt.spelllang = "en_us"
 opt.spell = false
 
@@ -112,7 +119,7 @@ opt.spell = false
 opt.shortmess:append("c")
 opt.shortmess:append("I")
 
--- Better whitespace display
+-- Show whitespace characters
 opt.list = true
 opt.listchars = {
   tab = "» ",
@@ -126,72 +133,60 @@ opt.listchars = {
 opt.fillchars = {
   eob = " ",
   diff = "╱",
+  fold = " ",
+  foldopen = "",
+  foldclose = "",
+  foldsep = " ",
 }
 
--- Case insensitive completion
+-- Command line completion
 opt.wildignorecase = true
 opt.wildmode = "longest:full,full"
+opt.wildmenu = true
 
--- Better diff
-opt.diffopt:append("algorithm:patience")
+-- Diff
+opt.diffopt:append("algorithm:histogram")
 opt.diffopt:append("indent-heuristic")
 opt.diffopt:append("linematch:60")
 
--- Session options
+-- Sessions
 opt.sessionoptions = "buffers,curdir,tabpages,winsize,help,globals,skiprtp,folds"
 
--- Grep program
+-- Use ripgrep for :grep if it is installed.
 if vim.fn.executable("rg") == 1 then
   opt.grepprg = "rg --vimgrep --no-heading --smart-case"
   opt.grepformat = "%f:%l:%c:%m"
 end
 
--- Virtual edit
+-- Visual block mode can move the cursor past the end of the line.
 opt.virtualedit = "block"
 
--- Formatting
+-- Format options
 opt.formatoptions = "jcroqlnt"
 
--- Confirm before quitting with unsaved changes
+-- Ask before you quit with changes that are not saved.
 opt.confirm = true
 
--- Better completion experience
-opt.wildmenu = true
-
--- Preserve cursor position
+-- Keep the view when you jump.
 opt.jumpoptions = "view"
 
--- Better splitting
+-- Show a live preview of :substitute in a split.
 opt.inccommand = "split"
 
--- Disable some builtin plugins
-local disabled_built_ins = {
-  "netrw",
-  "netrwPlugin",
-  "netrwSettings",
-  "netrwFileHandlers",
-  "gzip",
-  "zip",
-  "zipPlugin",
-  "tar",
-  "tarPlugin",
-  "getscript",
-  "getscriptPlugin",
-  "vimball",
-  "vimballPlugin",
-  "2html_plugin",
-  "logipat",
-  "rrhelper",
-  "spellfile_plugin",
-  "matchit",
-}
+-- Read .nvim.lua from the project folder. Neovim asks you to trust each file
+-- one time before it runs the file (see :help :trust).
+opt.exrc = true
 
-for _, plugin in pairs(disabled_built_ins) do
-  vim.g["loaded_" .. plugin] = 1
-end
+-- Disable netrw. neo-tree is the file explorer.
+-- lazy.nvim disables the other built-in plugins (see init.lua).
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 
--- Fix for Ubuntu/Pop!_OS LSP issues
+-- Providers
 vim.g.python3_host_prog = vim.fn.exepath("python3")
-
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
+vim.g.loaded_node_provider = 0
+
+-- Format on save is on. Use <leader>uf or :FormatToggle to change it.
+vim.g.autoformat = true

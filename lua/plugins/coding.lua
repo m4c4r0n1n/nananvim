@@ -1,106 +1,90 @@
--- AI plugins (codeium + avante) load only when you opt in by creating
--- lua/config/local.lua. Keeps fresh installs lean: no binary download, no
--- `make` build, and no eager load unless you actually want AI.
+-- AI plugins (Windsurf/Codeium and Avante) load only when the file
+-- lua/config/local.lua exists. This keeps a new install small: no binary
+-- download, no make step and no AI plugin until you ask for it.
 local ai_enabled = vim.fn.filereadable(vim.fn.stdpath("config") .. "/lua/config/local.lua") == 1
 local extras = require("config.extras")
-
--- Nerd-font icons for completion kinds (only used when extras.cmp_rich is on).
-local kind_icons = {
-  Text = "󰉿", Method = "󰆧", Function = "󰊕", Constructor = "", Field = "󰜢",
-  Variable = "󰀫", Class = "󰠱", Interface = "", Module = "", Property = "󰜢",
-  Unit = "󰑭", Value = "󰎠", Enum = "", Keyword = "󰌋", Snippet = "",
-  Color = "󰏘", File = "󰈙", Reference = "󰈇", Folder = "󰉋", EnumMember = "",
-  Constant = "󰏿", Struct = "󰙅", Event = "", Operator = "󰆕", TypeParameter = "",
-}
+local rich = extras.cmp_rich
 
 return {
   {
-    "hrsh7th/nvim-cmp",
-    event = "InsertEnter",
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-path",
-      "saadparwaiz1/cmp_luasnip",
-      "L3MON4D3/LuaSnip",
-    },
-    config = function()
-      local cmp = require("cmp")
-      local luasnip = require("luasnip")
+    "saghen/blink.cmp",
+    version = "1.*",
+    event = { "InsertEnter", "CmdlineEnter" },
+    dependencies = { "rafamadriz/friendly-snippets" },
+    opts_extend = { "sources.default" },
+    opts = function()
+      local opts = {
+        keymap = {
+          -- <CR> accepts only an item that you selected.
+          -- <Tab> and <S-Tab> move in the menu, then jump in snippets.
+          preset = "enter",
+          ["<C-n>"] = { "select_next", "fallback_to_mappings" },
+          ["<C-p>"] = { "select_prev", "fallback_to_mappings" },
+          ["<C-y>"] = { "select_and_accept", "fallback" },
+          ["<C-d>"] = { "scroll_documentation_up", "fallback" },
+          ["<C-f>"] = { "scroll_documentation_down", "fallback" },
+          ["<Tab>"] = { "select_next", "snippet_forward", "fallback" },
+          ["<S-Tab>"] = { "select_prev", "snippet_backward", "fallback" },
+        },
+        appearance = { nerd_font_variant = "mono" },
+        completion = {
+          list = { selection = { preselect = false, auto_insert = false } },
+          accept = { auto_brackets = { enabled = true } },
+          menu = {
+            border = rich and "rounded" or "none",
+            draw = rich and { treesitter = { "lsp" } } or {
+              columns = { { "label", "label_description", gap = 1 }, { "kind" } },
+            },
+          },
+          documentation = {
+            auto_show = rich,
+            auto_show_delay_ms = 200,
+            window = { border = rich and "rounded" or "none" },
+          },
+          ghost_text = { enabled = rich },
+        },
+        signature = {
+          enabled = true,
+          window = { border = rich and "rounded" or "none" },
+        },
+        sources = {
+          default = { "lazydev", "lsp", "path", "snippets", "buffer" },
+          providers = {
+            lazydev = {
+              name = "LazyDev",
+              module = "lazydev.integrations.blink",
+              -- Show lazydev items before LSP items.
+              score_offset = 100,
+            },
+          },
+        },
+        cmdline = {
+          keymap = { preset = "cmdline" },
+          completion = { menu = { auto_show = true } },
+        },
+        -- Use the Rust fuzzy matcher. Show a warning if its binary is not available.
+        fuzzy = { implementation = "prefer_rust_with_warning" },
+      }
 
-      cmp.setup({
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
-        mapping = cmp.mapping.preset.insert({
-          ["<C-n>"] = cmp.mapping.select_next_item(),
-          ["<C-p>"] = cmp.mapping.select_prev_item(),
-          ["<C-d>"] = cmp.mapping.scroll_docs(-4),
-          ["<C-f>"] = cmp.mapping.scroll_docs(4),
-          ["<C-Space>"] = cmp.mapping.complete(),
-          ["<CR>"] = cmp.mapping.confirm({ select = false }),
-          ["<C-y>"] = cmp.mapping.confirm({ select = true }),
-          ["<Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_next_item()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-        }),
-        sources = cmp.config.sources(vim.list_extend({
-          { name = "nvim_lsp" },
-          { name = "luasnip" },
-          { name = "buffer" },
-          { name = "path" },
-        }, extras.cmp_extra_sources or {})),
-        formatting = {
-          format = function(entry, vim_item)
-            local menu = ({
-              nvim_lsp = "[LSP]",
-              luasnip = "[Snippet]",
-              buffer = "[Buffer]",
-              path = "[Path]",
-            })[entry.source.name] or ("[" .. entry.source.name .. "]")
-            vim_item.menu = menu
-            -- Rich UI: prefix the kind with a nerd-font icon.
-            if extras.cmp_rich and kind_icons[vim_item.kind] then
-              vim_item.kind = kind_icons[vim_item.kind] .. " " .. vim_item.kind
-            end
-            return vim_item
-          end,
-        },
-        -- Rich UI: bordered menu + docs and inline ghost text preview.
-        window = extras.cmp_rich and {
-          completion = cmp.config.window.bordered(),
-          documentation = cmp.config.window.bordered(),
-        } or {},
-        experimental = { ghost_text = extras.cmp_rich },
-      })
+      -- Add the sources from lua/config/extras.lua.
+      for name, provider in pairs(extras.cmp_extra_sources or {}) do
+        opts.sources.providers[name] = provider
+        table.insert(opts.sources.default, name)
+      end
+
+      return opts
     end,
   },
   {
     "windwp/nvim-autopairs",
     event = "InsertEnter",
-    config = function()
-      require("nvim-autopairs").setup()
-      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-      local cmp = require("cmp")
-      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
-    end,
+    opts = { check_ts = true },
   },
   {
-    "numToStr/Comment.nvim",
-    event = { "BufReadPost", "BufNewFile" },
+    -- Neovim has built-in commenting (gc, gcc). This plugin gives it the
+    -- correct comment string for embedded languages (for example, JSX and Vue).
+    "folke/ts-comments.nvim",
+    event = "VeryLazy",
     opts = {},
   },
   {
@@ -110,79 +94,78 @@ return {
     opts = {},
   },
 
-  -- Codeium.vim (AI suggestions) - opt-in, see ai_enabled above
+  -- Windsurf (formerly Codeium) AI suggestions. Opt-in, see ai_enabled above.
   {
-    "Exafunction/codeium.vim",
+    "Exafunction/windsurf.vim",
     event = "InsertEnter",
     enabled = ai_enabled,
-    config = function()
+    init = function()
       vim.g.codeium_disable_bindings = 1
-
-      -- Accept a codeium suggestion, but yield <Tab> to nvim-cmp while its
-      -- completion menu is open (otherwise codeium silently steals cmp's
-      -- Tab-to-cycle behaviour).
+    end,
+    config = function()
+      -- Accept a suggestion with <Tab>.
+      -- When the completion menu is open, blink.cmp uses <Tab> first.
+      -- blink.cmp sends <Tab> to this mapping when the menu is closed.
       vim.keymap.set("i", "<Tab>", function()
-        local ok, cmp = pcall(require, "cmp")
-        if ok and cmp.visible() then
-          cmp.select_next_item()
-          return ""
-        end
         return vim.fn["codeium#Accept"]()
-      end, { expr = true, silent = true })
+      end, { expr = true, silent = true, replace_keycodes = false, desc = "Accept AI suggestion" })
 
       vim.keymap.set("i", "<C-]>", function()
         return vim.fn["codeium#Clear"]()
-      end, { expr = true, silent = true })
+      end, { expr = true, silent = true, desc = "Clear AI suggestion" })
 
       vim.keymap.set("i", "<M-]>", function()
         return vim.fn["codeium#CycleCompletions"](1)
-      end, { expr = true, silent = true })
+      end, { expr = true, silent = true, desc = "Next AI suggestion" })
 
       vim.keymap.set("i", "<M-[>", function()
         return vim.fn["codeium#CycleCompletions"](-1)
-      end, { expr = true, silent = true })
+      end, { expr = true, silent = true, desc = "Previous AI suggestion" })
     end,
   },
 
-  -- Emmet for HTML/CSS abbreviations
+  -- Emmet for HTML and CSS abbreviations
   {
     "mattn/emmet-vim",
     ft = { "html", "css", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
     init = function()
       vim.g.user_emmet_leader_key = "<C-z>"
-      vim.g.user_emmet_mode = "inv" -- enable in insert, normal, and visual modes
+      vim.g.user_emmet_mode = "inv" -- Insert, normal and visual mode
       vim.g.user_emmet_install_global = 0
     end,
   },
 
-  -- Avante (AI chat - OPTIONAL)
-  -- To enable: create lua/config/local.lua and add your provider config
+  -- Avante AI chat. Opt-in.
+  -- To enable it, make lua/config/local.lua and add your provider settings.
   {
     "yetone/avante.nvim",
     version = false,
     enabled = ai_enabled,
+    build = "make",
     opts = function()
-      -- Try to load personal config, otherwise use defaults
+      -- Use the settings from lua/config/local.lua if they exist.
       local ok, local_config = pcall(require, "config.local")
-      if ok and local_config.avante then
+      if ok and type(local_config) == "table" and local_config.avante then
         return local_config.avante
       end
 
-      -- Default fallback (you have to configure)
+      -- Default settings. Set ANTHROPIC_API_KEY in your shell.
       return {
         provider = "claude",
         providers = {
           claude = {
             endpoint = "https://api.anthropic.com",
-            -- claude-sonnet-4-20250514 is deprecated (retires 2026-06-15).
-            -- Sonnet 5 also rejects non-default sampling params, so no
-            -- temperature here (it would 400 the request).
-            model = "claude-sonnet-5",
+            -- For harder tasks, change this to "claude-opus-5-5".
+            -- Do not set temperature. Sonnet 5.5 rejects sampling parameters
+            -- that are not the default.
+            model = "claude-sonnet-5-5",
             extra_request_body = {
-              max_tokens = 4096,
+              max_tokens = 16000,
             },
           },
         },
+        input = { provider = "snacks" },
+        selector = { provider = "snacks" },
         behaviour = {
           auto_suggestions = false,
           auto_set_highlight_group = true,
@@ -212,23 +195,19 @@ return {
         },
       }
     end,
-
-    build = "make",
     dependencies = {
-      "stevearc/dressing.nvim",
-      "nvim-treesitter/nvim-treesitter",
       "nvim-lua/plenary.nvim",
       "MunifTanjim/nui.nvim",
+      "folke/snacks.nvim",
       "nvim-tree/nvim-web-devicons",
       {
         "MeanderingProgrammer/render-markdown.nvim",
+        ft = { "markdown", "Avante" },
         opts = {
           file_types = { "markdown", "Avante" },
         },
-        ft = { "markdown", "Avante" },
       },
     },
-
     keys = {
       {
         "<leader>aa",
@@ -236,7 +215,7 @@ return {
           require("avante.api").ask()
         end,
         desc = "Avante: Ask",
-        mode = { "n", "v" },
+        mode = { "n", "x" },
       },
       {
         "<leader>ar",
@@ -251,7 +230,7 @@ return {
           require("avante.api").edit()
         end,
         desc = "Avante: Edit",
-        mode = "v",
+        mode = "x",
       },
       { "<leader>at", "<cmd>AvanteToggle<cr>", desc = "Avante: Toggle" },
       { "<leader>ac", "<cmd>AvanteChat<cr>", desc = "Avante: Chat" },
