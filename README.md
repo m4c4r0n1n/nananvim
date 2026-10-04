@@ -12,12 +12,12 @@ Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, mul
 
 ## Why nananvim?
 
-There are a hundred "minimal nvim configs" out there. Here's what this one does differently:
+Because why not. Nobody will use this, lol. But if you're here, here are some specs:
 
-- **Actually fast**: ~35ms startup. 53 plugins total, only 6 load before the first screen draws, everything else waits for its trigger. Completion runs on blink.cmp's Rust fuzzy matcher.
+- **Kinda Fast**: ~35ms startup. 53 plugins total, only 6 load before the first screen draws, everything else waits for its trigger. Completion runs on blink.cmp's Rust fuzzy matcher.
 - **Built on Neovim 0.12, not around it**: native `vim.lsp.config`/`vim.lsp.enable`, native commenting, native treesitter incremental selection, global rounded borders (`winborder`), linked HTML tag editing. Less plugin glue, fewer things to break.
-- **Two first-party plugins you won't find anywhere else** (see below): a Browser│Terminal│TODO panel workspace, and a live-preview theme switcher with a blackout mode.
-- **An IDE when you want one, not when you don't**: rich completion UI, a full linting layer, and the entire DAP debugging stack sit behind per-feature flags in one file (`lua/config/extras.lua`). On by default, one `false` to genuinely remove any of them.
+- **Custom Plugins** (see below): a Browser│Terminal│TODO panel workspace, and a live-preview theme switcher with a blackout mode.
+- **Easy to use and functional**: rich completion UI, a full linting layer, and the entire DAP debugging stack sit behind per-feature flags in one file (`lua/config/extras.lua`). On by default, one `false` to genuinely remove any of them.
 - **Updates don't eat your settings**: your stuff lives in one gitignored file (`lua/config/local.lua`): options, keymaps, extra plugins, overrides for any built-in plugin. `:NananvimUpdate` pulls the new version and the tested plugin versions without touching it.
 - **AI is opt-in, not opt-out**: no Windsurf, no Avante, no binary downloads, no `make` step, until you create one file. Delete the file, it's all gone.
 - **Tested, not vibes**: CI loads every plugin headless on stable *and* nightly Neovim on every push and fails on any startup error, then checks formatting (StyLua), the installer (ShellCheck) and the docs. `:checkhealth nananvim` diagnoses your machine.
