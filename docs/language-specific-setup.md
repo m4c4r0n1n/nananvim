@@ -92,15 +92,17 @@ npm install  # or pnpm install / yarn install
 
 ### Features Included
 
-- TypeScript LSP (ts_ls)
+- TypeScript LSP (vtsls: the VS Code TypeScript engine, with move-to-file refactors and import updates when you move files)
+- ESLint (diagnostics and fixes, starts only in projects with an ESLint config)
 - Prettier formatting (prettierd when available) for JS, TS, JSX, TSX, Vue, Svelte, JSON, YAML, Markdown, HTML, CSS
 - Auto-imports
 - JSDoc highlighting
 - Debugging with js-debug-adapter (`<leader>dc`)
+- Tests with neotest (vitest and jest are detected automatically, `<leader>Tr` runs the nearest test)
 
 ### React/Vue/Svelte
 
-ts_ls handles JSX/TSX out of the box. For better support:
+vtsls handles JSX/TSX out of the box, and HTML/JSX tags close and rename themselves (nvim-ts-autotag). For better support:
 
 ```bash
 # In your project

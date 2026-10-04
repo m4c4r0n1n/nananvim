@@ -419,23 +419,17 @@ To use a specific register:
 "*y  " Yank to selection clipboard (X11)
 ```
 
-## Sessions
+## Sessions (Already Included!)
 
-### Auto-Save Sessions
+persistence.nvim saves the open files, splits and cursor positions for each folder when you quit.
 
-Add to `lua/plugins/editor.lua` (`<leader>q` is already Quit, so this uses `<leader>S`):
-
-```lua
-{
-  "folke/persistence.nvim",
-  event = "BufReadPre",
-  opts = {},
-  keys = {
-    { "<leader>Ss", function() require("persistence").load() end, desc = "Restore Session" },
-    { "<leader>Sl", function() require("persistence").load({ last = true }) end, desc = "Restore Last Session" },
-  },
-}
-```
+| Key | Action |
+|-----|--------|
+| `s` (dashboard) | Restore this folder's session |
+| `<leader>Ss` | Restore this folder's session |
+| `<leader>Sl` | Restore the last session (any folder) |
+| `<leader>SS` | Pick a session |
+| `<leader>Sd` | Don't save the session this time |
 
 ### Manual Sessions
 
@@ -472,6 +466,52 @@ snacks.terminal keys instances by command and cwd, so different invocations get 
 
 Needs the `lazygit` binary (the installer adds it).
 
+## Edit Files Like Text (oil.nvim)
+
+Press `-` to open the current file's folder as a buffer. Rename a file by editing its name, delete with `dd`, move by cutting and pasting into another folder, create with a new line (end it with `/` for a folder). `:w` applies it all. `-` goes up a folder, `q` closes. neo-tree stays the sidebar.
+
+## Harpoon (Your Most-Used Files)
+
+| Key | Action |
+|-----|--------|
+| `<leader>H` | Mark the current file |
+| `<leader>j` | Show the marked files (reorder or delete lines to edit the list) |
+| `<leader>1`-`<leader>5` | Jump to marked file 1 to 5 |
+
+## Multiple Cursors
+
+| Key | Action |
+|-----|--------|
+| `<C-n>` | Add a cursor at the next match of the word (or selection) |
+| `<C-p>` | Skip this match |
+| `<leader>M` | Add cursors at every match |
+| `<C-q>` | Add or remove a cursor right here |
+| `<Left>` / `<Right>` | Move between cursors (while there are several) |
+| `<leader>X` | Delete the current cursor |
+| `<Esc>` | Back to one cursor |
+
+Then edit normally: `ciw`, `A`, `dd`, anything, and it happens at every cursor.
+
+## Testing (neotest)
+
+| Key | Action |
+|-----|--------|
+| `<leader>Tr` | Run the nearest test |
+| `<leader>Tt` | Run the tests in this file |
+| `<leader>TT` | Run all tests |
+| `<leader>Tl` | Run the last test again |
+| `<leader>Td` | Debug the nearest test (DAP) |
+| `<leader>Tw` | Watch the file: rerun on save |
+| `<leader>Ts` | Summary tree |
+| `<leader>To` / `<leader>TO` | Output of the test / output panel |
+| `]T` / `[T` | Next / previous failed test |
+
+Pass/fail shows as signs and virtual text next to each test. Adapters for pytest, vitest and jest are included. Turn the whole thing off with `extras = { test = false }` in `local.lua`.
+
+## Scratch Buffers
+
+`<leader>.` opens a floating scratch buffer for the current file type, and it's saved for next time. `<leader>s.` picks between your scratch buffers. Good for notes and trying out code.
+
 ## Diff View
 
 ### Built-in Diffing
@@ -480,6 +520,15 @@ Needs the `lazygit` binary (the installer adds it).
 :windo diffthis  " Diff all windows
 :diffoff         " Turn off diff
 ```
+
+### diffview
+
+| Key | Action |
+|-----|--------|
+| `<leader>gd` | All changes side by side (and a 3-way merge view during a conflict) |
+| `<leader>gh` | History of the current file |
+| `<leader>gH` | History of the branch |
+| `q` | Close the diff view |
 
 ### Git Diff
 

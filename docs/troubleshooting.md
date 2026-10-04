@@ -27,7 +27,7 @@ basedpyright runs in "standard" mode (same as Pyright). If you changed it, set `
 
 ### TypeScript/JavaScript LSP Issues
 
-**Problem:** ts_ls not working
+**Problem:** vtsls (TypeScript) not working
 
 **Solutions:**
 1. Install Node.js 20+: `node --version`
@@ -120,6 +120,31 @@ Run `:FormatToggle!` (with `!`) to turn it off for the current buffer only.
 **Problem:** `<leader>gg` says lazygit not installed
 
 Install lazygit (`sudo pacman -S lazygit`, `brew install lazygit`, or let the installer download it).
+
+## Updating
+
+**Problem:** `:NananvimUpdate` says you changed files
+
+It stops instead of overwriting your edits to tracked files. Move those changes to `lua/config/local.lua` (see `lua/config/local.example.lua`), then run `git -C ~/.config/nvim checkout -- .` and update again. Or keep them with `git -C ~/.config/nvim stash` and `stash pop` afterward.
+
+**Problem:** Something broke after `:Lazy update`
+
+`:Lazy update` moves plugins past the versions CI tested. `:Lazy restore` (or `:NananvimUpdate`) puts them back on the tested versions.
+
+## Copilot Issues
+
+**Problem:** No Copilot suggestions
+
+1. Check `lua/config/local.lua` has `suggestions = "copilot"`
+2. Sign in once: `:LspCopilotSignIn`
+3. Copilot needs `node` on your PATH
+4. Check the server is attached: `:checkhealth vim.lsp` should list `copilot`
+
+## Tests (neotest)
+
+**Problem:** No tests found
+
+The adapters look for pytest (`test_*.py` / `*_test.py`), vitest and jest in the project. The treesitter parser for the language must be installed (it installs itself when you open the file). For Python, pytest must be installed in the active venv.
 
 ## Windsurf (Codeium) Issues
 

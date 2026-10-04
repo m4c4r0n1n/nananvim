@@ -2,6 +2,33 @@
 
 Notable changes, newest first. If you use this config and something breaks after an update, open an issue and I **WILL** fix it.
 
+## 2026-10-04, QOL round
+
+Went through everything people end up bolting onto their configs and put it in, all lazy-loaded so startup is still ~30ms.
+
+**New**
+- **Sessions** (persistence.nvim): every folder remembers its files and splits, restore from the dashboard (`s`) or `<leader>Ss`
+- **oil.nvim** on `-`: rename/move/delete files by editing them like text, `:w` applies it
+- **Harpoon**: `<leader>H` marks a file, `<leader>1`-`5` jumps to it, `<leader>j` shows the list
+- **Multiple cursors** (multicursor.nvim): `<C-n>` next match, `<leader>M` all matches, `<Esc>` back to one
+- **diffview** (the maintained fork): `<leader>gd` side-by-side diff and 3-way merge for conflicts, `<leader>gh` file history
+- **neotest**: run the nearest test/file/project, results inline, debug a test with DAP (`<leader>T`). pytest, vitest and jest out of the box, behind `extras.test`
+- **Markdown renders in the buffer** (render-markdown), `<leader>um` toggles it
+- HTML/JSX tags close and rename themselves (nvim-ts-autotag)
+- **Editable quickfix** (quicker.nvim), `<leader>xq`, `>`/`<` for more context
+- **Copilot** as a suggestions option: `suggestions = "copilot"` in local.lua, runs on nvim 0.12's built-in inline completion, no plugin
+- TypeScript is **vtsls** now (VS Code's engine: move-to-file, imports follow file moves) plus **eslint**
+- Folds come from the LSP server when it has them, and an LSP progress spinner
+- **`lua/config/local.lua` grew up**: options/keymaps at the top, then `extras`, `plugins` (add plugins or change any built-in one's opts) and `ai = false`. Template in `local.example.lua`. Git ignores it so updates never fight you
+- **`:NananvimUpdate`**: git pull + tested plugin versions, refuses to run over your edits
+- Opt-in nvim 0.12 message UI (`extras.ui2`), no more "Press ENTER"
+- Keymaps: centered `<C-d>`/`<C-u>`, `J` keeps the cursor, `gco`/`gcO`, `]e`/`[e` errors, `]w`/`[w` warnings, `<leader>-`/`<leader>|` splits, `<leader>fy` copy path, undo steps at `,` `.` `;`, DAP conditional breakpoints/log points/run to cursor
+- Toggles: diagnostic lines (`<leader>uv`), git blame line (`<leader>ub`), zoom (`<leader>uZ`), smooth scroll (`<leader>uS`)
+- Pickers for registers, marks, jumps, commands, highlights, quickfix; scratch buffers on `<leader>.`
+- `nvim file.lua:42` opens at line 42, `:SudaWrite` for root-owned files, tmux pane navigation (only loads in tmux), Neovide zoom/paste keys
+- Lualine shows `recording @q` while you record a macro (showmode is off so you couldn't see it before)
+- matchparen is back on
+
 ## 2026-10-03, full update and upgrade
 
 Every plugin updated to its latest version, and the stack moved to what Neovim 0.12 does natively.

@@ -32,6 +32,22 @@ Leader key is `<Space>`. Press it and wait: which-key shows every group. `<leade
 
 `f`, `F`, `t`, `T` are the native motions.
 
+### Files You Use Most (Harpoon)
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<leader>H` | Mark file | Normal | Add the current file to the list |
+| `<leader>j` | Marked files | Normal | Show the list (edit lines to reorder or remove) |
+| `<leader>1`-`<leader>5` | Jump | Normal | Open marked file 1 to 5 |
+
+### Sessions
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `s` | Restore session | Dashboard | Reopen this folder's files and splits |
+| `<leader>Ss` | Restore session | Normal | This folder's last session |
+| `<leader>Sl` | Restore last | Normal | The last session, any folder |
+| `<leader>SS` | Select session | Normal | Pick from all saved sessions |
+| `<leader>Sd` | Don't save | Normal | Skip saving the session on quit |
+
 ### Window Navigation
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
@@ -41,9 +57,13 @@ Leader key is `<Space>`. Press it and wait: which-key shows every group. `<leade
 | `<C-l>` | Go right | Normal | Move to right window |
 | `<C-Up>` / `<C-Down>` | Resize height | Normal | Decrease / increase window height |
 | `<C-Left>` / `<C-Right>` | Resize width | Normal | Decrease / increase window width |
+| `<leader>-` | Split below | Normal | Horizontal split |
+| `<leader>\|` | Split right | Normal | Vertical split |
 | `<C-w>v` | Split vertical | Normal | Create vertical split |
 | `<C-w>s` | Split horizontal | Normal | Create horizontal split |
 | `<C-w>q` | Close window | Normal | Close current window |
+
+Inside tmux, `<C-h/j/k/l>` also move into tmux panes (add the tmux half from the [vim-tmux-navigator README](https://github.com/christoomey/vim-tmux-navigator)). In Neovide, `<C-=>` / `<C-->` / `<C-0>` zoom in / out / reset and `<C-S-v>` pastes.
 
 ### Buffer Management
 | Key | Action | Mode | Description |
@@ -72,6 +92,14 @@ Leader key is `<Space>`. Press it and wait: which-key shows every group. `<leade
 | `c` | Copy to | Neo-tree | Copy to a path you type |
 | `<CR>` | Open | Neo-tree | Open file/directory |
 
+### oil.nvim (edit the file system like text)
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `-` | Parent folder | Normal | Open the current file's folder (again: go up) |
+| `<CR>` | Open | Oil | Open file or folder |
+| edit + `:w` | Apply | Oil | Rename, delete (`dd`), move (cut/paste), create (new line) |
+| `q` | Close | Oil | Close oil |
+
 ## Language Server (LSP)
 
 | Key | Action | Mode | Description |
@@ -92,6 +120,8 @@ Leader key is `<Space>`. Press it and wait: which-key shows every group. `<leade
 | `<leader>sS` | Workspace symbols | Normal | Symbols in the project |
 | `<leader>ih` | Toggle inlay hints | Normal | Toggle LSP inlay hints |
 | `]d` / `[d` | Next / previous diagnostic | Normal | Jump to next/previous error or warning |
+| `]e` / `[e` | Next / previous error | Normal | Errors only, with a float |
+| `]w` / `[w` | Next / previous warning | Normal | Warnings only, with a float |
 | `]]` / `[[` | Next / previous reference | Normal | Jump between uses of the word under the cursor |
 
 Neovim's built-in LSP keys also work: `grn` rename, `gra` code action, `grr` references, `gri` implementation, `grt` type definition, `gO` document symbols, `<C-s>` signature help (insert).
@@ -112,6 +142,25 @@ Neovim's built-in LSP keys also work: `grn` rename, `gra` code action, `grr` ref
 | `<leader>du` | Toggle DAP UI | Normal | Open/close the debug UI panels |
 | `<leader>dh` | Hover variables | Normal | Show variable values under the cursor |
 | `<leader>dS` | Scopes | Normal | Show scope variables in a float |
+| `<leader>dB` | Conditional breakpoint | Normal | Stop only when a condition is true |
+| `<leader>dp` | Log point | Normal | Print a message instead of stopping |
+| `<leader>dC` | Run to cursor | Normal | Continue to the cursor line |
+
+## Testing (neotest)
+
+| Key | Action | Mode | Description |
+|-----|--------|------|-------------|
+| `<leader>Tr` | Run nearest | Normal | Run the test under the cursor |
+| `<leader>Tt` | Run file | Normal | Run the tests in this file |
+| `<leader>TT` | Run all | Normal | Run every test in the project |
+| `<leader>Tl` | Run last | Normal | Run the last test again |
+| `<leader>Td` | Debug nearest | Normal | Run the nearest test in the debugger |
+| `<leader>Tw` | Watch | Normal | Run the file's tests on every save |
+| `<leader>Ts` | Summary | Normal | Test tree with pass/fail |
+| `<leader>To` | Output | Normal | Output of the test under the cursor |
+| `<leader>TO` | Output panel | Normal | All test output |
+| `<leader>TS` | Stop | Normal | Stop running tests |
+| `]T` / `[T` | Next / previous failure | Normal | Jump between failed tests |
 
 ## Git Integration
 
@@ -140,6 +189,9 @@ Neovim's built-in LSP keys also work: `grn` rename, `gra` code action, `grr` ref
 | `<leader>gc` | Git commits | Normal | Commit log picker |
 | `<leader>gb` | Git branches | Normal | Branch picker |
 | `<leader>gB` | Git browse | Normal/Visual | Open the file/selection on GitHub |
+| `<leader>gd` | Diff view | Normal | All changes side by side, 3-way merge during conflicts (`q` closes) |
+| `<leader>gh` | File history | Normal | Every commit that changed this file |
+| `<leader>gH` | Branch history | Normal | Commit history of the branch |
 
 ## Completion & Snippets (blink.cmp)
 
@@ -157,13 +209,13 @@ The command line (`:`, `/`) has completion too.
 
 ## AI Features
 
-### Windsurf / Codeium (Inline Suggestions, opt-in via `lua/config/local.lua`)
+### Windsurf or Copilot (Inline Suggestions, opt-in via `lua/config/local.lua`)
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
 | `<Tab>` | Accept suggestion | Insert | Accept the suggestion (the completion menu gets `<Tab>` first while it is open) |
 | `<M-]>` | Next suggestion | Insert | Show next suggestion |
 | `<M-[>` | Previous suggestion | Insert | Show previous suggestion |
-| `<C-]>` | Dismiss | Insert | Dismiss suggestion |
+| `<C-]>` | Dismiss | Insert | Dismiss suggestion (Windsurf) |
 
 ### Avante (AI Chat, opt-in)
 | Key | Action | Mode | Description |
@@ -183,6 +235,12 @@ The command line (`:`, `/`) has completion too.
 |-----|--------|------|-------------|
 | `gcc` | Comment line | Normal | Toggle comment on line (built in, treesitter-aware) |
 | `gc` | Comment | Visual/Operator | Toggle comment (`gcip` comments a paragraph) |
+| `gco` / `gcO` | Comment below / above | Normal | Open a new comment line |
+| `J` | Join lines | Normal | Join without moving the cursor |
+| `<C-n>` | Add cursor | Normal/Visual | Add a cursor at the next match (`<Esc>` back to one) |
+| `<C-p>` | Skip match | Normal/Visual | Skip this match while adding cursors |
+| `<leader>M` | Cursors at all matches | Normal/Visual | One cursor on every match |
+| `<C-q>` | Toggle cursor | Normal/Visual | Add or remove a cursor here |
 | `>` / `<` | Indent / unindent | Visual | Indent and keep the selection |
 | `<A-j>` / `<A-k>` | Move line down / up | Normal/Visual | Move line/selection |
 | `<leader>P` | Paste and keep | Visual | Paste over the selection without losing the register |
@@ -203,6 +261,7 @@ The command line (`:`, `/`) has completion too.
 | `<leader>xl` | LSP | Normal | Definitions/references side panel (Trouble) |
 | `<leader>xL` | Location list | Normal | Open location list (Trouble) |
 | `<leader>xQ` | Quickfix list | Normal | Open quickfix list (Trouble) |
+| `<leader>xq` | Quickfix (editable) | Normal | Quickfix you can edit and save; `>` / `<` show more/less context |
 | `<leader>xt` | Todo list | Normal | All TODOs (Trouble) |
 | `<leader>xT` | Todo/Fix list | Normal | TODO, FIX and FIXME only (Trouble) |
 | `<leader>st` | Todo picker | Normal | Search TODO comments |
@@ -218,6 +277,15 @@ The command line (`:`, `/`) has completion too.
 | `<leader>su` | Undo history | Normal | Browse and restore undo states |
 | `<leader>sn` | Notifications | Normal | Notification history |
 | `<leader>s/` | Search history | Normal | Browse `/` history |
+| `<leader>s"` | Registers | Normal | Browse and paste registers |
+| `<leader>sm` | Marks | Normal | Jump to a mark |
+| `<leader>sj` | Jumps | Normal | Browse the jump list |
+| `<leader>sC` | Commands | Normal | Search all commands |
+| `<leader>sH` | Highlights | Normal | Search highlight groups |
+| `<leader>sq` | Quickfix | Normal | Search the quickfix list |
+| `<leader>.` | Scratch buffer | Normal | Floating notes buffer that persists |
+| `<leader>s.` | Select scratch | Normal | Pick a scratch buffer |
+| `<leader>fy` / `<leader>fY` | Copy path | Normal | Copy the relative / absolute file path |
 
 ## UI Toggles
 
@@ -236,6 +304,11 @@ which-key shows the current state of each toggle.
 | `<leader>uT` | Treesitter highlight |
 | `<leader>uD` | Dim inactive code |
 | `<leader>uz` | Zen mode |
+| `<leader>uZ` | Zoom the window |
+| `<leader>uv` | Diagnostic lines under the code |
+| `<leader>ub` | Git blame on the current line |
+| `<leader>um` | Render markdown |
+| `<leader>uS` | Smooth scrolling |
 
 ## Terminal
 
@@ -306,6 +379,7 @@ which-key shows the current state of each toggle.
 | `<leader>Q` | Quit all | Normal | Quit Neovim |
 | `<Esc>` | Clear search | Normal | Clear search highlighting |
 | `n` / `N` | Next / previous match | Normal | Jump and center the match |
+| `<C-d>` / `<C-u>` | Half page | Normal | Scroll and keep the cursor centered |
 | `<leader>l` | Lazy | Normal | Open plugin manager |
 | `<leader>m` | Mason | Normal | Open LSP/tool installer |
 | `<leader>?` | Buffer keymaps | Normal | which-key for the current buffer |
@@ -373,6 +447,9 @@ Smart node-aware selection, built in to Neovim 0.12 (`an` / `in`). Each press ex
 | `:lsp restart` | Restart the LSP servers |
 | `:ConformInfo` | Show which formatter runs for this buffer |
 | `:FormatToggle` | Toggle format on save (`!` for the current buffer only) |
+| `:NananvimUpdate` | Pull the latest nananvim and the tested plugin versions |
+| `:SudaWrite` / `:SudaRead` | Save or open a file that needs root |
+| `:LspCopilotSignIn` | Sign in to Copilot (when `suggestions = "copilot"`) |
 | `:TokenCount [model]` | Exact Claude token count of the buffer or selection (needs `ANTHROPIC_API_KEY`, else a rough estimate) |
 | `:TSUpdate` | Update installed treesitter parsers |
 | `:TSInstall <lang>` | Install a specific parser |

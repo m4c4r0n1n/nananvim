@@ -2,6 +2,40 @@
 
 How to make nananvim your own.
 
+## The Update-Safe Way: `lua/config/local.lua`
+
+Anything you change in a tracked file conflicts with the next `:NananvimUpdate`. Put your changes in `lua/config/local.lua` instead. Git ignores it, so updates never touch it.
+
+```bash
+cp ~/.config/nvim/lua/config/local.example.lua ~/.config/nvim/lua/config/local.lua
+```
+
+It runs after the built-in options and keymaps, so plain Lua at the top overrides them. The table it returns covers the rest:
+
+```lua
+vim.opt.relativenumber = false
+vim.keymap.set("n", "<leader>cm", "<cmd>make<cr>", { desc = "Run make" })
+
+return {
+  ai = false, -- keep this file without turning on AI
+  extras = { dap = false, ui2 = true },
+  linters_by_ft = { python = { "mypy" } },
+  plugins = {
+    -- New plugins:
+    { "folke/tokyonight.nvim", lazy = false, priority = 1000 },
+    -- Change any built-in plugin (these load last, so they win):
+    { "folke/snacks.nvim", opts = { scroll = { enabled = true } } },
+    { "nvim-treesitter/nvim-treesitter", opts = { ensure_installed = { "rust", "go" } } },
+    -- Turn a built-in plugin off:
+    { "folke/flash.nvim", enabled = false },
+  },
+}
+```
+
+Note: with `local.lua` present, AI is on unless you set `ai = false`. That keeps old setups (`return {}`) working.
+
+Everything below edits the tracked files directly. That works too, but you'll have to merge your changes when you update.
+
 ## Changing the Colorscheme
 
 ### Using the Theme Switcher (Easiest Way)

@@ -2,7 +2,7 @@
 
 <img width="1718" height="1362" alt="image" src="https://github.com/user-attachments/assets/de3c5790-93db-410b-bb40-52619dfa93ee" />
 
-A fast, minimal, fully documented Neovim config that actually works. ~35ms startup, 40 plugins with only 6 loaded before the first screen draws, CI-tested against Neovim **stable and nightly** with a smoke test that fails on any startup error. Batteries included, bloat optional.
+A fast, minimal, fully documented Neovim config that actually works. ~35ms startup, 53 plugins with only 6 loaded before the first screen draws, CI-tested against Neovim **stable and nightly** with a smoke test that fails on any startup error. Batteries included, bloat optional.
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
@@ -14,10 +14,11 @@ What's changed lately lives in the [CHANGELOG](CHANGELOG.md).
 
 There are a hundred "minimal nvim configs" out there. Here's what this one does differently:
 
-- **Actually fast**: ~35ms startup. 40 plugins total, only 6 load before the first screen draws, everything else waits for its trigger. Completion runs on blink.cmp's Rust fuzzy matcher.
+- **Actually fast**: ~35ms startup. 53 plugins total, only 6 load before the first screen draws, everything else waits for its trigger. Completion runs on blink.cmp's Rust fuzzy matcher.
 - **Built on Neovim 0.12, not around it**: native `vim.lsp.config`/`vim.lsp.enable`, native commenting, native treesitter incremental selection, global rounded borders (`winborder`), linked HTML tag editing. Less plugin glue, fewer things to break.
 - **Two first-party plugins you won't find anywhere else** (see below): a Browser│Terminal│TODO panel workspace, and a live-preview theme switcher with a blackout mode.
 - **An IDE when you want one, not when you don't**: rich completion UI, a full linting layer, and the entire DAP debugging stack sit behind per-feature flags in one file (`lua/config/extras.lua`). On by default, one `false` to genuinely remove any of them.
+- **Updates don't eat your settings**: your stuff lives in one gitignored file (`lua/config/local.lua`): options, keymaps, extra plugins, overrides for any built-in plugin. `:NananvimUpdate` pulls the new version and the tested plugin versions without touching it.
 - **AI is opt-in, not opt-out**: no Windsurf, no Avante, no binary downloads, no `make` step, until you create one file. Delete the file, it's all gone.
 - **Tested, not vibes**: CI loads every plugin headless on stable *and* nightly Neovim on every push and fails on any startup error, then checks formatting (StyLua), the installer (ShellCheck) and the docs. `:checkhealth nananvim` diagnoses your machine.
 - **Documented like someone might actually read it**: full [keybinding reference](KEYBINDINGS.md), [customization guide](docs/customization-guide.md), [troubleshooting](docs/troubleshooting.md), [advanced features](docs/advanced-features.md).
@@ -36,16 +37,20 @@ One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser 
 
 - **Snacks.nvim**: Dashboard, fuzzy picker (files, grep, LSP, git, undo history, keymaps...) that can preview images, PDFs and more right in your terminal (Kitty or Ghostty, anything with the kitty graphics protocol), notifications, indent guides, lazygit, terminal, zen mode and `<leader>u` UI toggles
 - **Treesitter** (`main` branch): highlighting and indent for 25+ languages out of the box, and any other parser installs itself the first time you open that file type. Function/class/argument text objects and motions, plus a sticky context line
-- **LSP**: Native Neovim 0.12 LSP, servers auto-install through Mason (Lua, Python via basedpyright + ruff, TypeScript, HTML/CSS/Tailwind, JSON/YAML with SchemaStore, Bash, Markdown, C/C++). Definitions and references open in a picker with preview
+- **LSP**: Native Neovim 0.12 LSP, servers auto-install through Mason (Lua, Python via basedpyright + ruff, TypeScript/JavaScript via vtsls + eslint, HTML/CSS/Tailwind, JSON/YAML with SchemaStore, Bash, Markdown, C/C++). Definitions and references open in a picker with preview, folds come from the server when it has them, and a spinner shows what the server is doing
 - **Completion**: blink.cmp with kind icons, bordered menu/docs, ghost text, signature help, friendly-snippets, cmdline completion, and a hook to append your own sources
 - **Formatting**: conform.nvim formats on save (ruff, stylua, prettier, shfmt, clang-format); `<leader>uf` toggles it
 - **Linting**: nvim-lint layered on top of LSP (shellcheck, markdownlint, hadolint, yamllint auto-installed); add a linter by adding one table entry
 - **DAP**: Debug Adapter Protocol support for Python, C/C++/Rust (via codelldb), Bash/sh, JavaScript/TypeScript, and Lua (Neovim config/plugins, via osv) with DAP UI, and automatic `.vscode/launch.json` loading per project
-- **Motion and search**: flash.nvim jumps (`s`), grug-far project-wide search and replace with live preview (`<leader>sr`)
-- **Git**: gitsigns (stage lines, blame, hunk text object), lazygit (`<leader>gg`), git pickers, open on GitHub
+- **Testing**: neotest runs the test under the cursor, the file or the whole project (pytest, vitest, jest), results inline, debug a test with DAP
+- **Motion and search**: flash.nvim jumps (`s`), grug-far project-wide search and replace with live preview (`<leader>sr`), harpoon for your 5 most-used files, multiple cursors (`<C-n>`)
+- **Files**: neo-tree, plus oil.nvim (`-`) to rename/move/delete files by editing them like text
+- **Git**: gitsigns (stage lines, blame, hunk text object), lazygit (`<leader>gg`), diffview for side-by-side diffs, file history and merge conflicts, git pickers, open on GitHub
+- **Sessions**: every folder remembers its open files and splits; restore from the dashboard (`s`)
+- **Markdown**: rendered right in the buffer (headings, tables, checkboxes); the raw text shows on the cursor line
 - **Rose Pine Moon**: Default theme, blacked out by default
 - **AI (opt-in)**: Windsurf (Codeium) inline suggestions + Avante chat (Claude Sonnet 5.5 by default), both off by default, flip them on with a `lua/config/local.lua` (see AI setup below)
-- **Other stuff**: Bufferline for tabs, trouble for diagnostics, todo-comments, autopairs, surround motions, lualine status bar (git diff, LSP servers, plugin updates), which-key with labeled groups, `:TokenCount` with exact Claude token counts
+- **Other stuff**: Bufferline for tabs, trouble for diagnostics, an editable quickfix list, todo-comments, autopairs + auto-closing HTML/JSX tags, surround motions, lualine status bar (git diff, LSP servers, macro recording, plugin updates), which-key with labeled groups, scratch buffers, `nvim file.lua:42` opens at line 42, `:SudaWrite` for root files, tmux pane navigation, Neovide support, `:TokenCount` with exact Claude token counts
 
 ### Extras switch
 
@@ -60,9 +65,13 @@ return {
   cmp_rich = true, -- kind icons, bordered menus, ghost text, auto docs
   lint = true,     -- nvim-lint linters + auto-installed tools
   dap = true,      -- nvim-dap + dap-ui + .vscode/launch.json
+  test = true,     -- neotest on <leader>T
+  ui2 = false,     -- Neovim 0.12 message UI, no "Press ENTER" (experimental)
   cmp_extra_sources = {}, -- append your own blink.cmp sources here
 }
 ```
+
+Rather not touch a tracked file? Flip them from `lua/config/local.lua` instead: `return { extras = { dap = false } }`.
 
 ## Screenshots
 
@@ -225,24 +234,25 @@ After setup, run `:checkhealth nananvim` to see what's working and what's missin
 
 ## AI Features Setup
 
-AI is **off by default** to keep startup lean and reliable, no binary downloads, no `make` build, nothing loads until you opt in. Both Windsurf (formerly Codeium, inline suggestions) and Avante (chat) are gated behind a single file: `lua/config/local.lua`. Create it and they turn on.
+AI is **off by default** to keep startup lean and reliable, no binary downloads, no `make` build, nothing loads until you opt in. Inline suggestions and Avante (chat) are gated behind a single file: `lua/config/local.lua`. Create it and they turn on.
 
 **Just want free Windsurf suggestions?** That's the whole setup (then run `:Codeium Auth` once to log in):
 
 ```bash
-mkdir -p ~/.config/nvim/lua/config
-echo 'return {}' > ~/.config/nvim/lua/config/local.lua
+cp ~/.config/nvim/lua/config/local.example.lua ~/.config/nvim/lua/config/local.lua
 ```
 
-With an empty `local.lua`, Avante uses Claude Sonnet 5.5 and reads `ANTHROPIC_API_KEY`. For a different provider, put its config in that same file (see below).
+**Got GitHub Copilot instead?** Set `suggestions = "copilot"` in that file and run `:LspCopilotSignIn` once. It runs on Neovim 0.12's built-in inline completion, so there's no Copilot plugin at all. `suggestions = false` turns suggestions off but keeps Avante.
 
-### Windsurf / Codeium (Inline Suggestions)
+With no `avante` table, Avante uses Claude Sonnet 5.5 and reads `ANTHROPIC_API_KEY`. For a different provider, put its config in that same file (see below), or `avante = false` to drop it.
+
+### Windsurf / Copilot (Inline Suggestions)
 
 **Keybindings** (once enabled):
 - `<Tab>` - Accept suggestion (while the completion menu is open, `<Tab>` moves in the menu instead)
 - `<M-]>` - Next suggestion
 - `<M-[>` - Previous suggestion
-- `<C-]>` - Dismiss suggestion
+- `<C-]>` - Dismiss suggestion (Windsurf)
 
 ### Avante (AI Chat) - Optional
 
@@ -400,9 +410,11 @@ If you want to understand how this is organized or modify it:
 │   │   ├── options.lua    # Vim options
 │   │   ├── keymaps.lua    # Global keymaps
 │   │   ├── autocmds.lua   # Autocommands
-│   │   ├── commands.lua   # :TokenCount, :FormatToggle
-│   │   ├── extras.lua     # Master switch: cmp UI / lint / DAP flags
-│   │   └── local.lua      # (optional, gitignored) AI opt-in + overrides
+│   │   ├── commands.lua   # :TokenCount, :FormatToggle, :NananvimUpdate
+│   │   ├── extras.lua     # Master switch: cmp UI / lint / DAP / test / ui2 flags
+│   │   ├── user.lua       # Reads local.lua (you don't edit this one)
+│   │   ├── local.example.lua  # Template for your personal settings
+│   │   └── local.lua      # (optional, gitignored) your settings, AI opt-in, extra plugins
 │   ├── nananvim/
 │   │   └── health.lua     # :checkhealth nananvim
 │   └── plugins/
@@ -410,13 +422,14 @@ If you want to understand how this is organized or modify it:
 │       ├── theme-switcher.lua # Live theme preview + blackout toggle
 │       ├── nanabrowser.lua    # Browser │ Terminal │ TODO workspace
 │       ├── ui.lua             # Snacks (dashboard/picker/terminal/toggles), bufferline, lualine
-│       ├── editor.lua         # neo-tree, which-key, flash, grug-far, sleuth
-│       ├── coding.lua         # blink.cmp, autopairs, ts-comments, surround, Windsurf, Avante
+│       ├── editor.lua         # neo-tree, oil, which-key, flash, grug-far, harpoon, multicursor, sessions
+│       ├── coding.lua         # blink.cmp, autopairs, autotag, ts-comments, surround, Windsurf, Avante
 │       ├── lsp.lua            # LSP servers, Mason, lazydev, SchemaStore, conform formatters
 │       ├── lint.lua           # nvim-lint (gated by extras.lint)
 │       ├── treesitter.lua     # Parsers, text objects, sticky context
-│       ├── git.lua            # Gitsigns, lazygit and git pickers
-│       ├── diagnostics.lua    # Trouble, todo-comments
+│       ├── git.lua            # Gitsigns, diffview, lazygit and git pickers
+│       ├── diagnostics.lua    # Trouble, quicker (quickfix), todo-comments
+│       ├── test.lua           # neotest (gated by extras.test)
 │       └── dap.lua            # Debug Adapter Protocol (gated by extras.dap)
 ├── init.lua               # Main entry point
 ├── README.md              # This file
@@ -548,6 +561,15 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 - `af` / `if`, `ac` / `ic`, `aa` / `ia` - Function / class / argument text objects (`]f` / `[f` to jump between functions)
 - `<C-Space>` - Expand selection by syntax node (`<BS>` shrinks)
 - `<leader>u` - UI toggles (wrap, spell, diagnostics, zen...)
+- `-` - Open the parent folder in oil (edit files like text)
+- `<C-n>` - Add a cursor at the next match (`<Esc>` clears)
+- `<leader>H` / `<leader>j` / `<leader>1`-`5` - Harpoon: mark file / list / jump
+- `<leader>Ss` - Restore this folder's session
+- `<leader>Tr` / `<leader>Tt` - Run nearest test / file
+- `<leader>gd` / `<leader>gh` - Diff view / file history
+- `<leader>.` - Scratch buffer
+- `<leader>-` / `<leader>|` - Split below / right
+- `]e` / `[e` - Next / previous error
 - `<C-s>` - Save file
 - `<leader>q` - Quit
 - `<leader>Q` - Quit all
@@ -574,9 +596,17 @@ Some known quirks:
 - Treesitter parsers compile on first launch; if highlighting is missing, check that `tree-sitter` and a C compiler are installed (`:checkhealth nananvim`)
 - On some systems, fd might be called `fdfind` - the Ubuntu install command handles this but if you install manually you might need to symlink it
 
+## Updating
+
+```vim
+:NananvimUpdate
+```
+
+Pulls the latest nananvim and puts every plugin on the version CI tested, then `:restart`. Your `lua/config/local.lua` is never touched. If you edited a tracked file, it stops and tells you which one instead of making a mess.
+
 ## Making This Config Your Own
 
-Feel free to fork this and modify it! Check out the [Customization Guide](docs/customization-guide.md) for details on:
+Put your changes in `lua/config/local.lua` (copy `local.example.lua`) and updates never conflict: options and keymaps at the top, then `extras`, `linters_by_ft` and `plugins` (new plugins, or `opts` for any built-in one) in the returned table. Want to go deeper? Fork it. The [Customization Guide](docs/customization-guide.md) covers:
 
 - Changing the colorscheme
 - Adding more language servers
@@ -602,6 +632,10 @@ This config wouldn't exist without these amazing projects:
 - [nvim-dap](https://github.com/mfussenegger/nvim-dap) - Debug Adapter Protocol
 - [flash.nvim](https://github.com/folke/flash.nvim) - Jump anywhere
 - [grug-far.nvim](https://github.com/MagicDuck/grug-far.nvim) - Search and replace
+- [oil.nvim](https://github.com/stevearc/oil.nvim) - Edit the file system like a buffer
+- [neotest](https://github.com/nvim-neotest/neotest) - Test runner
+- [diffview.nvim](https://github.com/dlyongemallo/diffview.nvim) - Diffs and merge conflicts
+- [multicursor.nvim](https://github.com/jake-stewart/multicursor.nvim) - Multiple cursors
 - [windsurf.vim](https://github.com/Exafunction/windsurf.vim) - Free AI suggestions
 - [avante.nvim](https://github.com/yetone/avante.nvim) - AI chat
 - And many more listed in the plugin files
