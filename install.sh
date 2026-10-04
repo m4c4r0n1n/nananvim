@@ -26,10 +26,12 @@ NVIM_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nvim"
 # NANANVIM_REPO and NANANVIM_REF install from a fork, a branch or a local clone (CI uses this).
 REPO_URL="${NANANVIM_REPO:-https://github.com/m4c4r0n1n/nananvim.git}"
 REPO_REF="${NANANVIM_REF:-}"
-BACKUP_DIR="$HOME/.config/nvim.bak.$(date +%Y%m%d_%H%M%S)"
+BACKUP_DIR="${NVIM_CONFIG_DIR}.bak.$(date +%Y%m%d_%H%M%S)"
 MIN_NVIM_VERSION="0.12.0"
 # nvim-treesitter (main) needs this tree-sitter CLI version or newer.
 MIN_TS_VERSION="0.26.1"
+# Mason installs most language servers with npm. They need this Node.js major version or newer.
+MIN_NODE_MAJOR=20
 
 # Log file
 LOG_FILE="/tmp/nananvim_install_$(date +%Y%m%d_%H%M%S).log"
@@ -308,6 +310,75 @@ ensure_tree_sitter() {
         print_error "Could not install tree-sitter CLI ${MIN_TS_VERSION}+. Treesitter parsers will not compile."
         return 1
     fi
+}
+
+# Print the major version of node (for example 22), or nothing.
+node_major() {
+    local version
+    version=$(node --version 2>/dev/null) || return 0
+    version=${version#v}
+    echo "${version%%.*}"
+}
+
+# Return 0 if node runs and is new enough.
+node_ok() {
+    local major
+    major=$(node_major)
+    [ -n "$major" ] && [ "$major" -ge "$MIN_NODE_MAJOR" ]
+}
+
+# Install the latest Node.js LTS release in /opt/node. Link node, npm and npx
+# to /usr/local/bin.
+install_node_release() {
+    local arch
+    case "$(release_arch)" in
+        x86_64) arch=x64 ;;
+        arm64) arch=arm64 ;;
+        *) return 1 ;;
+    esac
+
+    # index.json has one release on each line, newest first.
+    local line version=""
+    line=$(curl -fsSL https://nodejs.org/dist/index.json | grep -m1 '"lts":"') || true
+    if [[ "$line" =~ \"version\":\"(v[0-9.]+)\" ]]; then
+        version=${BASH_REMATCH[1]}
+    fi
+    [ -n "$version" ] || return 1
+
+    print_info "Installing Node.js ${version} (LTS) in /opt/node..."
+    local tmp bin
+    tmp=$(mktemp -d)
+    curl -fsSL -o "$tmp/node.tar.gz" "https://nodejs.org/dist/${version}/node-${version}-linux-${arch}.tar.gz" || {
+        rm -rf "$tmp"
+        return 1
+    }
+    tar -xzf "$tmp/node.tar.gz" -C "$tmp"
+    sudo rm -rf /opt/node
+    sudo mv "$tmp/node-${version}-linux-${arch}" /opt/node
+    for bin in node npm npx; do
+        sudo ln -sf "/opt/node/bin/$bin" "/usr/local/bin/$bin"
+    done
+    rm -rf "$tmp"
+    hash -r
+}
+
+# Make sure that a new enough Node.js is installed. Distribution packages are
+# sometimes too old (Ubuntu 22.04 has node 12, Ubuntu 24.04 has node 18).
+# Node.js is optional: without it, only the npm-based servers are missing.
+ensure_node() {
+    if ! node_ok; then
+        case "$OS" in
+            macos) brew upgrade node || brew install node || true ;;
+            nixos) print_warning "nixpkgs gave Node.js $(node --version 2>/dev/null). Update your nixpkgs." ;;
+            *) install_node_release || true ;;
+        esac
+    fi
+    if node_ok; then
+        print_success "Node.js $(node --version)"
+    else
+        print_warning "Node.js ${MIN_NODE_MAJOR}+ is not installed. Mason cannot install the TypeScript, HTML, CSS, JSON and YAML servers."
+    fi
+    return 0
 }
 
 # Make sure that a new enough Neovim is installed. Distribution packages are
@@ -792,6 +863,7 @@ main() {
     # Distribution packages can be too old. Get new enough versions.
     ensure_neovim || exit 1
     ensure_tree_sitter || exit 1
+    ensure_node
 
     # Optional text browser. A failure does not stop the install.
     install_optional_browser

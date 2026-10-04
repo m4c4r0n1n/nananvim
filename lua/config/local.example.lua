@@ -17,7 +17,8 @@ return {
   -- "copilot" (run :LspCopilotSignIn one time) or false (no suggestions).
   suggestions = "windsurf",
 
-  -- Avante chat. Remove this table to use the default (Claude, ANTHROPIC_API_KEY).
+  -- Avante chat. The default is Claude with ANTHROPIC_API_KEY. The fields in this
+  -- table replace the same fields of the default. Keep the table out to use the default.
   -- Set avante = false to turn Avante off.
   -- avante = {
   --   provider = "claude",
@@ -37,7 +38,8 @@ return {
     -- ui2 = true,
   },
 
-  -- More linters for nvim-lint, by file type.
+  -- Linters for nvim-lint, by file type. A list here replaces the default list
+  -- of that file type (see lua/plugins/lint.lua).
   linters_by_ft = {
     -- python = { "mypy" },
   },

@@ -150,13 +150,9 @@ return {
     enabled = user.ai and user.settings.avante ~= false,
     build = "make",
     opts = function()
-      -- Use the settings from lua/config/local.lua if they exist.
-      if type(user.settings.avante) == "table" then
-        return user.settings.avante
-      end
-
       -- Default settings. Set ANTHROPIC_API_KEY in your shell.
-      return {
+      -- An avante table in lua/config/local.lua changes these fields.
+      local defaults = {
         provider = "claude",
         providers = {
           claude = {
@@ -200,6 +196,10 @@ return {
           list_opener = "copen",
         },
       }
+      if type(user.settings.avante) == "table" then
+        return vim.tbl_deep_extend("force", defaults, user.settings.avante)
+      end
+      return defaults
     end,
     dependencies = {
       "nvim-lua/plenary.nvim",

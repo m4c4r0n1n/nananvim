@@ -69,8 +69,14 @@ function M.check()
   health.start("nananvim: language tooling")
 
   check_exe("node", "TypeScript, HTML, CSS, JSON and YAML servers, prettier, JS debugging", "warn")
+  if has("node") then
+    local major = tonumber(vim.fn.system({ "node", "--version" }):match("^v(%d+)"))
+    if major and major < 20 then
+      health.warn("node " .. major .. " is too old. Mason's npm servers and Copilot need node 20 or later")
+    end
+  end
   check_exe("python3", "Python provider and debugpy", "warn")
-  check_exe("clangd", "C and C++ LSP (Mason installs it if it is not on PATH)", "warn")
+  check_exe("clangd", "C and C++ LSP (Mason also installs it)", "warn")
   local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
   if vim.fn.isdirectory(mason_bin) == 1 then
     health.ok("Mason tools folder exists: " .. mason_bin)

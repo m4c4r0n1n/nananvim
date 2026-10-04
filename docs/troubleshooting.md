@@ -39,7 +39,7 @@ basedpyright runs in "standard" mode (same as Pyright). If you changed it, set `
 **Problem:** C/C++ LSP not working
 
 **Solutions:**
-1. Install clang: `sudo pacman -S clang` (Arch) or `sudo apt install clang` (Ubuntu). Mason also installs clangd if it is not on PATH.
+1. Install clang: `sudo pacman -S clang` (Arch) or `sudo apt install clang` (Ubuntu). Mason also installs clangd.
 2. For compile_commands.json: Use CMake with `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` or use bear
 3. Restart LSP: `:lsp restart`
 

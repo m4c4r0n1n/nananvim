@@ -307,7 +307,8 @@ return {
           program = "${file}",
           cwd = "${workspaceFolder}",
           pathCat = "cat",
-          pathBash = "/bin/bash",
+          -- NixOS has no /bin/bash. Use the bash on PATH.
+          pathBash = vim.fn.exepath("bash") ~= "" and vim.fn.exepath("bash") or "/bin/bash",
           pathMkfifo = "mkfifo",
           pathPkill = "pkill",
           args = {},

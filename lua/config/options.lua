@@ -184,7 +184,10 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
 -- Providers
-vim.g.python3_host_prog = vim.fn.exepath("python3")
+-- Set the Python provider only when python3 exists. An empty path gives health errors.
+if vim.fn.exepath("python3") ~= "" then
+  vim.g.python3_host_prog = vim.fn.exepath("python3")
+end
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_node_provider = 0
