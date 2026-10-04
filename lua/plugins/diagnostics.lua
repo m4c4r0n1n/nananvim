@@ -46,6 +46,39 @@ return {
     },
   },
   {
+    -- A better quickfix list: edit it like a buffer (save to apply the
+    -- changes to the files), and push > or < to show more or less context.
+    "stevearc/quicker.nvim",
+    ft = "qf",
+    opts = {
+      keys = {
+        {
+          ">",
+          function()
+            require("quicker").expand({ before = 2, after = 2, add_to_existing = true })
+          end,
+          desc = "Show more context",
+        },
+        {
+          "<",
+          function()
+            require("quicker").collapse()
+          end,
+          desc = "Show less context",
+        },
+      },
+    },
+    keys = {
+      {
+        "<leader>xq",
+        function()
+          require("quicker").toggle()
+        end,
+        desc = "Quickfix list",
+      },
+    },
+  },
+  {
     "folke/todo-comments.nvim",
     cmd = { "TodoTrouble", "TodoQuickFix" },
     event = { "BufReadPost", "BufNewFile" },

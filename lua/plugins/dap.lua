@@ -27,6 +27,27 @@ return {
         desc = "Toggle Breakpoint",
       },
       {
+        "<leader>dB",
+        function()
+          require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
+        end,
+        desc = "Conditional Breakpoint",
+      },
+      {
+        "<leader>dp",
+        function()
+          require("dap").set_breakpoint(nil, nil, vim.fn.input("Log message: "))
+        end,
+        desc = "Log Point",
+      },
+      {
+        "<leader>dC",
+        function()
+          require("dap").run_to_cursor()
+        end,
+        desc = "Run to Cursor",
+      },
+      {
         "<leader>dc",
         function()
           require("dap").continue()

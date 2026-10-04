@@ -17,6 +17,8 @@ return {
         { "<leader>p", group = "panels" },
         { "<leader>r", group = "rename/replace" },
         { "<leader>s", group = "search" },
+        { "<leader>S", group = "sessions" },
+        { "<leader>T", group = "tests" },
         { "<leader>t", group = "theme/term/todo" },
         { "<leader>u", group = "ui toggles" },
         { "<leader>w", group = "web" },
@@ -177,4 +179,173 @@ return {
     },
   },
   { "tpope/vim-sleuth", event = { "BufReadPre", "BufNewFile" } },
+  {
+    -- Save the session (open files, splits, cursor) for each folder when you quit.
+    -- Restore it from the dashboard (s) or with <leader>Ss.
+    "folke/persistence.nvim",
+    event = "BufReadPre",
+    opts = {},
+    keys = {
+      {
+        "<leader>Ss",
+        function()
+          require("persistence").load()
+        end,
+        desc = "Restore session (this folder)",
+      },
+      {
+        "<leader>Sl",
+        function()
+          require("persistence").load({ last = true })
+        end,
+        desc = "Restore last session",
+      },
+      {
+        "<leader>SS",
+        function()
+          require("persistence").select()
+        end,
+        desc = "Select session",
+      },
+      {
+        "<leader>Sd",
+        function()
+          require("persistence").stop()
+        end,
+        desc = "Do not save this session",
+      },
+    },
+  },
+  {
+    -- Edit the file system like a buffer: rename, move and delete files with
+    -- normal text edits, then save with :w. Push - to open the parent folder.
+    "stevearc/oil.nvim",
+    cmd = "Oil",
+    keys = {
+      { "-", "<cmd>Oil<cr>", desc = "Open parent folder (oil)" },
+    },
+    opts = {
+      -- neo-tree opens folders (nvim .). oil opens only with - or :Oil.
+      default_file_explorer = false,
+      delete_to_trash = true,
+      skip_confirm_for_simple_edits = true,
+      view_options = { show_hidden = true },
+      keymaps = {
+        ["q"] = { "actions.close", mode = "n" },
+      },
+    },
+  },
+  {
+    -- Mark the files that you use most. Jump to them with one key.
+    "ThePrimeagen/harpoon",
+    branch = "harpoon2",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {
+      settings = { save_on_toggle = true },
+    },
+    keys = function()
+      local keys = {
+        {
+          "<leader>H",
+          function()
+            require("harpoon"):list():add()
+          end,
+          desc = "Harpoon: mark file",
+        },
+        {
+          "<leader>j",
+          function()
+            local harpoon = require("harpoon")
+            harpoon.ui:toggle_quick_menu(harpoon:list())
+          end,
+          desc = "Harpoon: marked files",
+        },
+      }
+      for i = 1, 5 do
+        table.insert(keys, {
+          "<leader>" .. i,
+          function()
+            require("harpoon"):list():select(i)
+          end,
+          desc = "Harpoon: file " .. i,
+        })
+      end
+      return keys
+    end,
+  },
+  {
+    -- Multiple cursors. <C-n> adds a cursor at the next match of the word
+    -- or the selection. <Esc> removes all cursors.
+    "jake-stewart/multicursor.nvim",
+    branch = "1.0",
+    keys = {
+      {
+        "<C-n>",
+        function()
+          require("multicursor-nvim").matchAddCursor(1)
+        end,
+        mode = { "n", "x" },
+        desc = "Add cursor at next match",
+      },
+      {
+        "<C-p>",
+        function()
+          require("multicursor-nvim").matchSkipCursor(1)
+        end,
+        mode = { "n", "x" },
+        desc = "Skip this match",
+      },
+      {
+        "<leader>M",
+        function()
+          require("multicursor-nvim").matchAllAddCursors()
+        end,
+        mode = { "n", "x" },
+        desc = "Add cursors at all matches",
+      },
+      {
+        "<C-q>",
+        function()
+          require("multicursor-nvim").toggleCursor()
+        end,
+        mode = { "n", "x" },
+        desc = "Add or remove cursor here",
+      },
+    },
+    config = function()
+      local mc = require("multicursor-nvim")
+      mc.setup()
+      -- These keys work only when there are many cursors.
+      mc.addKeymapLayer(function(layer)
+        layer({ "n", "x" }, "<left>", mc.prevCursor)
+        layer({ "n", "x" }, "<right>", mc.nextCursor)
+        layer({ "n", "x" }, "<leader>X", mc.deleteCursor)
+        layer("n", "<esc>", function()
+          if not mc.cursorsEnabled() then
+            mc.enableCursors()
+          else
+            mc.clearCursors()
+          end
+        end)
+      end)
+    end,
+  },
+  {
+    -- In tmux, <C-h/j/k/l> move between Neovim splits and tmux panes.
+    -- This loads only in tmux. Add the tmux side from the plugin README.
+    "christoomey/vim-tmux-navigator",
+    cond = vim.env.TMUX ~= nil,
+    cmd = { "TmuxNavigateLeft", "TmuxNavigateDown", "TmuxNavigateUp", "TmuxNavigateRight" },
+    keys = {
+      { "<C-h>", "<cmd>TmuxNavigateLeft<cr>", desc = "Go to left window or pane" },
+      { "<C-j>", "<cmd>TmuxNavigateDown<cr>", desc = "Go to lower window or pane" },
+      { "<C-k>", "<cmd>TmuxNavigateUp<cr>", desc = "Go to upper window or pane" },
+      { "<C-l>", "<cmd>TmuxNavigateRight<cr>", desc = "Go to right window or pane" },
+    },
+  },
+  {
+    -- Save or open a file that needs root: :SudaWrite and :SudaRead.
+    "lambdalisue/vim-suda",
+    cmd = { "SudaWrite", "SudaRead" },
+  },
 }

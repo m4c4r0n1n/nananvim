@@ -27,8 +27,8 @@ return {
       }
 
       -- Add the linters from lua/config/local.lua, if that file exists.
-      local ok, personal = pcall(require, "config.local")
-      if ok and type(personal.linters_by_ft) == "table" then
+      local personal = require("config.user").settings
+      if type(personal.linters_by_ft) == "table" then
         for ft, linters in pairs(personal.linters_by_ft) do
           lint.linters_by_ft[ft] = linters
         end

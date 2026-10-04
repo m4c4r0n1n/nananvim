@@ -1,4 +1,5 @@
 local extras = require("config.extras")
+local user = require("config.user")
 
 -- Language servers that Mason installs and this config enables.
 -- To add a server: add its lspconfig name here. Add settings below if it needs them.
@@ -6,7 +7,8 @@ local servers = {
   "lua_ls",
   "basedpyright",
   "ruff",
-  "ts_ls",
+  "vtsls",
+  "eslint",
   "html",
   "cssls",
   "tailwindcss",
@@ -15,6 +17,26 @@ local servers = {
   "bashls",
   "marksman",
   "clangd",
+}
+
+-- Copilot suggestions use the Copilot language server and the Neovim 0.12
+-- inline completion. Set suggestions = "copilot" in lua/config/local.lua.
+if user.suggestions == "copilot" then
+  table.insert(servers, "copilot")
+end
+
+-- Settings for TypeScript and JavaScript in vtsls.
+local ts_settings = {
+  updateImportsOnFileMove = { enabled = "always" },
+  suggest = { completeFunctionCalls = true },
+  inlayHints = {
+    enumMemberValues = { enabled = true },
+    functionLikeReturnTypes = { enabled = true },
+    parameterNames = { enabled = "literals" },
+    parameterTypes = { enabled = true },
+    propertyDeclarationTypes = { enabled = true },
+    variableTypes = { enabled = false },
+  },
 }
 
 return {
@@ -163,7 +185,60 @@ return {
         },
       })
 
+      vim.lsp.config("vtsls", {
+        settings = {
+          complete_function_calls = true,
+          vtsls = {
+            enableMoveToFileCodeAction = true,
+            autoUseWorkspaceTsdk = true,
+            experimental = {
+              maxInlayHintLength = 30,
+              completion = { enableServerSideFuzzyMatch = true },
+            },
+          },
+          typescript = ts_settings,
+          javascript = ts_settings,
+        },
+      })
+
       vim.lsp.enable(servers)
+
+      if user.suggestions == "copilot" then
+        -- Accept a Copilot suggestion with <Tab>.
+        -- When the completion menu is open, blink.cmp uses <Tab> first.
+        vim.keymap.set("i", "<Tab>", function()
+          if not vim.lsp.inline_completion.get() then
+            return "<Tab>"
+          end
+        end, { expr = true, desc = "Accept AI suggestion" })
+        vim.keymap.set("i", "<M-]>", function()
+          vim.lsp.inline_completion.select({ count = 1 })
+        end, { desc = "Next AI suggestion" })
+        vim.keymap.set("i", "<M-[>", function()
+          vim.lsp.inline_completion.select({ count = -1 })
+        end, { desc = "Previous AI suggestion" })
+      end
+
+      -- Show LSP progress (for example "lua_ls: Loading workspace 40%") in a
+      -- notification that updates in place.
+      local spinner = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" }
+      vim.api.nvim_create_autocmd("LspProgress", {
+        group = vim.api.nvim_create_augroup("nananvim_lsp_progress", { clear = true }),
+        callback = function(ev)
+          local value = ev.data.params.value
+          if type(value) ~= "table" then
+            return
+          end
+          local done = value.kind == "end"
+          vim.notify(vim.lsp.status(), vim.log.levels.INFO, {
+            id = "lsp_progress",
+            title = "LSP",
+            opts = function(notif)
+              notif.icon = done and "✓ " or spinner[math.floor(vim.uv.hrtime() / (1e6 * 80)) % #spinner + 1] .. " "
+            end,
+          })
+        end,
+      })
 
       vim.api.nvim_create_autocmd("LspAttach", {
         group = vim.api.nvim_create_augroup("nananvim_lsp_attach", { clear = true }),
@@ -193,6 +268,19 @@ return {
           -- Change the closing HTML tag when you change the opening tag.
           if client:supports_method("textDocument/linkedEditingRange") then
             vim.lsp.linked_editing_range.enable(true, { client_id = client.id })
+          end
+
+          -- Use the folds from the server when it gives them (better than treesitter).
+          if client:supports_method("textDocument/foldingRange") then
+            local win = vim.fn.bufwinid(buf)
+            if win ~= -1 then
+              vim.wo[win][0].foldexpr = "v:lua.vim.lsp.foldexpr()"
+            end
+          end
+
+          -- Copilot: show suggestions as ghost text. <Tab> accepts (see lua/plugins/coding.lua).
+          if client:supports_method("textDocument/inlineCompletion") then
+            vim.lsp.inline_completion.enable(true, { bufnr = buf })
           end
 
           -- Pickers show a preview and let you filter long result lists.

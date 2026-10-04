@@ -121,6 +121,7 @@ return {
               },
               { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
               { icon = " ", key = "m", desc = "Mason", action = ":Mason" },
+              { icon = " ", key = "s", desc = "Restore session", section = "session" },
               { icon = " ", key = "q", desc = "Quit", action = ":qa" },
             },
           },
@@ -150,6 +151,47 @@ return {
           Snacks.toggle.indent():map("<leader>ug")
           Snacks.toggle.dim():map("<leader>uD")
           Snacks.toggle.zen():map("<leader>uz")
+          Snacks.toggle.zoom():map("<leader>uZ")
+          Snacks.toggle.scroll():map("<leader>uS")
+          local saved_virtual_text
+          Snacks.toggle({
+            name = "Diagnostic lines",
+            get = function()
+              local lines = vim.diagnostic.config().virtual_lines
+              return lines ~= nil and lines ~= false
+            end,
+            set = function(state)
+              -- Lines under the code (current line only) replace the text at the end of the line.
+              if state then
+                saved_virtual_text = vim.diagnostic.config().virtual_text
+                vim.diagnostic.config({ virtual_lines = { current_line = true }, virtual_text = false })
+              else
+                vim.diagnostic.config({ virtual_lines = false, virtual_text = saved_virtual_text or true })
+              end
+            end,
+          }):map("<leader>uv")
+          Snacks.toggle({
+            name = "Git blame (line)",
+            get = function()
+              return require("gitsigns.config").config.current_line_blame
+            end,
+            set = function(state)
+              require("gitsigns").toggle_current_line_blame(state)
+            end,
+          }):map("<leader>ub")
+          Snacks.toggle({
+            name = "Render markdown",
+            get = function()
+              return require("render-markdown.state").enabled
+            end,
+            set = function(state)
+              if state then
+                require("render-markdown").enable()
+              else
+                require("render-markdown").disable()
+              end
+            end,
+          }):map("<leader>um")
           Snacks.toggle({
             name = "Format on save",
             get = function()
@@ -293,6 +335,63 @@ return {
         end,
         desc = "Search history",
       },
+      {
+        '<leader>s"',
+        function()
+          Snacks.picker.registers()
+        end,
+        desc = "Registers",
+      },
+      {
+        "<leader>sm",
+        function()
+          Snacks.picker.marks()
+        end,
+        desc = "Marks",
+      },
+      {
+        "<leader>sj",
+        function()
+          Snacks.picker.jumps()
+        end,
+        desc = "Jump list",
+      },
+      {
+        "<leader>sH",
+        function()
+          Snacks.picker.highlights()
+        end,
+        desc = "Highlight groups",
+      },
+      {
+        "<leader>sC",
+        function()
+          Snacks.picker.commands()
+        end,
+        desc = "Commands",
+      },
+      {
+        "<leader>sq",
+        function()
+          Snacks.picker.qflist()
+        end,
+        desc = "Quickfix list",
+      },
+      -- Scratch buffers: notes and test code that persist, one per file type.
+      {
+        "<leader>.",
+        function()
+          Snacks.scratch()
+        end,
+        desc = "Scratch buffer",
+      },
+      {
+        "<leader>s.",
+        function()
+          Snacks.scratch.select()
+        end,
+        desc = "Select scratch buffer",
+      },
       -- Buffers
       {
         "<leader>bd",
@@ -364,6 +463,16 @@ return {
     },
   },
   {
+    -- Render Markdown in the buffer: headings, tables, code blocks, checkboxes.
+    -- The raw text shows on the line under the cursor. <leader>um toggles it.
+    "MeanderingProgrammer/render-markdown.nvim",
+    ft = { "markdown", "Avante" },
+    opts = {
+      file_types = { "markdown", "Avante" },
+      completions = { blink = { enabled = true } },
+    },
+  },
+  {
     "nvim-lualine/lualine.nvim",
     event = "VeryLazy",
     opts = {
@@ -381,6 +490,17 @@ return {
           { "filename", path = 1 },
         },
         lualine_x = {
+          {
+            -- Show "recording @q" while you record a macro.
+            -- showmode is off, thus Neovim does not show it in the command line.
+            function()
+              return "recording @" .. vim.fn.reg_recording()
+            end,
+            cond = function()
+              return vim.fn.reg_recording() ~= ""
+            end,
+            color = { fg = "#eb6f92" },
+          },
           {
             function()
               return require("lazy.status").updates()
@@ -409,7 +529,7 @@ return {
         lualine_y = { "progress" },
         lualine_z = { "location" },
       },
-      extensions = { "neo-tree", "lazy", "mason", "trouble" },
+      extensions = { "neo-tree", "lazy", "mason", "trouble", "oil", "quickfix" },
     },
   },
 }

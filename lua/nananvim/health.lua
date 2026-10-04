@@ -109,28 +109,46 @@ function M.check()
 
   local ok_extras, extras = pcall(require, "config.extras")
   if ok_extras then
-    for _, flag in ipairs({ "cmp_rich", "lint", "dap" }) do
+    for _, flag in ipairs({ "cmp_rich", "lint", "dap", "test", "ui2" }) do
       health.info(flag .. " = " .. tostring(extras[flag]))
     end
   else
-    health.error("lua/config/extras.lua did not load. The extras layer (completion UI, lint, DAP) is off")
+    health.error("lua/config/extras.lua did not load: " .. tostring(extras))
+  end
+
+  health.start("nananvim: personal settings (lua/config/local.lua)")
+
+  local user = require("config.user")
+  if user.exists then
+    health.ok("lua/config/local.lua is loaded. Git ignores it, thus :NananvimUpdate keeps it")
+  else
+    health.info("no lua/config/local.lua. Copy lua/config/local.example.lua to make one")
   end
 
   health.start("nananvim: AI (opt-in)")
 
-  local local_lua = vim.fn.stdpath("config") .. "/lua/config/local.lua"
-  if vim.fn.filereadable(local_lua) == 1 then
-    health.ok("lua/config/local.lua exists: Windsurf (Codeium) and Avante are on")
+  if not user.ai then
+    health.info("AI is off. Make lua/config/local.lua to turn on suggestions and Avante. See the README")
+    return
+  end
+  if user.suggestions == "windsurf" then
+    health.ok("suggestions: Windsurf (run :Codeium Auth one time to log in)")
+  elseif user.suggestions == "copilot" then
+    health.ok("suggestions: Copilot (run :LspCopilotSignIn one time to log in)")
+    check_exe("node", "the Copilot language server runs with node", "error")
+  else
+    health.info("suggestions: off")
+  end
+  if user.settings.avante == false then
+    health.info("Avante: off")
+  else
+    health.ok("Avante: on")
     if vim.env.ANTHROPIC_API_KEY or vim.env.GROQ_API_KEY or vim.env.OPENAI_API_KEY then
       health.ok("a provider API key is in the environment")
     else
-      health.info(
-        "no ANTHROPIC_API_KEY, GROQ_API_KEY or OPENAI_API_KEY found. Avante chat needs one. Windsurf does not"
-      )
+      health.info("no ANTHROPIC_API_KEY, GROQ_API_KEY or OPENAI_API_KEY found. Avante chat needs one")
     end
     check_exe("make", "Avante uses it to build or download its binary", "warn")
-  else
-    health.info("AI is off (no lua/config/local.lua). Make that file to turn on Windsurf and Avante. See the README")
   end
 end
 

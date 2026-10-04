@@ -103,11 +103,12 @@ opt.mouse = "a"
 -- Line length guide. It is off. Remove the comment marks to show it.
 -- opt.colorcolumn = "80"
 
--- Folds use treesitter. All folds are open when you open a file.
+-- Folds use treesitter, or the LSP server when it gives folds.
+-- All folds are open when you open a file. zc closes a fold, za toggles it.
 opt.foldmethod = "expr"
 opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 opt.foldtext = ""
-opt.foldenable = false
+opt.foldenable = true
 opt.foldlevel = 99
 opt.foldlevelstart = 99
 
@@ -190,3 +191,26 @@ vim.g.loaded_node_provider = 0
 
 -- Format on save is on. Use <leader>uf or :FormatToggle to change it.
 vim.g.autoformat = true
+
+-- Neovide (GUI). Change the font in lua/config/local.lua, for example:
+-- vim.o.guifont = "JetBrainsMono Nerd Font:h13"
+if vim.g.neovide then
+  vim.g.neovide_cursor_animation_length = 0.08
+  vim.g.neovide_scroll_animation_length = 0.2
+  vim.g.neovide_remember_window_size = true
+  vim.g.neovide_scale_factor = 1.0
+  local function scale(delta)
+    vim.g.neovide_scale_factor = delta == 0 and 1.0 or vim.g.neovide_scale_factor * delta
+  end
+  vim.keymap.set("n", "<C-=>", function()
+    scale(1.1)
+  end, { desc = "Zoom in" })
+  vim.keymap.set("n", "<C-->", function()
+    scale(1 / 1.1)
+  end, { desc = "Zoom out" })
+  vim.keymap.set("n", "<C-0>", function()
+    scale(0)
+  end, { desc = "Reset zoom" })
+  -- Paste with Ctrl+Shift+V, as in a terminal.
+  vim.keymap.set({ "i", "c" }, "<C-S-v>", "<C-r>+", { desc = "Paste" })
+end

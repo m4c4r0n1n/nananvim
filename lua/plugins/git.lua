@@ -70,6 +70,28 @@ return {
     },
   },
   {
+    -- Side-by-side diffs, file history and a 3-way merge tool for conflicts.
+    -- This fork is maintained (the original diffview.nvim is not).
+    "dlyongemallo/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory" },
+    keys = {
+      { "<leader>gd", "<cmd>DiffviewOpen<cr>", desc = "Diff view (all changes, conflicts)" },
+      { "<leader>gh", "<cmd>DiffviewFileHistory %<cr>", desc = "File history" },
+      { "<leader>gH", "<cmd>DiffviewFileHistory<cr>", desc = "Branch history" },
+    },
+    opts = function()
+      local close = { "n", "q", "<cmd>DiffviewClose<cr>", { desc = "Close diff view" } }
+      return {
+        enhanced_diff_hl = true,
+        keymaps = {
+          view = { close },
+          file_panel = { close },
+          file_history_panel = { close },
+        },
+      }
+    end,
+  },
+  {
     -- Git tools from snacks.nvim. The main snacks spec is in lua/plugins/ui.lua.
     "folke/snacks.nvim",
     keys = {

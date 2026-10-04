@@ -1,7 +1,8 @@
--- AI plugins (Windsurf/Codeium and Avante) load only when the file
+-- AI plugins (Windsurf/Codeium, Copilot and Avante) load only when the file
 -- lua/config/local.lua exists. This keeps a new install small: no binary
 -- download, no make step and no AI plugin until you ask for it.
-local ai_enabled = vim.fn.filereadable(vim.fn.stdpath("config") .. "/lua/config/local.lua") == 1
+-- Copilot uses the Neovim 0.12 inline completion. See lua/plugins/lsp.lua.
+local user = require("config.user")
 local extras = require("config.extras")
 local rich = extras.cmp_rich
 
@@ -93,12 +94,18 @@ return {
     event = "VeryLazy",
     opts = {},
   },
+  {
+    -- Close and rename HTML tags automatically (HTML, JSX, TSX, Vue, Svelte, XML).
+    "windwp/nvim-ts-autotag",
+    event = { "BufReadPre", "BufNewFile" },
+    opts = {},
+  },
 
-  -- Windsurf (formerly Codeium) AI suggestions. Opt-in, see ai_enabled above.
+  -- Windsurf (formerly Codeium) AI suggestions. Opt-in, see the top of this file.
   {
     "Exafunction/windsurf.vim",
     event = "InsertEnter",
-    enabled = ai_enabled,
+    enabled = user.suggestions == "windsurf",
     init = function()
       vim.g.codeium_disable_bindings = 1
     end,
@@ -140,13 +147,12 @@ return {
   {
     "yetone/avante.nvim",
     version = false,
-    enabled = ai_enabled,
+    enabled = user.ai and user.settings.avante ~= false,
     build = "make",
     opts = function()
       -- Use the settings from lua/config/local.lua if they exist.
-      local ok, local_config = pcall(require, "config.local")
-      if ok and type(local_config) == "table" and local_config.avante then
-        return local_config.avante
+      if type(user.settings.avante) == "table" then
+        return user.settings.avante
       end
 
       -- Default settings. Set ANTHROPIC_API_KEY in your shell.
@@ -200,13 +206,8 @@ return {
       "MunifTanjim/nui.nvim",
       "folke/snacks.nvim",
       "nvim-tree/nvim-web-devicons",
-      {
-        "MeanderingProgrammer/render-markdown.nvim",
-        ft = { "markdown", "Avante" },
-        opts = {
-          file_types = { "markdown", "Avante" },
-        },
-      },
+      -- The main spec is in lua/plugins/ui.lua.
+      "MeanderingProgrammer/render-markdown.nvim",
     },
     keys = {
       {

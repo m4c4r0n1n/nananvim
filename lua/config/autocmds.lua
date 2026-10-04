@@ -95,6 +95,29 @@ vim.api.nvim_create_autocmd("BufWritePre", {
   end,
 })
 
+-- Open "file:line" and "file:line:col" (the format of compiler errors and
+-- grep output) at that position. Example: nvim init.lua:12
+vim.api.nvim_create_autocmd("BufNewFile", {
+  group = augroup("file_line"),
+  callback = function(event)
+    local name = event.match
+    local file, line, col = name:match("^(.-):(%d+):?(%d*):?$")
+    if not file or vim.uv.fs_stat(name) or not vim.uv.fs_stat(file) then
+      return
+    end
+    local bad_buf = event.buf
+    vim.schedule(function()
+      vim.cmd.edit(vim.fn.fnameescape(file))
+      local col_nr = math.max((tonumber(col) or 1) - 1, 0)
+      pcall(vim.api.nvim_win_set_cursor, 0, { tonumber(line), col_nr })
+      vim.cmd("normal! zz")
+      if vim.api.nvim_buf_is_valid(bad_buf) then
+        vim.api.nvim_buf_delete(bad_buf, { force = true })
+      end
+    end)
+  end,
+})
+
 -- Background modes (normal, blackout, transparent) belong to
 -- theme-switcher.nvim. It sets the mode again after each colorscheme change.
 -- Use <leader>tb to change the mode.

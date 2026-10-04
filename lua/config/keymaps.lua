@@ -35,6 +35,26 @@ keymap("x", "<A-k>", ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv"
 keymap("n", "n", "nzzzv", { desc = "Next search result" })
 keymap("n", "N", "Nzzzv", { desc = "Previous search result" })
 
+-- Keep the cursor in the center when you scroll half a page.
+keymap("n", "<C-d>", "<C-d>zz", { desc = "Scroll down" })
+keymap("n", "<C-u>", "<C-u>zz", { desc = "Scroll up" })
+
+-- Join lines and keep the cursor where it is.
+keymap("n", "J", "mzJ`z", { desc = "Join lines" })
+
+-- Undo in small steps: each , . ; starts a new undo step in insert mode.
+keymap("i", ",", ",<C-g>u")
+keymap("i", ".", ".<C-g>u")
+keymap("i", ";", ";<C-g>u")
+
+-- Add a comment line below or above the cursor.
+keymap("n", "gco", "o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add comment below" })
+keymap("n", "gcO", "O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>", { desc = "Add comment above" })
+
+-- Splits
+keymap("n", "<leader>-", "<C-w>s", { desc = "Split below" })
+keymap("n", "<leader>|", "<C-w>v", { desc = "Split right" })
+
 -- Paste over a selection and keep the old register.
 keymap("x", "<leader>P", [["_dP]], { desc = "Paste and keep register" })
 
@@ -50,6 +70,29 @@ keymap("n", "<leader>Q", "<cmd>quitall<cr>", { desc = "Quit all" })
 
 -- Diagnostics
 keymap("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })
+
+local function diagnostic_jump(count, severity)
+  return function()
+    vim.diagnostic.jump({ count = count, severity = severity, float = true })
+  end
+end
+local severity = vim.diagnostic.severity
+keymap("n", "]e", diagnostic_jump(1, severity.ERROR), { desc = "Next error" })
+keymap("n", "[e", diagnostic_jump(-1, severity.ERROR), { desc = "Previous error" })
+keymap("n", "]w", diagnostic_jump(1, severity.WARN), { desc = "Next warning" })
+keymap("n", "[w", diagnostic_jump(-1, severity.WARN), { desc = "Previous warning" })
+
+-- Copy the path of the current file. Use the system clipboard if it is
+-- available, else the unnamed register.
+local function copy_path(modifier)
+  return function()
+    local path = vim.fn.expand(modifier)
+    vim.fn.setreg(vim.fn.has("clipboard") == 1 and "+" or '"', path)
+    vim.notify("Copied: " .. path)
+  end
+end
+keymap("n", "<leader>fy", copy_path("%:."), { desc = "Copy file path (relative)" })
+keymap("n", "<leader>fY", copy_path("%:p"), { desc = "Copy file path (absolute)" })
 
 -- Plugin managers
 keymap("n", "<leader>l", "<cmd>Lazy<cr>", { desc = "Lazy (plugins)" })

@@ -110,3 +110,56 @@ vim.api.nvim_create_user_command("FormatToggle", function(opts)
     vim.notify("Format on save (global): " .. (vim.g.autoformat and "on" or "off"))
   end
 end, { bang = true, desc = "Toggle format on save" })
+
+-- :NananvimUpdate
+-- Get the newest nananvim with git, then install the tested plugin versions
+-- from lazy-lock.json. Your lua/config/local.lua is not changed (git ignores it).
+vim.api.nvim_create_user_command("NananvimUpdate", function()
+  local dir = vim.fn.stdpath("config")
+  local function say(msg, level)
+    vim.schedule(function()
+      vim.notify(msg, level or vim.log.levels.INFO, { title = "nananvim" })
+    end)
+  end
+
+  local status = vim
+    .system({ "git", "-C", dir, "status", "--porcelain", "--untracked-files=no" }, { text = true })
+    :wait()
+  if status.code ~= 0 then
+    say("The config folder is not a git clone:\n" .. dir, vim.log.levels.ERROR)
+    return
+  end
+
+  -- A change to lazy-lock.json comes from :Lazy update. The update replaces it
+  -- with the tested versions. Changes to other files stop the update.
+  local changed = {}
+  for line in status.stdout:gmatch("[^\n]+") do
+    local file = line:sub(4)
+    if file ~= "lazy-lock.json" then
+      table.insert(changed, file)
+    end
+  end
+  if #changed > 0 then
+    say(
+      "You changed these files, thus the update stopped:\n  "
+        .. table.concat(changed, "\n  ")
+        .. "\nMove your changes to lua/config/local.lua, or run git stash, then try again.",
+      vim.log.levels.WARN
+    )
+    return
+  end
+  vim.system({ "git", "-C", dir, "checkout", "--", "lazy-lock.json" }):wait()
+
+  say("Updating nananvim...")
+  vim.system({ "git", "-C", dir, "pull", "--ff-only" }, { text = true }, function(res)
+    if res.code ~= 0 then
+      say("git pull failed:\n" .. vim.trim(res.stderr or ""), vim.log.levels.ERROR)
+      return
+    end
+    say(vim.trim(res.stdout))
+    vim.schedule(function()
+      require("lazy").restore({ show = true })
+      vim.notify("Done. Run :restart to load the new config.", vim.log.levels.INFO, { title = "nananvim" })
+    end)
+  end)
+end, { desc = "Update nananvim and its plugins" })
