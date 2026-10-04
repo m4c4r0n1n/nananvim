@@ -43,6 +43,18 @@ basedpyright runs in "standard" mode (same as Pyright). If you changed it, set `
 2. For compile_commands.json: Use CMake with `-DCMAKE_EXPORT_COMPILE_COMMANDS=1` or use bear
 3. Restart LSP: `:lsp restart`
 
+## NixOS
+
+**Problem:** LSP servers or debuggers from Mason don't start
+
+Mason downloads prebuilt binaries, and on NixOS those need nix-ld (it gives them the normal Linux loader). Add this to `configuration.nix`, then `sudo nixos-rebuild switch`:
+
+```nix
+programs.nix-ld.enable = true;
+```
+
+`:checkhealth nananvim` tells you whether nix-ld is on. The installer puts the other dependencies in your user profile with `nix profile`; move them to `configuration.nix` or home-manager if you prefer.
+
 ## Image Previews Not Working
 
 **Problem:** Can't see images in Snacks picker

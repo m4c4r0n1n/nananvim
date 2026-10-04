@@ -23,9 +23,13 @@ NVIM_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/nvim"
 NVIM_DATA_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/nvim"
 NVIM_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/nvim"
 NVIM_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/nvim"
-REPO_URL="https://github.com/m4c4r0n1n/nananvim.git"
+# NANANVIM_REPO and NANANVIM_REF install from a fork, a branch or a local clone (CI uses this).
+REPO_URL="${NANANVIM_REPO:-https://github.com/m4c4r0n1n/nananvim.git}"
+REPO_REF="${NANANVIM_REF:-}"
 BACKUP_DIR="$HOME/.config/nvim.bak.$(date +%Y%m%d_%H%M%S)"
 MIN_NVIM_VERSION="0.12.0"
+# nvim-treesitter (main) needs this tree-sitter CLI version or newer.
+MIN_TS_VERSION="0.26.1"
 
 # Log file
 LOG_FILE="/tmp/nananvim_install_$(date +%Y%m%d_%H%M%S).log"
@@ -33,13 +37,11 @@ LOG_FILE="/tmp/nananvim_install_$(date +%Y%m%d_%H%M%S).log"
 print_banner() {
     echo -e "${MAGENTA}${BOLD}"
     cat << "BANNER"
-                                     _         
- _ __   __ _ _ __   __ _ _ ____   __(_)_ __ ___  
-| '_ \ / _` | '_ \ / _` | '_ \ \ / /| | '_ ` _ \ 
-| | | | (_| | | | | (_| | | | \ V / | | | | | | |
-|_| |_|\__,_|_| |_|\__,_|_| |_|\_/  |_|_| |_| |_|
-                                                  
-EOF
+                                    _
+ _ __   __ _ _ __   __ _ _ ____   _(_)_ __ ___
+| '_ \ / _` | '_ \ / _` | '_ \ \ / / | '_ ` _ \
+| | | | (_| | | | | (_| | | | \ V /| | | | | | |
+|_| |_|\__,_|_| |_|\__,_|_| |_|\_/ |_|_| |_| |_|
 BANNER
     echo -e "${NC}"
     echo -e "${CYAN}Modern Neovim Distribution${NC}"
@@ -68,11 +70,28 @@ print_warning() {
 }
 
 detect_os() {
+    # NANANVIM_OS skips the detection (CI uses it to test the NixOS path).
+    if [ -n "${NANANVIM_OS:-}" ]; then
+        echo "$NANANVIM_OS"
+        return
+    fi
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         if [ -f /etc/os-release ]; then
             # shellcheck disable=SC1091
             . /etc/os-release
             OS=$ID
+            # Derived distros (Kali, Mint, Manjaro, Nobara...) use the steps of
+            # their base distro (ID_LIKE).
+            case "$OS" in
+                arch|ubuntu|debian|fedora|nixos|gentoo) ;;
+                *)
+                    case " ${ID_LIKE:-} " in
+                        *" arch "*) OS=arch ;;
+                        *" fedora "*) OS=fedora ;;
+                        *" ubuntu "* | *" debian "*) OS=debian ;;
+                    esac
+                    ;;
+            esac
         elif type lsb_release >/dev/null 2>&1; then
             OS=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
         elif [ -f /etc/debian_version ]; then
@@ -129,8 +148,11 @@ version_compare() {
 }
 
 # Print the installed Neovim version without the "v" prefix (for example 0.12.5).
+# Only bash is used here, because minimal systems (the nix image) have no sed or awk.
 nvim_version() {
-    nvim --version | head -1 | cut -d' ' -f2 | sed 's/^v//'
+    local _ version
+    read -r _ version _ < <(nvim --version 2>/dev/null)
+    echo "${version#v}"
 }
 
 # Print the CPU architecture name that the release files use: x86_64 or arm64.
@@ -197,29 +219,111 @@ install_lazygit_release() {
     return 0
 }
 
-# Install the tree-sitter CLI from its GitHub release.
-# nvim-treesitter (main) uses it to compile parsers.
-install_tree_sitter_release() {
-    if check_command "tree-sitter"; then
-        return 0
-    fi
+# Print the installed tree-sitter CLI version (for example 0.26.9), or nothing.
+tree_sitter_version() {
+    local _ version
+    read -r _ version _ < <(tree-sitter --version 2>/dev/null)
+    echo "$version"
+}
 
+# Return 0 if the tree-sitter CLI runs and is new enough.
+tree_sitter_ok() {
+    local version
+    version=$(tree_sitter_version)
+    [ -n "$version" ] && version_compare "$version" "$MIN_TS_VERSION"
+}
+
+# Print the glibc version (for example 2.39), or nothing (macOS, musl).
+glibc_version() {
+    local line
+    line=$(getconf GNU_LIBC_VERSION 2>/dev/null) || line=$(ldd --version 2>/dev/null) || line=""
+    line=${line%%$'\n'*}
+    if [[ "$line" =~ ([0-9]+\.[0-9]+)$ ]]; then
+        echo "${BASH_REMATCH[1]}"
+    fi
+}
+
+# Install the tree-sitter CLI from its GitHub release in /usr/local/bin.
+# The release binaries need glibc 2.39 or newer.
+install_tree_sitter_release() {
     local arch
     case "$(release_arch)" in
         x86_64) arch=x64 ;;
         arm64) arch=arm64 ;;
-        *) print_error "No tree-sitter release file for $(uname -m)"; return 1 ;;
+        *) return 1 ;;
     esac
 
-    print_info "Installing the tree-sitter CLI..."
+    print_info "Installing the tree-sitter CLI (release binary)..."
     local tmp
     tmp=$(mktemp -d)
-    curl -fsSL -o "$tmp/tree-sitter.gz" "https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-${arch}.gz"
+    curl -fsSL -o "$tmp/tree-sitter.gz" "https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-${arch}.gz" || {
+        rm -rf "$tmp"
+        return 1
+    }
     gunzip -f "$tmp/tree-sitter.gz"
     chmod +x "$tmp/tree-sitter"
     sudo mv "$tmp/tree-sitter" /usr/local/bin/tree-sitter
     rm -rf "$tmp"
-    print_success "tree-sitter CLI installed"
+    hash -r
+}
+
+# Build the tree-sitter CLI from source with cargo and put it in /usr/local/bin.
+# This works on any glibc. It takes a few minutes.
+install_tree_sitter_cargo() {
+    print_info "Building the tree-sitter CLI from source (this takes a few minutes)..."
+    # Distribution cargo packages are often too old. rustup gives a current Rust.
+    if ! check_command "rustup"; then
+        curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal || return 1
+    fi
+    # shellcheck disable=SC1091
+    [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+    cargo install --locked tree-sitter-cli || return 1
+    sudo install -m 755 "$HOME/.cargo/bin/tree-sitter" /usr/local/bin/tree-sitter
+    hash -r
+}
+
+# Make sure that a new enough tree-sitter CLI is installed. Distribution
+# packages are sometimes too old (Ubuntu 24.04, Fedora 43). Then use the release
+# binary, or build it from source when glibc is too old for the release binary.
+ensure_tree_sitter() {
+    if tree_sitter_ok; then
+        print_success "tree-sitter CLI $(tree_sitter_version)"
+        return 0
+    fi
+    if [ "$OS" = "macos" ]; then
+        brew upgrade tree-sitter-cli || brew install tree-sitter-cli || true
+    elif [ "$OS" = "nixos" ]; then
+        print_warning "nixpkgs gave tree-sitter $(tree_sitter_version). Update your nixpkgs (nix flake update / nix-channel --update)."
+    else
+        local glibc
+        glibc=$(glibc_version)
+        if [ -n "$glibc" ] && version_compare "$glibc" "2.39"; then
+            install_tree_sitter_release || true
+        fi
+        tree_sitter_ok || install_tree_sitter_cargo || true
+    fi
+    if tree_sitter_ok; then
+        print_success "tree-sitter CLI $(tree_sitter_version)"
+    else
+        print_error "Could not install tree-sitter CLI ${MIN_TS_VERSION}+. Treesitter parsers will not compile."
+        return 1
+    fi
+}
+
+# Make sure that a new enough Neovim is installed. Distribution packages are
+# sometimes too old (Debian, Ubuntu, Fedora 43). Then install the release.
+ensure_neovim() {
+    if check_command "nvim" && version_compare "$(nvim_version)" "$MIN_NVIM_VERSION"; then
+        return 0
+    fi
+    if [ "$OS" = "macos" ]; then
+        brew upgrade neovim || brew install neovim
+    elif [ "$OS" = "nixos" ]; then
+        print_error "nixpkgs gave Neovim $(nvim_version 2>/dev/null). Update your nixpkgs (nix flake update / nix-channel --update)."
+        return 1
+    else
+        install_neovim_release
+    fi
 }
 
 install_dependencies_arch() {
@@ -260,7 +364,7 @@ install_dependencies_arch() {
 install_dependencies_ubuntu() {
     print_info "Installing dependencies for Ubuntu/Debian..."
 
-    sudo apt update
+    sudo apt-get update
 
     local packages=(
         git
@@ -283,7 +387,7 @@ install_dependencies_ubuntu() {
         packages+=(kitty)
     fi
 
-    sudo apt install -y "${packages[@]}" || {
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "${packages[@]}" || {
         print_error "Failed to install packages"
         return 1
     }
@@ -295,21 +399,7 @@ install_dependencies_ubuntu() {
         print_info "Created fd symlink in ~/.local/bin"
     fi
 
-    # The apt version of Neovim is usually too old. Install the release if necessary.
-    if ! check_command "nvim" || ! version_compare "$(nvim_version)" "$MIN_NVIM_VERSION"; then
-        install_neovim_release || return 1
-    fi
-
     install_lazygit_release
-
-    # tree-sitter-cli is in apt from Ubuntu 23.10. Use the release file on older versions.
-    if ! check_command "tree-sitter"; then
-        if apt-cache show tree-sitter-cli >/dev/null 2>&1; then
-            sudo apt install -y tree-sitter-cli
-        else
-            install_tree_sitter_release || return 1
-        fi
-    fi
 
     print_success "Dependencies installed"
 }
@@ -320,6 +410,8 @@ install_dependencies_fedora() {
     local packages=(
         git
         curl
+        tar
+        gzip
         unzip
         make
         gcc
@@ -347,6 +439,64 @@ install_dependencies_fedora() {
 
     # lazygit is not in the official Fedora repositories.
     install_lazygit_release
+
+    print_success "Dependencies installed"
+}
+
+install_dependencies_nixos() {
+    print_info "Installing dependencies for NixOS (nix profile)..."
+
+    if ! check_command "nix"; then
+        print_error "nix is not installed"
+        return 1
+    fi
+
+    # Packages go in your user profile. Prefer configuration.nix or
+    # home-manager? Add the same packages there and run this script again.
+    # Each entry is "nixpkgs attribute:command". A package whose command
+    # already exists is skipped (nix profile refuses duplicates).
+    local packages=(
+        git:git
+        curl:curl
+        unzip:unzip
+        gnumake:make
+        gcc:cc
+        neovim:nvim
+        ripgrep:rg
+        fd:fd
+        imagemagick:magick
+        nodejs:node
+        python3:python3
+        tree-sitter:tree-sitter
+        lazygit:lazygit
+        w3m:w3m
+    )
+    local refs=()
+    local entry
+    for entry in "${packages[@]}"; do
+        if ! check_command "${entry#*:}"; then
+            refs+=("nixpkgs#${entry%%:*}")
+        fi
+    done
+
+    if [ "${#refs[@]}" -eq 0 ]; then
+        print_success "All dependencies are already installed"
+        return 0
+    fi
+
+    nix --extra-experimental-features "nix-command flakes" profile install "${refs[@]}" || {
+        print_error "Failed to install packages"
+        return 1
+    }
+    hash -r
+
+    # Mason downloads prebuilt language servers and debug adapters. On NixOS
+    # they start only with nix-ld (it supplies the normal Linux loader).
+    if [ -z "${NIX_LD:-}" ]; then
+        print_warning "nix-ld is not enabled. Mason's language servers will not start without it."
+        print_info "Add this to configuration.nix and run nixos-rebuild switch:"
+        echo "  programs.nix-ld.enable = true;"
+    fi
 
     print_success "Dependencies installed"
 }
@@ -397,9 +547,10 @@ install_optional_browser() {
     print_info "Installing w3m (optional in-editor text browser)..."
     case "$OS" in
         arch)                        sudo pacman -S --needed --noconfirm w3m ;;
-        ubuntu|debian|pop|linuxmint) sudo apt install -y w3m ;;
+        ubuntu|debian|pop|linuxmint) sudo DEBIAN_FRONTEND=noninteractive apt-get install -y w3m ;;
         fedora)                      sudo dnf install -y w3m ;;
         macos)                       brew install w3m ;;
+        nixos)                       nix --extra-experimental-features "nix-command flakes" profile install nixpkgs#w3m ;;
         *)                           false ;;
     esac || true
 
@@ -446,7 +597,11 @@ backup_existing_config() {
 install_nananvim() {
     print_info "Installing nananvim..."
 
-    git clone --depth 1 "$REPO_URL" "$NVIM_CONFIG_DIR" || {
+    if [ -n "$REPO_REF" ]; then
+        git clone "$REPO_URL" "$NVIM_CONFIG_DIR" && git -C "$NVIM_CONFIG_DIR" checkout -q "$REPO_REF"
+    else
+        git clone --depth 1 "$REPO_URL" "$NVIM_CONFIG_DIR"
+    fi || {
         print_error "Failed to clone repository"
         return 1
     }
@@ -534,6 +689,9 @@ main() {
         fedora)
             install_dependencies_fedora
             ;;
+        nixos)
+            install_dependencies_nixos
+            ;;
         macos)
             install_dependencies_macos
             ;;
@@ -551,6 +709,10 @@ main() {
             exit 1
             ;;
     esac
+
+    # Distribution packages can be too old. Get new enough versions.
+    ensure_neovim || exit 1
+    ensure_tree_sitter || exit 1
 
     # Optional text browser. A failure does not stop the install.
     install_optional_browser

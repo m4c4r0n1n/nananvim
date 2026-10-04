@@ -2,6 +2,10 @@
 
 Notable changes, newest first. If you use this config and something breaks after an update, open an issue and I **WILL** fix it.
 
+## 2026-10-04, works on more systems
+
+The installer runs on Arch, Fedora, Debian, Ubuntu, NixOS and macOS now (plus stuff based on them like Manjaro, Mint or Kali), and CI actually runs it on every one of those so it stays that way. If your distro ships an old Neovim or tree-sitter it grabs a newer one instead of breaking. Also fixed the installer banner.
+
 ## 2026-10-04, QOL round
 
 I've added a bunch of quality of life stuff to make it nicer to live in day to day: sessions that remember your files per folder (`s` on the dashboard), oil on `-` so you can rename/move files like text, harpoon, multiple cursors on `<C-n>`, diffview for diffs and merge conflicts, a test runner on `<leader>T`, markdown that renders right in the buffer, auto-closing HTML/JSX tags, and an editable quickfix list. Plus a pile of small keymaps and `<leader>u` toggles.

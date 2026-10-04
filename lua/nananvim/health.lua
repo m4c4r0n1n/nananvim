@@ -45,6 +45,18 @@ function M.check()
   check_exe("cc", "a C compiler is necessary to compile treesitter parsers", "warn")
   check_exe("lazygit", "git interface (<leader>gg)", "warn")
 
+  -- NixOS: Mason downloads prebuilt servers. They need nix-ld to start.
+  if vim.uv.fs_stat("/etc/NIXOS") then
+    if vim.env.NIX_LD then
+      health.ok("NixOS with nix-ld: Mason's language servers can start")
+    else
+      health.warn(
+        "NixOS without nix-ld: Mason's language servers and debug adapters will not start. "
+          .. "Add programs.nix-ld.enable = true; to configuration.nix, then nixos-rebuild switch"
+      )
+    end
+  end
+
   health.start("nananvim: completion")
 
   local ok_blink, blink_fuzzy = pcall(require, "blink.cmp.fuzzy.rust")

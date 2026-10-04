@@ -17,46 +17,126 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  test-linux:
+  # Install nananvim with install.sh on each distro, as a user would, then load
+  # every plugin and fail on any startup error.
+  linux:
+    name: ${{ matrix.name }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, ubuntu-22.04]
-        # stable is the version that users install. nightly finds breaking changes early.
-        nvim-version: [stable, nightly]
+        include:
+          - name: Arch
+            image: archlinux:latest
+            prep: pacman -Syu --noconfirm --needed sudo git curl
+          - name: Fedora
+            image: fedora:latest
+            prep: dnf install -y sudo git curl
+          # Fedora 43 packages Neovim 0.11 and tree-sitter 0.25. The installer
+          # must upgrade both.
+          - name: Fedora 43
+            image: fedora:43
+            prep: dnf install -y sudo git curl
+          - name: Debian
+            image: debian:stable
+            prep: apt-get update && apt-get install -y sudo git curl ca-certificates
+          - name: Ubuntu 24.04
+            image: ubuntu:24.04
+            prep: apt-get update && apt-get install -y sudo git curl ca-certificates
+          # Ubuntu 22.04 has glibc 2.35. The tree-sitter release binary needs
+          # 2.39, thus the installer builds tree-sitter from source.
+          - name: Ubuntu 22.04
+            image: ubuntu:22.04
+            prep: apt-get update && apt-get install -y sudo git curl ca-certificates
+    runs-on: ubuntu-latest
+    container: ${{ matrix.image }}
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install git and sudo
+        run: ${{ matrix.prep }}
 
-    runs-on: ${{ matrix.os }}
-    # A failure on nightly is a warning. It does not fail the workflow.
-    continue-on-error: ${{ matrix.nvim-version == 'nightly' }}
+      - uses: actions/checkout@v7
 
+      - name: Run install.sh
+        timeout-minutes: 25
+        shell: bash
+        run: |
+          git config --global --add safe.directory '*'
+          NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash install.sh
+
+      - name: Install plugins
+        timeout-minutes: 10
+        shell: bash
+        run: nvim --headless "+Lazy! restore" +qa
+
+      - name: Install treesitter parsers
+        timeout-minutes: 15
+        shell: bash
+        run: |
+          nvim --headless -c 'lua
+            local spec = require("lazy.core.config").plugins["nvim-treesitter"]
+            local opts = require("lazy.core.plugin").values(spec, "opts", false)
+            require("nvim-treesitter").install(opts.ensure_installed):wait(900000)' -c qa
+
+      - name: Smoke test
+        timeout-minutes: 5
+        # "shell: bash" sets pipefail, thus a failed test is not hidden by tee.
+        shell: bash
+        run: nvim --headless -c "luafile $HOME/.config/nvim/.github/smoke.lua" 2>&1 | tee smoke.log
+
+      - name: Health check
+        if: always()
+        shell: bash
+        run: |
+          nvim --headless "+checkhealth nananvim" "+w! health.log" +qa || true
+          cat health.log || true
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: logs-${{ matrix.name }}
+          path: |
+            health.log
+            smoke.log
+
+  # NixOS: install with nix profile in the official nix image (no normal Linux
+  # loader, as on NixOS). Docker runs it, because GitHub actions need glibc.
+  nixos:
+    name: NixOS (nix)
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
-      - name: Install Neovim
-        uses: rhysd/action-setup-vim@v1
-        with:
-          neovim: true
-          version: ${{ matrix.nvim-version }}
-
-      - name: Install dependencies
+      - name: Install and smoke test in nixos/nix
+        timeout-minutes: 30
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ripgrep fd-find python3 nodejs npm imagemagick clang build-essential
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE:/src" \
+            -e NANANVIM_REPO=/src \
+            -e NANANVIM_REF="$GITHUB_SHA" \
+            -e NANANVIM_OS=nixos \
+            nixos/nix:latest bash -c '
+              set -e
+              git config --global --add safe.directory "*"
+              bash /src/install.sh
+              nvim --headless "+Lazy! restore" +qa
+              nvim --headless -c "lua
+                local spec = require(\"lazy.core.config\").plugins[\"nvim-treesitter\"]
+                local opts = require(\"lazy.core.plugin\").values(spec, \"opts\", false)
+                require(\"nvim-treesitter\").install(opts.ensure_installed):wait(900000)" -c qa
+              nvim --headless -c "luafile $HOME/.config/nvim/.github/smoke.lua"
+            '
 
-          # Ubuntu names the fd binary fdfind.
-          mkdir -p ~/.local/bin
-          ln -sf "$(which fdfind)" ~/.local/bin/fd
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
 
-          # nvim-treesitter (main) compiles parsers with the tree-sitter CLI.
-          curl -fsSL -o /tmp/tree-sitter.gz https://github.com/tree-sitter/tree-sitter/releases/latest/download/tree-sitter-linux-x64.gz
-          gunzip -f /tmp/tree-sitter.gz
-          install -m 755 /tmp/tree-sitter ~/.local/bin/tree-sitter
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-
-      - name: Link config
-        run: |
-          mkdir -p ~/.config
-          ln -s "$GITHUB_WORKSPACE" ~/.config/nvim
+      - name: Run install.sh
+        timeout-minutes: 25
+        run: NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash install.sh
 
       - name: Install plugins
         timeout-minutes: 10
@@ -72,50 +152,54 @@ jobs:
 
       - name: Smoke test
         timeout-minutes: 5
-        # "shell: bash" sets pipefail, thus a failed test is not hidden by tee.
-        shell: bash
-        run: nvim --headless -c "luafile .github/smoke.lua" 2>&1 | tee smoke.log
+        run: nvim --headless -c "luafile $HOME/.config/nvim/.github/smoke.lua"
 
-      - name: Health check
-        if: always()
-        run: |
-          nvim --headless "+checkhealth" "+w! health.log" +qa || true
-          cat health.log || true
-
-      - name: Upload logs
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: logs-${{ matrix.os }}-${{ matrix.nvim-version }}
-          path: |
-            health.log
-            smoke.log
-
-  test-macos:
-    runs-on: macos-latest
-
+  # Neovim nightly on Arch. A failure here is a warning about the next Neovim
+  # version. It does not fail the workflow.
+  nightly:
+    name: Arch (Neovim nightly)
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    continue-on-error: true
     steps:
+      - name: Install git and sudo
+        run: pacman -Syu --noconfirm --needed sudo git curl
+
       - uses: actions/checkout@v7
 
-      - name: Install dependencies
-        run: brew install neovim ripgrep fd node python3 imagemagick tree-sitter-cli
-
-      - name: Link config
+      - name: Run install.sh
+        timeout-minutes: 25
+        shell: bash
         run: |
-          mkdir -p ~/.config
-          ln -s "$GITHUB_WORKSPACE" ~/.config/nvim
+          git config --global --add safe.directory '*'
+          NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash install.sh
 
-      - name: Install plugins
-        timeout-minutes: 10
-        run: nvim --headless "+Lazy! restore" +qa
+      - name: Install Neovim nightly
+        shell: bash
+        run: |
+          curl -fsSL -o /tmp/nvim.tar.gz https://github.com/neovim/neovim/releases/download/nightly/nvim-linux-x86_64.tar.gz
+          tar -xzf /tmp/nvim.tar.gz -C /opt
+          echo "/opt/nvim-linux-x86_64/bin" >> "$GITHUB_PATH"
+
+      - name: Install plugins and parsers
+        timeout-minutes: 20
+        shell: bash
+        run: |
+          nvim --version | head -1
+          nvim --headless "+Lazy! restore" +qa
+          nvim --headless -c 'lua
+            local spec = require("lazy.core.config").plugins["nvim-treesitter"]
+            local opts = require("lazy.core.plugin").values(spec, "opts", false)
+            require("nvim-treesitter").install(opts.ensure_installed):wait(900000)' -c qa
 
       - name: Smoke test
         timeout-minutes: 5
-        run: nvim --headless -c "luafile .github/smoke.lua"
+        shell: bash
+        run: nvim --headless -c "luafile $HOME/.config/nvim/.github/smoke.lua"
 
   lint:
+    name: Lint
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v7
 
