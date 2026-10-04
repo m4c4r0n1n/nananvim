@@ -8,7 +8,7 @@ A fast, minimal, fully documented Neovim config that actually works. ~35ms start
 
 Built primarily for Arch but works on most Linux distros and MacOS. I use this daily and fix things the moment they break, or eventually... If you do decide to use this config and something breaks, open an issue and I **WILL** fix it immediately. Thank you.
 
-What's changed lately lives in the [CHANGELOG](CHANGELOG.md).
+Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, multiple cursors, a test runner, diffview, rendered markdown and more), and your own settings now live in one file that updates never touch. Full rundown in the [CHANGELOG](CHANGELOG.md).
 
 ## Why nananvim?
 
