@@ -332,7 +332,7 @@ Common actions:
 
 ### LSP Pickers
 
-`gd`, `gr`, `gi`, `gy` and `gD` open in the snacks picker with a preview, so a symbol with many references is easy to filter. `<leader>xl` shows definitions and references in a Trouble side panel instead.
+`gd`, `gr`, `gI`, `gy` and `gD` open in the snacks picker with a preview, so a symbol with many references is easy to filter. `<leader>xl` shows definitions and references in a Trouble side panel instead.
 
 ### Rename a File
 

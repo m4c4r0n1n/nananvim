@@ -107,7 +107,7 @@ Inside tmux, `<C-h/j/k/l>` also move into tmux panes (add the tmux half from the
 | `gd` | Go to definition | Normal | Picker with preview |
 | `gD` | Go to declaration | Normal | Picker with preview |
 | `gr` | Find references | Normal | Picker with preview |
-| `gi` | Go to implementation | Normal | Picker with preview |
+| `gI` | Go to implementation | Normal | Picker with preview |
 | `gy` | Go to type definition | Normal | Picker with preview |
 | `K` | Hover | Normal | Show hover documentation |
 | `<C-k>` | Signature help | Insert | Show function signature (insert-only so it doesn't shadow window-up nav) |

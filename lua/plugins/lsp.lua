@@ -293,7 +293,7 @@ return {
           map("n", "gr", function()
             Snacks.picker.lsp_references()
           end, "References", { nowait = true })
-          map("n", "gi", function()
+          map("n", "gI", function()
             Snacks.picker.lsp_implementations()
           end, "Go to implementation")
           map("n", "gy", function()

@@ -485,7 +485,7 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 - `gd` - Go to definition (picker with preview)
 - `gr` - Find references (picker with preview)
 - `K` - Show hover documentation
-- `gi` / `gy` - Go to implementation / type definition
+- `gI` / `gy` - Go to implementation / type definition
 - `<leader>ca` - Code actions (quick fixes)
 - `<leader>rn` - Rename symbol
 - `<leader>cf` - Format current buffer (`<leader>uf` toggles format on save)
