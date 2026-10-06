@@ -1,6 +1,6 @@
 # nananvim
 
-<img width="1718" height="1362" alt="image" src="https://github.com/user-attachments/assets/de3c5790-93db-410b-bb40-52619dfa93ee" />
+<img width="1912" height="1259" alt="image" src="https://github.com/user-attachments/assets/a6103d17-4f2c-4b82-b29d-b34c4bf37bf7" />
 
 TIRED OF LAZYVIM? WANT SOMETHING LESS BLOATED? TRY NANANVIM! A fast, minimal, fully documented Neovim config that actually works. ~35ms startup, 53 plugins with only 6 loaded before the first screen draws, CI-tested against Neovim **stable and nightly** with a smoke test that fails on any startup error. Batteries included, bloat optional.
 
