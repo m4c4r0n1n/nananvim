@@ -134,11 +134,32 @@ return {
   -- Emmet for HTML and CSS abbreviations
   {
     "mattn/emmet-vim",
-    ft = { "html", "css", "javascript", "javascriptreact", "typescript", "typescriptreact", "vue", "svelte" },
+    ft = {
+      "html",
+      "css",
+      "scss",
+      "less",
+      "javascript",
+      "javascriptreact",
+      "typescript",
+      "typescriptreact",
+      "vue",
+      "svelte",
+      "astro",
+    },
     init = function()
       vim.g.user_emmet_leader_key = "<C-z>"
       vim.g.user_emmet_mode = "inv" -- Insert, normal and visual mode
       vim.g.user_emmet_install_global = 0
+    end,
+    config = function(plugin)
+      -- The keys are not global. EmmetInstall adds them to the current buffer.
+      vim.api.nvim_create_autocmd("FileType", {
+        group = vim.api.nvim_create_augroup("nananvim_emmet", { clear = true }),
+        pattern = plugin.ft,
+        command = "EmmetInstall",
+      })
+      vim.cmd("EmmetInstall")
     end,
   },
 

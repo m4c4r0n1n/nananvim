@@ -14,7 +14,6 @@ return {
         { "<leader>g", group = "git" },
         { "<leader>h", group = "git hunks" },
         { "<leader>i", group = "inlay hints" },
-        { "<leader>p", group = "panels" },
         { "<leader>r", group = "rename/replace" },
         { "<leader>s", group = "search" },
         { "<leader>S", group = "sessions" },

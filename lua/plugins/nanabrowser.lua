@@ -25,7 +25,7 @@ return {
         desc = "Toggle panels",
       },
       {
-        "<leader>pz",
+        "<leader>z",
         function()
           require("nanabrowser").toggle_zoom()
         end,

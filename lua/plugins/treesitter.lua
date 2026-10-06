@@ -1,6 +1,7 @@
 -- Parsers that install at once. Other parsers install automatically when
 -- you open a file of that type (see the FileType autocommand below).
 local ensure_installed = {
+  "astro",
   "bash",
   "c",
   "cpp",
@@ -10,6 +11,7 @@ local ensure_installed = {
   "git_config",
   "gitcommit",
   "gitignore",
+  "graphql",
   "html",
   "javascript",
   "jsdoc",
@@ -21,11 +23,14 @@ local ensure_installed = {
   "python",
   "query",
   "regex",
+  "scss",
+  "svelte",
   "toml",
   "tsx",
   "typescript",
   "vim",
   "vimdoc",
+  "vue",
   "xml",
   "yaml",
 }

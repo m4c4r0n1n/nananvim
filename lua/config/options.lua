@@ -184,13 +184,16 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
 -- Providers
--- Set the Python provider only when python3 exists. An empty path gives health errors.
-if vim.fn.exepath("python3") ~= "" then
-  vim.g.python3_host_prog = vim.fn.exepath("python3")
-end
+-- No plugin in this config uses them. The Python debugger uses its own Mason venv.
+vim.g.loaded_python3_provider = 0
 vim.g.loaded_perl_provider = 0
 vim.g.loaded_ruby_provider = 0
 vim.g.loaded_node_provider = 0
+
+-- Filetypes
+-- Neovim does not know .mdx files. Highlight them with the markdown parser.
+vim.filetype.add({ extension = { mdx = "mdx" } })
+vim.treesitter.language.register("markdown", "mdx")
 
 -- Format on save is on. Use <leader>uf or :FormatToggle to change it.
 vim.g.autoformat = true

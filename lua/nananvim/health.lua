@@ -75,7 +75,7 @@ function M.check()
       health.warn("node " .. major .. " is too old. Mason's npm servers and Copilot need node 20 or later")
     end
   end
-  check_exe("python3", "Python provider and debugpy", "warn")
+  check_exe("python3", "Python debugging (debugpy)", "warn")
   check_exe("clangd", "C and C++ LSP (Mason also installs it)", "warn")
   local mason_bin = vim.fn.stdpath("data") .. "/mason/bin"
   if vim.fn.isdirectory(mason_bin) == 1 then

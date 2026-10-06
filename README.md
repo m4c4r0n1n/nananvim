@@ -27,7 +27,7 @@ Because why not. Nobody will use this, lol. But if you're here, here are some sp
 
 ### [nanabrowser.nvim](https://github.com/m4c4r0n1n/nanabrowser.nvim): Browser │ Terminal │ TODO workspace
 
-One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser (w3m/lynx/elinks, auto-detected), a terminal, and a persistent TODO list. Adaptive layout: side-by-side when your window is wide, a tabbed float when it isn't. `<leader>pz` zooms one panel to full size and back. `gx` opens the URL under your cursor externally; `<leader>wb` browses it in-editor. Extensible: `register_panel()` lets you add your own panels.
+One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser (w3m/lynx/elinks, auto-detected), a terminal, and a persistent TODO list. Adaptive layout: side-by-side when your window is wide, a tabbed float when it isn't. `<leader>z` zooms one panel to full size and back. `gx` opens the URL under your cursor externally; `<leader>wb` browses it in-editor. Extensible: `register_panel()` lets you add your own panels.
 
 ### [theme-switcher.nvim](https://github.com/m4c4r0n1n/theme-switcher.nvim): live theme preview + blackout
 
@@ -37,7 +37,7 @@ One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser 
 
 - **Snacks.nvim**: Dashboard, fuzzy picker (files, grep, LSP, git, undo history, keymaps...) that can preview images, PDFs and more right in your terminal (Kitty or Ghostty, anything with the kitty graphics protocol), notifications, indent guides, lazygit, terminal, zen mode and `<leader>u` UI toggles
 - **Treesitter** (`main` branch): highlighting and indent for 25+ languages out of the box, and any other parser installs itself the first time you open that file type. Function/class/argument text objects and motions, plus a sticky context line
-- **LSP**: Native Neovim 0.12 LSP, servers auto-install through Mason (Lua, Python via basedpyright + ruff, TypeScript/JavaScript via vtsls + eslint, HTML/CSS/Tailwind, JSON/YAML with SchemaStore, Bash, Markdown, C/C++). Definitions and references open in a picker with preview, folds come from the server when it has them, and a spinner shows what the server is doing
+- **LSP**: Native Neovim 0.12 LSP, servers auto-install through Mason (Lua, Python via basedpyright + ruff, TypeScript/JavaScript via vtsls + eslint, HTML/CSS/Tailwind, Vue, Svelte, Astro, Emmet, JSON/YAML with SchemaStore, Bash, Markdown, C/C++). Definitions and references open in a picker with preview, folds come from the server when it has them, and a spinner shows what the server is doing
 - **Completion**: blink.cmp with kind icons, bordered menu/docs, ghost text, signature help, friendly-snippets, cmdline completion, and a hook to append your own sources
 - **Formatting**: conform.nvim formats on save (ruff, stylua, prettier, shfmt, clang-format); `<leader>uf` toggles it
 - **Linting**: nvim-lint layered on top of LSP (shellcheck, markdownlint, hadolint, yamllint auto-installed); add a linter by adding one table entry
@@ -113,6 +113,7 @@ curl -fsSL https://raw.githubusercontent.com/m4c4r0n1n/nananvim/main/install.sh 
 The installer will:
 - Detect your distro (Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo, macOS, and distros based on them), x86_64 and arm64
 - Install all required dependencies (including lazygit and the tree-sitter CLI)
+- Install clipboard tools (wl-clipboard, xclip) so yank and paste reach your system clipboard
 - Download the latest stable Neovim (0.12+) if yours is too old
 - Clone this config to `~/.config/nvim`
 - Backup your existing config if present
@@ -473,7 +474,7 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 ### Panel Workspace (nanabrowser)
 
 - `<leader>p` - Toggle Browser │ Terminal │ TODO panels
-- `<leader>pz` - Zoom current panel (focus one / show all)
+- `<leader>z` - Zoom current panel (focus one / show all)
 - `<Tab>` / `<S-Tab>` - Cycle panels (float layout)
 - `<leader>wb` - Browse a URL in-editor (w3m/lynx/elinks)
 - `<leader>wo` - Open a URL in your external browser

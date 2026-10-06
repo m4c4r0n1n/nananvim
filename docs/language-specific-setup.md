@@ -110,7 +110,7 @@ npm install -D @types/react @types/react-dom  # React
 npm install -D @types/node  # Node types
 ```
 
-For Vue add `"vue_ls"`, for Svelte add `"svelte"` to `servers`.
+Vue (`vue_ls`), Svelte (`svelte`) and Astro (`astro`) servers are included. In `.vue` files, vtsls reads the script part, so types work in the template too. `.mdx` files get markdown highlighting.
 
 ## Go
 
@@ -230,7 +230,7 @@ HTML and CSS LSPs are pre-configured:
 
 ### Emmet (Already Included!)
 
-emmet-vim loads for HTML, CSS, JS/TS, JSX/TSX, Vue and Svelte. Type an abbreviation, then press `<C-z>,`.
+emmet-vim loads for HTML, CSS, SCSS, Less, JS/TS, JSX/TSX, Vue, Svelte and Astro. Type an abbreviation, then press `<C-z>,`.
 
 ## JSON/YAML
 

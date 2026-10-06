@@ -8,6 +8,10 @@ Notable changes, newest first. If you use this config and something breaks after
 
 `:TokenCount` no longer puts your API key on the curl command line, where other programs on your machine could see it.
 
+Web stuff: Vue, Svelte and Astro servers are in now, with types working in Vue templates. Emmet (`<C-z>,`) was set up but never actually turned on, so it works now, in Astro and SCSS too. `.mdx` files get highlighting, and the parsers for Vue, Svelte, Astro, SCSS and GraphQL install up front.
+
+Fresh installs are cleaner: the installer adds wl-clipboard and xclip so yank reaches your system clipboard, and the Python provider is off (nothing used it, it only threw a health error). Panel zoom moved from `<leader>pz` to `<leader>z`, the same key it already was inside the panels, so `<leader>p` opens the panels without a delay.
+
 ## 2026-10-04, works on more systems
 
 The installer runs on Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo and macOS now (plus stuff based on them like Manjaro, Mint or Kali), and CI actually runs it on every one of those so it stays that way. If your distro ships an old Neovim or tree-sitter it grabs a newer one instead of breaking. Also fixed the installer banner.

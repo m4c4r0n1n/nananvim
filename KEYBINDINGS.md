@@ -360,7 +360,7 @@ which-key shows the current state of each toggle.
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
 | `<leader>p` | Toggle panels | Normal | Toggle Browser / Terminal / TODO (tabbed float by default) |
-| `<leader>pz` | Zoom panel | Normal | Focus one panel full-size / show all again |
+| `<leader>z` | Zoom panel | Normal | Focus one panel full-size / show all again |
 | `<Tab>` / `<S-Tab>` | Cycle panels | Panel | Switch between panels in the float layout |
 | `<leader>wb` | Browse URL (in-editor) | Normal | Open URL in the in-editor text browser (auto-detects w3m → lynx → elinks) |
 | `<leader>wo` | Open URL (external) | Normal | Open URL in your external browser |

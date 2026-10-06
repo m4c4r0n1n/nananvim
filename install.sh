@@ -765,6 +765,40 @@ install_optional_browser() {
     return 0
 }
 
+install_optional_clipboard() {
+    # Neovim copies to the system clipboard with wl-copy (Wayland) or xclip (X11).
+    # macOS has pbcopy. The clipboard is optional, thus a failure here must not
+    # stop the install.
+    if [ "$OS" = "macos" ]; then
+        return 0
+    fi
+    if check_command "wl-copy" && check_command "xclip"; then
+        print_success "Clipboard tools already installed"
+        return 0
+    fi
+
+    print_info "Installing clipboard tools (wl-clipboard, xclip)..."
+    case "$OS" in
+        arch)                        run sudo pacman -S --needed --noconfirm wl-clipboard xclip ;;
+        ubuntu|debian|pop|linuxmint) run sudo DEBIAN_FRONTEND=noninteractive apt-get install -y wl-clipboard xclip ;;
+        fedora)                      run sudo dnf install -y wl-clipboard xclip ;;
+        nixos)                       run nix --extra-experimental-features "nix-command flakes" profile install nixpkgs#wl-clipboard nixpkgs#xclip ;;
+        void)                        run sudo xbps-install -Sy wl-clipboard xclip ;;
+        gentoo)                      run sudo emerge --getbinpkg --noreplace --ask=n gui-apps/wl-clipboard x11-misc/xclip ;;
+        *)                           false ;;
+    esac || true
+    if [ "$DRY_RUN" = 1 ]; then
+        return 0
+    fi
+
+    if check_command "wl-copy" || check_command "xclip"; then
+        print_success "Clipboard tools installed"
+    else
+        print_warning "No clipboard tool installed. Copy to the system clipboard will not work"
+    fi
+    return 0
+}
+
 check_neovim_version() {
     if ! check_command "nvim"; then
         print_error "Neovim is not installed"
@@ -939,8 +973,9 @@ main() {
     ensure_tree_sitter || exit 1
     ensure_node
 
-    # Optional text browser. A failure does not stop the install.
+    # Optional text browser and clipboard tools. A failure does not stop the install.
     install_optional_browser
+    install_optional_clipboard
 
     # A dry run does not install Neovim, thus it does not check the version.
     if [ "$DRY_RUN" = 0 ]; then

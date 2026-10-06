@@ -12,6 +12,9 @@ local servers = {
   "html",
   "cssls",
   "tailwindcss",
+  "vue_ls",
+  "svelte",
+  "astro",
   "jsonls",
   "yamlls",
   "bashls",
@@ -24,6 +27,15 @@ local servers = {
 if user.suggestions == "copilot" then
   table.insert(servers, "copilot")
 end
+
+-- vtsls reads the script part of .vue files with the Vue TypeScript plugin.
+-- The plugin comes with the vue_ls Mason package.
+local vue_plugin = {
+  name = "@vue/typescript-plugin",
+  location = vim.fn.stdpath("data") .. "/mason/packages/vue-language-server/node_modules/@vue/language-server",
+  languages = { "vue" },
+  configNamespace = "typescript",
+}
 
 -- Settings for TypeScript and JavaScript in vtsls.
 local ts_settings = {
@@ -185,12 +197,36 @@ return {
         },
       })
 
+      -- Astro needs a TypeScript folder. Use the TypeScript of the project.
+      -- If the project has none, use the TypeScript in the Mason package.
+      vim.lsp.config("astro", {
+        before_init = function(_, config)
+          local tsdk = require("lspconfig.util").get_typescript_server_path(config.root_dir)
+          if tsdk == "" then
+            tsdk = vim.fn.stdpath("data") .. "/mason/packages/astro-language-server/node_modules/typescript/lib"
+          end
+          config.init_options = config.init_options or {}
+          config.init_options.typescript = config.init_options.typescript or {}
+          config.init_options.typescript.tsdk = tsdk
+        end,
+      })
+
       vim.lsp.config("vtsls", {
+        filetypes = {
+          "javascript",
+          "javascriptreact",
+          "javascript.jsx",
+          "typescript",
+          "typescriptreact",
+          "typescript.tsx",
+          "vue",
+        },
         settings = {
           complete_function_calls = true,
           vtsls = {
             enableMoveToFileCodeAction = true,
             autoUseWorkspaceTsdk = true,
+            tsserver = { globalPlugins = { vue_plugin } },
             experimental = {
               maxInlayHintLength = 30,
               completion = { enableServerSideFuzzyMatch = true },
@@ -351,6 +387,9 @@ return {
         html = { "prettierd", "prettier", stop_after_first = true },
         css = { "prettierd", "prettier", stop_after_first = true },
         scss = { "prettierd", "prettier", stop_after_first = true },
+        less = { "prettierd", "prettier", stop_after_first = true },
+        graphql = { "prettierd", "prettier", stop_after_first = true },
+        mdx = { "prettierd", "prettier", stop_after_first = true },
         sh = { "shfmt" },
         bash = { "shfmt" },
         c = { "clang-format" },
