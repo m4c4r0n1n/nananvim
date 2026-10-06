@@ -2,13 +2,13 @@
 
 <img width="1718" height="1362" alt="image" src="https://github.com/user-attachments/assets/de3c5790-93db-410b-bb40-52619dfa93ee" />
 
-A fast, minimal, fully documented Neovim config that actually works. ~35ms startup, 53 plugins with only 6 loaded before the first screen draws, CI-tested against Neovim **stable and nightly** with a smoke test that fails on any startup error. Batteries included, bloat optional.
+TIRED OF LAZYVIM? WANT SOMETHING LESS BLOATED? TRY NANANVIM! A fast, minimal, fully documented Neovim config that actually works. ~35ms startup, 53 plugins with only 6 loaded before the first screen draws, CI-tested against Neovim **stable and nightly** with a smoke test that fails on any startup error. Batteries included, bloat optional.
 
 <img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
 
 Built primarily for Arch but works on most Linux distros and MacOS. I use this daily and fix things the moment they break, or eventually... If you do decide to use this config and something breaks, open an issue and I **WILL** fix it immediately. Thank you.
 
-Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, multiple cursors, a test runner, diffview, rendered markdown and more), and your own settings now live in one file that updates never touch. Full rundown in the [CHANGELOG](CHANGELOG.md).
+Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, multiple cursors, a test runner, diffview, NananvimUpdate command, rendered markdown and more), and your own settings now live in one file that updates never touch. Full rundown in the [CHANGELOG](CHANGELOG.md).
 
 ## Why nananvim?
 
