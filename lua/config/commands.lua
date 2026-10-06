@@ -34,7 +34,8 @@ print(len(enc.encode(sys.stdin.read())))
 end
 
 -- Exact Claude count with the Anthropic count_tokens endpoint.
--- The endpoint is free. It does not send the text to a model.
+-- The endpoint is free and no model reads the text. But the text goes to the
+-- Anthropic API, thus do not count text that must stay on this computer.
 local function claude_count(text, model, api_key)
   if vim.fn.executable("curl") ~= 1 then
     notify("curl not found", vim.log.levels.ERROR)
@@ -44,6 +45,12 @@ local function claude_count(text, model, api_key)
     model = model,
     messages = { { role = "user", content = text } },
   })
+  -- Other programs can read the curl arguments (ps). Thus the API key goes to
+  -- curl on stdin, and the body goes in a file in the private Neovim temp folder.
+  local body_file = vim.fn.tempname()
+  local f = assert(io.open(body_file, "wb"))
+  f:write(body)
+  f:close()
   local cmd = {
     "curl",
     "--silent",
@@ -54,11 +61,12 @@ local function claude_count(text, model, api_key)
     "--header",
     "anthropic-version: 2023-06-01",
     "--header",
-    "x-api-key: " .. api_key,
-    "--data-binary",
     "@-",
+    "--data-binary",
+    "@" .. body_file,
   }
-  vim.system(cmd, { stdin = body, text = true }, function(res)
+  vim.system(cmd, { stdin = "x-api-key: " .. api_key .. "\n", text = true }, function(res)
+    os.remove(body_file)
     if res.code ~= 0 then
       notify("curl failed: " .. vim.trim(res.stderr or ""), vim.log.levels.ERROR)
       return
