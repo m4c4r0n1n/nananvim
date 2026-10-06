@@ -8,7 +8,7 @@ TIRED OF LAZYVIM? WANT SOMETHING LESS BLOATED? TRY NANANVIM! In all seriousness,
 
 Built primarily for Arch but works on most Linux distros and MacOS. I use this daily and fix things the moment they break, or eventually... If you do decide to use this config and something breaks, open an issue and I **WILL** fix it immediately. Thank you.
 
-Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, multiple cursors, a test runner, diffview, NananvimUpdate command, rendered markdown and more), and your own settings now live in one file that updates never touch. Full rundown in the [CHANGELOG](CHANGELOG.md).
+Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, multiple cursors, a test runner, diffview, NananvimUpdate command, rendered markdown and more), and your own settings now live in one file that updates never touch. Web dev is in too now: Vue, Svelte, Astro, MDX and working Emmet. Full rundown in the [CHANGELOG](CHANGELOG.md).
 
 ## Why nananvim?
 
@@ -20,7 +20,7 @@ Because why not. Nobody will use this, lol. But if you're here, here are some sp
 - **Easy to use and functional**: rich completion UI, a full linting layer, and the entire DAP debugging stack sit behind per-feature flags in one file (`lua/config/extras.lua`). On by default, one `false` to genuinely remove any of them.
 - **Updates don't eat your settings**: your stuff lives in one gitignored file (`lua/config/local.lua`): options, keymaps, extra plugins, overrides for any built-in plugin. `:NananvimUpdate` pulls the new version and the tested plugin versions without touching it.
 - **AI is opt-in, not opt-out**: no Windsurf, no Avante, no binary downloads, no `make` step, until you create one file. Delete the file, it's all gone.
-- **Tested, not vibes**: CI loads every plugin headless on stable *and* nightly Neovim on every push and fails on any startup error, then checks formatting (StyLua), the installer (ShellCheck) and the docs. `:checkhealth nananvim` diagnoses your machine.
+- **Tested, not vibes**: on every push, CI runs the real installer on Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo and macOS, loads every plugin on stable *and* nightly Neovim and fails on any startup error, then checks formatting (StyLua), the installer (ShellCheck and a dry run) and the docs. `:checkhealth nananvim` diagnoses your machine.
 - **Documented like someone might actually read it**: full [keybinding reference](KEYBINDINGS.md), [customization guide](docs/customization-guide.md), [troubleshooting](docs/troubleshooting.md), [advanced features](docs/advanced-features.md).
 
 ## First-party plugins
@@ -36,8 +36,8 @@ One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser 
 ## What else is in it?
 
 - **Snacks.nvim**: Dashboard, fuzzy picker (files, grep, LSP, git, undo history, keymaps...) that can preview images, PDFs and more right in your terminal (Kitty or Ghostty, anything with the kitty graphics protocol), notifications, indent guides, lazygit, terminal, zen mode and `<leader>u` UI toggles
-- **Treesitter** (`main` branch): highlighting and indent for 25+ languages out of the box, and any other parser installs itself the first time you open that file type. Function/class/argument text objects and motions, plus a sticky context line
-- **LSP**: Native Neovim 0.12 LSP, servers auto-install through Mason (Lua, Python via basedpyright + ruff, TypeScript/JavaScript via vtsls + eslint, HTML/CSS/Tailwind, Vue, Svelte, Astro, Emmet, JSON/YAML with SchemaStore, Bash, Markdown, C/C++). Definitions and references open in a picker with preview, folds come from the server when it has them, and a spinner shows what the server is doing
+- **Treesitter** (`main` branch): highlighting and indent for 30+ languages out of the box, and any other parser installs itself the first time you open that file type. Function/class/argument text objects and motions, plus a sticky context line
+- **LSP**: Native Neovim 0.12 LSP, servers auto-install through Mason (Lua, Python via basedpyright + ruff, TypeScript/JavaScript via vtsls + eslint, HTML/CSS/Tailwind, Vue, Svelte, Astro, JSON/YAML with SchemaStore, Bash, Markdown, C/C++). Definitions and references open in a picker with preview, folds come from the server when it has them, and a spinner shows what the server is doing
 - **Completion**: blink.cmp with kind icons, bordered menu/docs, ghost text, signature help, friendly-snippets, cmdline completion, and a hook to append your own sources
 - **Formatting**: conform.nvim formats on save (ruff, stylua, prettier, shfmt, clang-format); `<leader>uf` toggles it
 - **Linting**: nvim-lint layered on top of LSP (shellcheck, markdownlint, hadolint, yamllint auto-installed); add a linter by adding one table entry
@@ -50,7 +50,7 @@ One keypress (`<leader>p`) toggles a panel workspace: an in-editor text browser 
 - **Markdown**: rendered right in the buffer (headings, tables, checkboxes); the raw text shows on the cursor line
 - **Rose Pine Moon**: Default theme, blacked out by default
 - **AI (opt-in)**: Windsurf (Codeium) inline suggestions + Avante chat (Claude Sonnet 5.5 by default), both off by default, flip them on with a `lua/config/local.lua` (see AI setup below)
-- **Other stuff**: Bufferline for tabs, trouble for diagnostics, an editable quickfix list, todo-comments, autopairs + auto-closing HTML/JSX tags, surround motions, lualine status bar (git diff, LSP servers, macro recording, plugin updates), which-key with labeled groups, scratch buffers, `nvim file.lua:42` opens at line 42, `:SudaWrite` for root files, tmux pane navigation, Neovide support, `:TokenCount` with exact Claude token counts
+- **Other stuff**: Bufferline for tabs, trouble for diagnostics, an editable quickfix list, todo-comments, autopairs + auto-closing HTML/JSX tags, Emmet (`<C-z>,`), surround motions, lualine status bar (git diff, LSP servers, macro recording, plugin updates), which-key with labeled groups, scratch buffers, `nvim file.lua:42` opens at line 42, `:SudaWrite` for root files, tmux pane navigation, Neovide support, `:TokenCount` with exact Claude token counts
 
 ### Extras switch
 
@@ -140,12 +140,12 @@ mv ~/.config/nvim ~/.config/nvim.bak
 
 **For Arch:**
 ```bash
-sudo pacman -S git curl unzip ripgrep fd imagemagick kitty nodejs npm python clang tree-sitter-cli lazygit
+sudo pacman -S git curl unzip ripgrep fd imagemagick kitty nodejs npm python clang tree-sitter-cli lazygit wl-clipboard xclip
 ```
 
 **For Ubuntu/Debian:**
 ```bash
-sudo apt install git curl unzip ripgrep fd-find imagemagick kitty nodejs npm python3 python3-venv clang build-essential
+sudo apt install git curl unzip ripgrep fd-find imagemagick kitty nodejs npm python3 python3-venv clang build-essential wl-clipboard xclip
 # fd-find is called fdfind on Ubuntu, so symlink it:
 ln -s $(which fdfind) ~/.local/bin/fd
 # tree-sitter-cli only lands in apt from 23.10+; otherwise grab the binary:
@@ -224,6 +224,7 @@ Honestly using WSL2 is your best option.
 - **A kitty-graphics terminal**: Kitty, Ghostty, or WezTerm, anything that speaks the kitty graphics protocol (needed for inline image previews)
 - **w3m** (or lynx/elinks): The in-editor text browser for the panel workspace, auto-detected, falls back to your external browser if absent
 - **lazygit**: The git UI on `<leader>gg`
+- **wl-clipboard or xclip**: Yank and paste with the system clipboard (the installer adds both)
 
 **For language servers and formatters:**
 
@@ -404,8 +405,9 @@ If you want to understand how this is organized or modify it:
 ~/.config/nvim/
 ├── .github/
 │   ├── smoke.lua          # CI smoke test: loads every plugin, fails on errors
+│   ├── test.sh            # CI: install with install.sh, then the smoke test
 │   └── workflows/
-│       └── ci.yml         # CI: smoke test on stable + nightly nvim, StyLua, ShellCheck
+│       └── ci.yml         # CI: installer on 8 systems, stable + nightly nvim, StyLua, ShellCheck
 ├── docs/                  # Documentation
 │   ├── troubleshooting.md
 │   ├── customization-guide.md

@@ -14,6 +14,8 @@ Fresh installs are cleaner: the installer adds wl-clipboard and xclip so yank re
 
 Theme switcher: `j`/`k`/`q` work in the picker again, it remembers the exact variant you pick (rose-pine-dawn stays dawn), it doesn't spam a message on every move, and blackout now blacks out the selected tab, which-key, popups and menus too.
 
+First launch (and the first start after an update with new parsers) is quieter: the treesitter parsers install with one message instead of a wall of text and a "Press ENTER" prompt. `:checkhealth nananvim` checks the clipboard too.
+
 ## 2026-10-04, works on more systems
 
 The installer runs on Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo and macOS now (plus stuff based on them like Manjaro, Mint or Kali), and CI actually runs it on every one of those so it stays that way. If your distro ships an old Neovim or tree-sitter it grabs a newer one instead of breaking. Also fixed the installer banner.

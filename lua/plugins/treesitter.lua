@@ -46,7 +46,63 @@ return {
     opts = { ensure_installed = ensure_installed },
     config = function(_, opts)
       local ts = require("nvim-treesitter")
-      ts.install(opts.ensure_installed)
+
+      -- Install the missing parsers after startup. nvim-treesitter writes some
+      -- lines for each parser, and many lines give a hit-enter prompt. Thus show
+      -- one message and stop the prompt until the install ends. :messages keeps
+      -- all the lines.
+      local function missing_parsers()
+        local installed = {}
+        for _, lang in ipairs(ts.get_installed()) do
+          installed[lang] = true
+        end
+        return vim.tbl_filter(function(lang)
+          return not installed[lang]
+        end, opts.ensure_installed)
+      end
+
+      local function install_missing()
+        local missing = missing_parsers()
+        if #missing == 0 then
+          return
+        end
+        if vim.fn.executable("tree-sitter") ~= 1 then
+          vim.notify(
+            "tree-sitter CLI not found. Parsers do not install. See :checkhealth nananvim",
+            vim.log.levels.WARN
+          )
+          return
+        end
+        local messagesopt = vim.o.messagesopt
+        if not require("config.extras").ui2 then
+          vim.o.messagesopt = messagesopt:gsub("hit%-enter", "wait:0")
+        end
+        vim.notify(("Installing %d treesitter parsers..."):format(#missing))
+        ts.install(missing):await(function()
+          vim.schedule(function()
+            -- Clear the lines on the screen first. Else they give the prompt now.
+            vim.cmd("redraw")
+            vim.o.messagesopt = messagesopt
+            local failed = #missing_parsers()
+            if failed > 0 then
+              vim.notify(("%d treesitter parsers did not install. See :messages"):format(failed), vim.log.levels.WARN)
+            else
+              vim.notify("Treesitter parsers installed")
+            end
+          end)
+        end)
+      end
+
+      if vim.v.vim_did_enter == 1 then
+        vim.schedule(install_missing)
+      else
+        vim.api.nvim_create_autocmd("VimEnter", {
+          once = true,
+          callback = function()
+            vim.schedule(install_missing)
+          end,
+        })
+      end
 
       local available = {}
       for _, lang in ipairs(ts.get_available()) do

@@ -443,7 +443,7 @@ Smart node-aware selection, built in to Neovim 0.12 (`an` / `in`). Each press ex
 | `:Lazy` | Open plugin manager |
 | `:Mason` | Open LSP/formatter installer |
 | `:checkhealth nananvim` | Check every external tool the config uses |
-| `:checkhealth vim.lsp` | Show LSP status for current buffer (`:LspInfo` is an alias) |
+| `:checkhealth vim.lsp` | Show LSP status for current buffer |
 | `:lsp restart` | Restart the LSP servers |
 | `:ConformInfo` | Show which formatter runs for this buffer |
 | `:FormatToggle` | Toggle format on save (`!` for the current buffer only) |

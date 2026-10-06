@@ -8,7 +8,7 @@ Common issues and their solutions for nananvim.
 
 ### General
 
-1. See which servers are attached: `:checkhealth vim.lsp` (or `:LspInfo`, an alias). The status line also lists them on the right.
+1. See which servers are attached: `:checkhealth vim.lsp`. The status line also lists them on the right.
 2. Restart servers: `:lsp restart`
 3. Open `:Mason` and check that the server is installed. Mason installs all servers in the background on first launch, so wait a minute on a fresh install.
 

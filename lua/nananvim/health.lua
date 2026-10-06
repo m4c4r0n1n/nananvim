@@ -44,6 +44,11 @@ function M.check()
   check_exe("tree-sitter", "nvim-treesitter (main) uses it to compile parsers", "warn")
   check_exe("cc", "a C compiler is necessary to compile treesitter parsers", "warn")
   check_exe("lazygit", "git interface (<leader>gg)", "warn")
+  if vim.fn.has("clipboard") == 1 then
+    health.ok("clipboard: yank and paste use the system clipboard")
+  else
+    health.warn("no clipboard tool: install wl-clipboard (Wayland) or xclip (X11) for the system clipboard")
+  end
 
   -- NixOS: Mason downloads prebuilt servers. They need nix-ld to start.
   if vim.uv.fs_stat("/etc/NIXOS") then

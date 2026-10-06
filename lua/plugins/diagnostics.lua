@@ -21,9 +21,10 @@ return {
           if require("trouble").is_open() then
             require("trouble").prev({ skip_groups = true, jump = true })
           else
+            -- At the start of the list or with an empty list, show a warning, not an error.
             local ok, err = pcall(vim.cmd.cprev)
             if not ok then
-              vim.notify(err, vim.log.levels.ERROR)
+              vim.notify(err, vim.log.levels.WARN)
             end
           end
         end,
@@ -37,7 +38,7 @@ return {
           else
             local ok, err = pcall(vim.cmd.cnext)
             if not ok then
-              vim.notify(err, vim.log.levels.ERROR)
+              vim.notify(err, vim.log.levels.WARN)
             end
           end
         end,
