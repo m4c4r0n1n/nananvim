@@ -2,9 +2,9 @@
 
 <img width="1912" height="1259" alt="image" src="https://github.com/user-attachments/assets/a6103d17-4f2c-4b82-b29d-b34c4bf37bf7" />
 
-TIRED OF LAZYVIM? WANT SOMETHING LESS BLOATED? TRY NANANVIM! A fast, minimal, fully documented Neovim config that actually works. ~35ms startup, 53 plugins with only 6 loaded before the first screen draws, CI-tested against Neovim **stable and nightly** with a smoke test that fails on any startup error. Batteries included, bloat optional.
+The above image is from a Debian virtual machine, I'll update with more up-to-date pictures soon!
 
-<img width="1319" height="1376" alt="image" src="https://github.com/user-attachments/assets/0f47d7df-7692-4e4a-8974-d325f8219308" />
+TIRED OF LAZYVIM? WANT SOMETHING LESS BLOATED? TRY NANANVIM! A fast, minimal, fully documented Neovim config that actually works. ~35ms startup, 53 plugins with only 6 loaded before the first screen draws, CI-tested against Neovim **stable and nightly** with a smoke test that fails on any startup error. Batteries included, bloat optional.
 
 Built primarily for Arch but works on most Linux distros and MacOS. I use this daily and fix things the moment they break, or eventually... If you do decide to use this config and something breaks, open an issue and I **WILL** fix it immediately. Thank you.
 
