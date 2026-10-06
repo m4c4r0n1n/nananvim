@@ -591,8 +591,6 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 
 ## Known Issues & Bugs
 
-If you find something broken or weird:
-
 I've fixed all I could find, if you find any let me know!
 
 Some known quirks:
