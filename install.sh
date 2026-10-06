@@ -5,6 +5,9 @@
 #
 # This script installs the dependencies, backs up your current Neovim config
 # and clones nananvim to ~/.config/nvim.
+#
+# Usage: install.sh [--dry-run]
+#   --dry-run  Show each change. Do not make it.
 
 set -e
 
@@ -35,6 +38,9 @@ MIN_NODE_MAJOR=20
 
 # Log file
 LOG_FILE="/tmp/nananvim_install_$(date +%Y%m%d_%H%M%S).log"
+
+# 1 = dry run: show each change, do not make it (--dry-run).
+DRY_RUN=0
 
 print_banner() {
     echo -e "${MAGENTA}${BOLD}"
@@ -69,6 +75,27 @@ print_info() {
 print_warning() {
     echo -e "${YELLOW}${BOLD}[WARNING]${NC} $1"
     echo "[WARNING] $1" >> "$LOG_FILE"
+}
+
+# Show a change that a dry run does not make.
+print_dry() {
+    echo -e "${CYAN}${BOLD}[DRY RUN]${NC} $1"
+}
+
+# Run a command that changes the system. A dry run shows it and does not run it.
+run() {
+    if [ "$DRY_RUN" = 1 ]; then
+        print_dry "$*"
+    else
+        "$@"
+    fi
+}
+
+# Report a change that is complete. A dry run makes no change, thus it shows nothing.
+print_done() {
+    if [ "$DRY_RUN" = 0 ]; then
+        print_success "$1"
+    fi
 }
 
 detect_os() {
@@ -195,6 +222,10 @@ install_lazygit_release() {
     if check_command "lazygit"; then
         return 0
     fi
+    if [ "$DRY_RUN" = 1 ]; then
+        print_dry "Install lazygit from its GitHub release in /usr/local/bin"
+        return 0
+    fi
 
     local arch
     case "$(release_arch)" in
@@ -292,6 +323,12 @@ ensure_tree_sitter() {
         print_success "tree-sitter CLI $(tree_sitter_version)"
         return 0
     fi
+    if [ "$DRY_RUN" = 1 ]; then
+        local found
+        found=$(tree_sitter_version)
+        print_dry "Install tree-sitter CLI ${MIN_TS_VERSION}+ (found: ${found:-none})"
+        return 0
+    fi
     if [ "$OS" = "macos" ]; then
         brew upgrade tree-sitter-cli || brew install tree-sitter-cli || true
     elif [ "$OS" = "nixos" ]; then
@@ -366,6 +403,12 @@ install_node_release() {
 # sometimes too old (Ubuntu 22.04 has node 12, Ubuntu 24.04 has node 18).
 # Node.js is optional: without it, only the npm-based servers are missing.
 ensure_node() {
+    if ! node_ok && [ "$DRY_RUN" = 1 ]; then
+        local found
+        found=$(node_major)
+        print_dry "Install Node.js ${MIN_NODE_MAJOR}+ (found: ${found:-none})"
+        return 0
+    fi
     if ! node_ok; then
         case "$OS" in
             macos) brew upgrade node || brew install node || true ;;
@@ -385,6 +428,12 @@ ensure_node() {
 # sometimes too old (Debian, Ubuntu, Fedora 43). Then install the release.
 ensure_neovim() {
     if check_command "nvim" && version_compare "$(nvim_version)" "$MIN_NVIM_VERSION"; then
+        return 0
+    fi
+    if [ "$DRY_RUN" = 1 ]; then
+        local found
+        found=$(nvim_version)
+        print_dry "Install Neovim ${MIN_NVIM_VERSION}+ (found: ${found:-none})"
         return 0
     fi
     if [ "$OS" = "macos" ]; then
@@ -424,18 +473,18 @@ install_dependencies_arch() {
         packages+=(kitty)
     fi
 
-    sudo pacman -S --needed --noconfirm "${packages[@]}" || {
+    run sudo pacman -S --needed --noconfirm "${packages[@]}" || {
         print_error "Failed to install packages"
         return 1
     }
 
-    print_success "Dependencies installed"
+    print_done "Dependencies installed"
 }
 
 install_dependencies_ubuntu() {
     print_info "Installing dependencies for Ubuntu/Debian..."
 
-    sudo apt-get update
+    run sudo apt-get update
 
     local packages=(
         git
@@ -458,21 +507,21 @@ install_dependencies_ubuntu() {
         packages+=(kitty)
     fi
 
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "${packages[@]}" || {
+    run sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "${packages[@]}" || {
         print_error "Failed to install packages"
         return 1
     }
 
     # Ubuntu names the fd binary fdfind. Link it as fd.
     if check_command "fdfind" && ! check_command "fd"; then
-        mkdir -p "$HOME/.local/bin"
-        ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
-        print_info "Created fd symlink in ~/.local/bin"
+        print_info "Linking fdfind as fd in ~/.local/bin"
+        run mkdir -p "$HOME/.local/bin"
+        run ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"
     fi
 
     install_lazygit_release
 
-    print_success "Dependencies installed"
+    print_done "Dependencies installed"
 }
 
 install_dependencies_fedora() {
@@ -503,7 +552,7 @@ install_dependencies_fedora() {
         packages+=(kitty)
     fi
 
-    sudo dnf install -y "${packages[@]}" || {
+    run sudo dnf install -y "${packages[@]}" || {
         print_error "Failed to install packages"
         return 1
     }
@@ -511,7 +560,7 @@ install_dependencies_fedora() {
     # lazygit is not in the official Fedora repositories.
     install_lazygit_release
 
-    print_success "Dependencies installed"
+    print_done "Dependencies installed"
 }
 
 install_dependencies_void() {
@@ -548,15 +597,15 @@ install_dependencies_void() {
     done
 
     # Update xbps first. An old xbps cannot install from the current repository.
-    sudo xbps-install -Syu xbps || true
+    run sudo xbps-install -Syu xbps || true
     if [ "${#missing[@]}" -gt 0 ]; then
-        sudo xbps-install -Sy "${missing[@]}" || {
+        run sudo xbps-install -Sy "${missing[@]}" || {
             print_error "Failed to install packages"
             return 1
         }
     fi
 
-    print_success "Dependencies installed"
+    print_done "Dependencies installed"
 }
 
 install_dependencies_gentoo() {
@@ -581,7 +630,7 @@ install_dependencies_gentoo() {
 
     # --getbinpkg uses the official Gentoo binary packages, thus most
     # packages do not compile. --noreplace keeps the packages you have.
-    sudo emerge --getbinpkg --noreplace --ask=n "${packages[@]}" || {
+    run sudo emerge --getbinpkg --noreplace --ask=n "${packages[@]}" || {
         print_error "Failed to install packages"
         return 1
     }
@@ -589,7 +638,7 @@ install_dependencies_gentoo() {
     # lazygit is not in the Gentoo repository.
     install_lazygit_release
 
-    print_success "Dependencies installed"
+    print_done "Dependencies installed"
 }
 
 install_dependencies_nixos() {
@@ -633,7 +682,7 @@ install_dependencies_nixos() {
         return 0
     fi
 
-    nix --extra-experimental-features "nix-command flakes" profile install "${refs[@]}" || {
+    run nix --extra-experimental-features "nix-command flakes" profile install "${refs[@]}" || {
         print_error "Failed to install packages"
         return 1
     }
@@ -647,7 +696,7 @@ install_dependencies_nixos() {
         echo "  programs.nix-ld.enable = true;"
     fi
 
-    print_success "Dependencies installed"
+    print_done "Dependencies installed"
 }
 
 install_dependencies_macos() {
@@ -676,12 +725,12 @@ install_dependencies_macos() {
         packages+=(kitty)
     fi
 
-    brew install "${packages[@]}" || {
+    run brew install "${packages[@]}" || {
         print_error "Failed to install packages"
         return 1
     }
 
-    print_success "Dependencies installed"
+    print_done "Dependencies installed"
 }
 
 install_optional_browser() {
@@ -695,15 +744,18 @@ install_optional_browser() {
 
     print_info "Installing w3m (optional in-editor text browser)..."
     case "$OS" in
-        arch)                        sudo pacman -S --needed --noconfirm w3m ;;
-        ubuntu|debian|pop|linuxmint) sudo DEBIAN_FRONTEND=noninteractive apt-get install -y w3m ;;
-        fedora)                      sudo dnf install -y w3m ;;
-        macos)                       brew install w3m ;;
-        nixos)                       nix --extra-experimental-features "nix-command flakes" profile install nixpkgs#w3m ;;
-        void)                        sudo xbps-install -Sy w3m ;;
-        gentoo)                      sudo emerge --getbinpkg --noreplace --ask=n www-client/w3m ;;
+        arch)                        run sudo pacman -S --needed --noconfirm w3m ;;
+        ubuntu|debian|pop|linuxmint) run sudo DEBIAN_FRONTEND=noninteractive apt-get install -y w3m ;;
+        fedora)                      run sudo dnf install -y w3m ;;
+        macos)                       run brew install w3m ;;
+        nixos)                       run nix --extra-experimental-features "nix-command flakes" profile install nixpkgs#w3m ;;
+        void)                        run sudo xbps-install -Sy w3m ;;
+        gentoo)                      run sudo emerge --getbinpkg --noreplace --ask=n www-client/w3m ;;
         *)                           false ;;
     esac || true
+    if [ "$DRY_RUN" = 1 ]; then
+        return 0
+    fi
 
     if check_command "w3m"; then
         print_success "w3m installed"
@@ -733,31 +785,31 @@ check_neovim_version() {
 backup_existing_config() {
     if [ -d "$NVIM_CONFIG_DIR" ]; then
         print_info "Backing up the current config to $BACKUP_DIR"
-        mv "$NVIM_CONFIG_DIR" "$BACKUP_DIR"
-        print_success "Backup created"
+        run mv "$NVIM_CONFIG_DIR" "$BACKUP_DIR"
+        print_done "Backup created"
     fi
 
     # Remove the old plugin data, cache and state.
     print_info "Cleaning Neovim cache and state..."
-    rm -rf "$NVIM_DATA_DIR/lazy"
-    rm -rf "$NVIM_CACHE_DIR"
-    rm -rf "$NVIM_STATE_DIR/lazy"
-    rm -f "$NVIM_STATE_DIR/lazy-lock.json"
+    run rm -rf "$NVIM_DATA_DIR/lazy"
+    run rm -rf "$NVIM_CACHE_DIR"
+    run rm -rf "$NVIM_STATE_DIR/lazy"
+    run rm -f "$NVIM_STATE_DIR/lazy-lock.json"
 }
 
 install_nananvim() {
     print_info "Installing nananvim..."
 
     if [ -n "$REPO_REF" ]; then
-        git clone "$REPO_URL" "$NVIM_CONFIG_DIR" && git -C "$NVIM_CONFIG_DIR" checkout -q "$REPO_REF"
+        run git clone "$REPO_URL" "$NVIM_CONFIG_DIR" && run git -C "$NVIM_CONFIG_DIR" checkout -q "$REPO_REF"
     else
-        git clone --depth 1 "$REPO_URL" "$NVIM_CONFIG_DIR"
+        run git clone --depth 1 "$REPO_URL" "$NVIM_CONFIG_DIR"
     fi || {
         print_error "Failed to clone repository"
         return 1
     }
 
-    print_success "nananvim installed"
+    print_done "nananvim installed"
 }
 
 verify_installation() {
@@ -813,14 +865,36 @@ post_install_message() {
     echo -e "${BLUE}Issues: https://github.com/m4c4r0n1n/nananvim/issues${NC}"
 }
 
+usage() {
+    echo "Usage: install.sh [--dry-run]"
+    echo
+    echo "  --dry-run   Show each change. Do not make it."
+    echo "  -h, --help  Show this help."
+}
+
 main() {
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --dry-run) DRY_RUN=1 ;;
+            -h|--help) usage; exit 0 ;;
+            *) usage >&2; exit 1 ;;
+        esac
+        shift
+    done
+
     print_banner
+
+    if [ "$DRY_RUN" = 1 ]; then
+        # A dry run does not write a log.
+        LOG_FILE=/dev/null
+        print_dry "Nothing changes. Each change shows as [DRY RUN]."
+    fi
 
     OS=$(detect_os)
     print_info "Detected OS: $OS"
 
-    # Ask before the script replaces a config.
-    if [ -d "$NVIM_CONFIG_DIR" ]; then
+    # Ask before the script replaces a config. A dry run does not replace it, thus it does not ask.
+    if [ -d "$NVIM_CONFIG_DIR" ] && [ "$DRY_RUN" = 0 ]; then
         echo -e "${YELLOW}Existing Neovim configuration found${NC}"
         read -p "Do you want to backup and replace it? (y/N): " -n 1 -r < /dev/tty
         echo
@@ -868,11 +942,20 @@ main() {
     # Optional text browser. A failure does not stop the install.
     install_optional_browser
 
-    check_neovim_version || exit 1
+    # A dry run does not install Neovim, thus it does not check the version.
+    if [ "$DRY_RUN" = 0 ]; then
+        check_neovim_version || exit 1
+    fi
 
     backup_existing_config
 
     install_nananvim || exit 1
+
+    if [ "$DRY_RUN" = 1 ]; then
+        echo
+        print_success "Dry run complete. Nothing changed."
+        exit 0
+    fi
 
     verify_installation || exit 1
 

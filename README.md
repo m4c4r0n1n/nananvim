@@ -119,6 +119,12 @@ The installer will:
 
 **Note:** If you want to review the script first: [install.sh](install.sh)
 
+Want to see what it does before it touches anything? Add `--dry-run`. It prints every package, backup and delete, and changes nothing:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/m4c4r0n1n/nananvim/main/install.sh | bash -s -- --dry-run
+```
+
 ## Manual Install
 
 If you prefer to install manually or want more control:

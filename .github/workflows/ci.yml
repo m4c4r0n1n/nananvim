@@ -117,6 +117,20 @@ jobs:
         shell: bash
         run: NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash .github/test.sh
 
+  # A dry run must show the steps and change nothing.
+  dry-run:
+    name: Installer dry run
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Dry run with an old config in place
+        run: |
+          mkdir -p ~/.config/nvim
+          echo keep > ~/.config/nvim/init.lua
+          bash install.sh --dry-run
+          test "$(cat ~/.config/nvim/init.lua)" = keep
+          test -z "$(ls -d ~/.config/nvim.bak.* 2>/dev/null)"
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
