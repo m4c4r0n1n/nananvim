@@ -12,6 +12,8 @@ Web stuff: Vue, Svelte and Astro servers are in now, with types working in Vue t
 
 Fresh installs are cleaner: the installer adds wl-clipboard and xclip so yank reaches your system clipboard, and the Python provider is off (nothing used it, it only threw a health error). Panel zoom moved from `<leader>pz` to `<leader>z`, the same key it already was inside the panels, so `<leader>p` opens the panels without a delay.
 
+Theme switcher: `j`/`k`/`q` work in the picker again, it remembers the exact variant you pick (rose-pine-dawn stays dawn), it doesn't spam a message on every move, and blackout now blacks out the selected tab, which-key, popups and menus too.
+
 ## 2026-10-04, works on more systems
 
 The installer runs on Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo and macOS now (plus stuff based on them like Manjaro, Mint or Kali), and CI actually runs it on every one of those so it stays that way. If your distro ships an old Neovim or tree-sitter it grabs a newer one instead of breaking. Also fixed the installer banner.
