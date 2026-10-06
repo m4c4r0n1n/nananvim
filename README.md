@@ -594,6 +594,7 @@ I tried to keep these intuitive and similar to other popular configs. Press `<Sp
 1. First, run `:checkhealth nananvim`, it knows what every dependency is for and will tell you what's missing
 2. Check if it's an LSP issue (some servers are finicky on certain distros)
 3. If it's actually broken, please open an issue, I use this daily and fix things fast
+
 I've fixed all I could find, if you find any let me know!
 
 ## Updating
