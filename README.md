@@ -4,8 +4,6 @@
 
 <img width="1912" alt="nananvim" src="https://github.com/user-attachments/assets/a6103d17-4f2c-4b82-b29d-b34c4bf37bf7" />
 
-<sub>The above image is from a Debian virtual machine, I'll update with more up-to-date pictures soon!</sub>
-
 <p>
   <a href="https://github.com/m4c4r0n1n/nananvim/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/m4c4r0n1n/nananvim/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=e0def4&color=9ccfd8&style=for-the-badge&labelColor=232136" /></a>
   <a href="https://github.com/neovim/neovim/releases"><img alt="Neovim 0.12+" src="https://img.shields.io/badge/Neovim-0.12%2B-c4a7e7?logo=neovim&logoColor=e0def4&style=for-the-badge&labelColor=232136" /></a>
