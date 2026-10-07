@@ -12,7 +12,7 @@ Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, mul
 
 ## Why nananvim?
 
-Because why not. Nobody will use this, lol. But if you're here, here are some specs:
+Because why not. Nobody will use this, so it's like you'll be part of an exclusive club! But since you're here, here are some specs:
 
 - **Kinda Fast**: ~35ms startup. 53 plugins total, only 6 load before the first screen draws, everything else waits for its trigger. Completion runs on blink.cmp's Rust fuzzy matcher.
 - **Built on Neovim 0.12, not around it**: native `vim.lsp.config`/`vim.lsp.enable`, native commenting, native treesitter incremental selection, global rounded borders (`winborder`), linked HTML tag editing. Less plugin glue, fewer things to break.
