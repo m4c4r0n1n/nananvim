@@ -36,6 +36,81 @@ Note: with `local.lua` present, AI is on unless you set `ai = false`. That keeps
 
 Everything below edits the tracked files directly. That works too, but you'll have to merge your changes when you update.
 
+## Extras Switch
+
+The richer completion UI, standalone linting, and the DAP layer are all wired
+through a single master switch at `lua/config/extras.lua`. They're **on by
+default** but still fully lazy-loaded, the flags only decide whether a feature's
+trigger is armed, not whether it loads at startup. Flip any to `false` to make it
+genuinely gone on a lean machine:
+
+```lua
+return {
+  cmp_rich = true, -- kind icons, bordered menus, ghost text, auto docs
+  lint = true,     -- nvim-lint linters + auto-installed tools
+  dap = true,      -- nvim-dap + dap-ui + .vscode/launch.json
+  test = true,     -- neotest on <leader>T
+  ui2 = false,     -- Neovim 0.12 message UI, no "Press ENTER" (experimental)
+  cmp_extra_sources = {}, -- append your own blink.cmp sources here
+}
+```
+
+Rather not touch a tracked file? Flip them from `lua/config/local.lua` instead: `return { extras = { dap = false } }`.
+
+## Config Structure
+
+If you want to understand how this is organized or modify it:
+
+```
+~/.config/nvim/
+├── .github/
+│   ├── smoke.lua          # CI smoke test: loads every plugin, fails on errors
+│   ├── test.sh            # CI: install with install.sh, then the smoke test
+│   └── workflows/
+│       └── ci.yml         # CI: installer on 8 systems, stable + nightly nvim, StyLua, ShellCheck
+├── docs/                  # Documentation
+│   ├── troubleshooting.md
+│   ├── customization-guide.md
+│   ├── language-specific-setup.md
+│   └── advanced-features.md
+├── lua/
+│   ├── config/
+│   │   ├── init.lua       # Loads all config modules
+│   │   ├── options.lua    # Vim options
+│   │   ├── keymaps.lua    # Global keymaps
+│   │   ├── autocmds.lua   # Autocommands
+│   │   ├── commands.lua   # :TokenCount, :FormatToggle, :NananvimUpdate
+│   │   ├── extras.lua     # Master switch: cmp UI / lint / DAP / test / ui2 flags
+│   │   ├── user.lua       # Reads local.lua (you don't edit this one)
+│   │   ├── local.example.lua  # Template for your personal settings
+│   │   └── local.lua      # (optional, gitignored) your settings, AI opt-in, extra plugins
+│   ├── nananvim/
+│   │   └── health.lua     # :checkhealth nananvim
+│   └── plugins/
+│       ├── colorscheme.lua    # Rose Pine Moon theme
+│       ├── theme-switcher.lua # Live theme preview + blackout toggle
+│       ├── nanabrowser.lua    # Browser │ Terminal │ TODO workspace
+│       ├── ui.lua             # Snacks (dashboard/picker/terminal/toggles), bufferline, lualine
+│       ├── editor.lua         # neo-tree, oil, which-key, flash, grug-far, harpoon, multicursor, sessions
+│       ├── coding.lua         # blink.cmp, autopairs, autotag, ts-comments, surround, Windsurf, Avante
+│       ├── lsp.lua            # LSP servers, Mason, lazydev, SchemaStore, conform formatters
+│       ├── lint.lua           # nvim-lint (gated by extras.lint)
+│       ├── treesitter.lua     # Parsers, text objects, sticky context
+│       ├── git.lua            # Gitsigns, diffview, lazygit and git pickers
+│       ├── diagnostics.lua    # Trouble, quicker (quickfix), todo-comments
+│       ├── test.lua           # neotest (gated by extras.test)
+│       └── dap.lua            # Debug Adapter Protocol (gated by extras.dap)
+├── init.lua               # Main entry point
+├── README.md              # Start here
+├── CHANGELOG.md           # What's changed
+├── KEYBINDINGS.md         # Complete keybinding reference
+├── CONTRIBUTING.md        # Contribution guidelines
+├── install.sh             # One-line installer script
+└── lazy-lock.json         # Plugin versions
+```
+
+All plugin files in `lua/plugins/` are automatically loaded by Lazy, you don't need to require them manually.
+
 ## Changing the Colorscheme
 
 ### Using the Theme Switcher (Easiest Way)

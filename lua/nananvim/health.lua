@@ -151,7 +151,7 @@ function M.check()
   health.start("nananvim: AI (opt-in)")
 
   if not user.ai then
-    health.info("AI is off. Make lua/config/local.lua to turn on suggestions and Avante. See the README")
+    health.info("AI is off. Make lua/config/local.lua to turn on suggestions and Avante. See docs/ai-setup.md")
     return
   end
   if user.suggestions == "windsurf" then

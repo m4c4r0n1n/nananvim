@@ -99,6 +99,10 @@ Why two instances? osv installs a debug hook in the debuggee and freezes it when
 
 ### Understanding the UI
 
+**Panels too cramped?** The DAP UI panel sizes live at the top of the `config`
+function in `lua/plugins/dap.lua` (`left_panel_width` / `bottom_panel_height`).
+Bump either number and restart to give the sidebar or repl/console more room.
+
 When you start debugging, you'll see:
 
 **Left sidebar (40 columns):**
