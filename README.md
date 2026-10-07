@@ -41,26 +41,13 @@ Because why not. Nobody will use this, so it's like you'll be part of an exclusi
 
 ## Screenshots
 
-### Snacks picker with inline image preview
-
-<img width="1718" alt="Picker with inline image preview" src="https://github.com/user-attachments/assets/a36b2720-f89e-4226-93c6-452d5127a9f6" />
-
-### Editing with LSP, Treesitter syntax highlighting, and Rose Pine Moon theme
-
-<img width="1718" alt="Editing with LSP and Treesitter" src="https://github.com/user-attachments/assets/c3855bf3-304a-4bdd-80bd-640c596a1046" />
-
-### Silly Theme-Picker I Made
-
-<img width="1718" alt="Theme picker" src="https://github.com/user-attachments/assets/d93ea09b-8973-4884-af19-5ab23d7dc9fc" />
-Like most others, but it doesn't keep moving the selections over each time you scroll.
-
-### A Panel Project
-
-<img width="1718" alt="Panel workspace" src="https://github.com/user-attachments/assets/b98bac43-4de5-4aa4-b6ec-db4d8055b7ea" />
-
-### Debugging with DAP
-
-<img width="3438" alt="Debugging with DAP" src="https://github.com/user-attachments/assets/4605dfd2-5450-4466-b242-79402f5ce90e" />
+<p align="center">
+  <img width="49%" alt="Picker with inline image preview" src="https://github.com/user-attachments/assets/a36b2720-f89e-4226-93c6-452d5127a9f6" />
+  <img width="49%" alt="Editing with LSP and Treesitter" src="https://github.com/user-attachments/assets/c3855bf3-304a-4bdd-80bd-640c596a1046" />
+  <img width="49%" alt="Theme picker" src="https://github.com/user-attachments/assets/d93ea09b-8973-4884-af19-5ab23d7dc9fc" />
+  <img width="49%" alt="Panel workspace" src="https://github.com/user-attachments/assets/b98bac43-4de5-4aa4-b6ec-db4d8055b7ea" />
+  <img width="98.6%" alt="Debugging with DAP" src="https://github.com/user-attachments/assets/4605dfd2-5450-4466-b242-79402f5ce90e" />
+</p>
 
 ## License
 
