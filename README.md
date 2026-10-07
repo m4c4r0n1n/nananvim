@@ -41,12 +41,13 @@ Because why not. Nobody will use this, so it's like you'll be part of an exclusi
 
 ## Screenshots
 
+### Snacks picker with inline image preview
+
 <img width="1718" alt="Picker with inline image preview" src="https://github.com/user-attachments/assets/a36b2720-f89e-4226-93c6-452d5127a9f6" />
 
-<img width="1718" alt="Editing with LSP and Treesitter" src="https://github.com/user-attachments/assets/c3855bf3-304a-4bdd-80bd-640c596a1046" />
+### Editing with LSP, Treesitter syntax highlighting, and Rose Pine Moon theme
 
-<details>
-<summary><b>More screenshots</b></summary>
+<img width="1718" alt="Editing with LSP and Treesitter" src="https://github.com/user-attachments/assets/c3855bf3-304a-4bdd-80bd-640c596a1046" />
 
 ### Silly Theme-Picker I Made
 
@@ -60,8 +61,6 @@ Like most others, but it doesn't keep moving the selections over each time you s
 ### Debugging with DAP
 
 <img width="3438" alt="Debugging with DAP" src="https://github.com/user-attachments/assets/4605dfd2-5450-4466-b242-79402f5ce90e" />
-
-</details>
 
 ## License
 
