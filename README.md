@@ -13,7 +13,7 @@
 
 TIRED OF LAZYVIM? WANT SOMETHING LESS BLOATED? TRY NANANVIM! In all seriousness, I didn't build this for stars, I didn't build it to compete with anyone or anything like that. I built it for me, with just the things I find useful in day to day life and kept adding more as work demanded it. I figure *maybe* someone else might stumble upon this and want something a bit lighter and easier to customize and learn. Or maybe someone just looking for something new and bored with everything else. So I documented it.
 
-Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, multiple cursors, a test runner, diffview, NananvimUpdate command, rendered markdown and more), and your own settings now live in one file that updates never touch. Web dev is in too now: Vue, Svelte, Astro, MDX and working Emmet. Full rundown in the [CHANGELOG](CHANGELOG.md).
+Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, multiple cursors, a test runner, diffview, NananvimUpdate command, rendered markdown and more), and your own settings now live in one file that updates never touch. Web dev is in too: Vue, Svelte, Astro, MDX and working Emmet. Full rundown in the [CHANGELOG](CHANGELOG.md).
 
 ---
 
