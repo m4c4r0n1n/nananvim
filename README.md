@@ -10,6 +10,7 @@
   <a href="https://github.com/m4c4r0n1n/nananvim/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/m4c4r0n1n/nananvim?logo=git&logoColor=e0def4&color=f6c177&style=for-the-badge&labelColor=232136" /></a>
   <a href="https://github.com/m4c4r0n1n/nananvim/commits/main"><img alt="Maintained: yes" src="https://img.shields.io/badge/Maintained%3F-yes-9ccfd8?style=for-the-badge&labelColor=232136" /></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/github/license/m4c4r0n1n/nananvim?color=ea9a97&style=for-the-badge&labelColor=232136" /></a>
+  <a href="https://ko-fi.com/koifist"><img alt="Ko-fi" src="https://img.shields.io/badge/Ko--fi-support-eb6f92?logo=kofi&logoColor=e0def4&style=for-the-badge&labelColor=232136" /></a>
 </p>
 
 TIRED OF LAZYVIM? WANT SOMETHING LESS BLOATED? TRY NANANVIM! In all seriousness, I didn't build this for stars, I didn't build it to compete with anyone or anything like that. I built it for me, with just the things I find useful in day to day life and kept adding more as work demanded it. I figure *maybe* someone else might stumble upon this and want something a bit lighter and easier to customize and learn. Or maybe someone just looking for something new and bored with everything else. So I documented it.
