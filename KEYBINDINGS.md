@@ -447,6 +447,7 @@ Smart node-aware selection, built in to Neovim 0.12 (`an` / `in`). Each press ex
 | `:lsp restart` | Restart the LSP servers |
 | `:ConformInfo` | Show which formatter runs for this buffer |
 | `:FormatToggle` | Toggle format on save (`!` for the current buffer only) |
+| `:ThemeSwitch <theme> [mode]` | Change the theme (and background mode) in every open Neovim |
 | `:NananvimUpdate` | Pull the latest nananvim and the tested plugin versions |
 | `:SudaWrite` / `:SudaRead` | Save or open a file that needs root |
 | `:LspCopilotSignIn` | Sign in to Copilot (when `suggestions = "copilot"`) |
