@@ -12,10 +12,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 # Each job installs nananvim with install.sh, as a user does, then runs
 # .github/test.sh: plugins, parsers and the smoke test.
 jobs:
@@ -27,13 +23,13 @@ jobs:
         include:
           - name: Arch
             image: archlinux:latest
-            prep: pacman -Syu --noconfirm --needed sudo git curl
+            prep: pacman -Syu --noconfirm --needed sudo git curl tar gzip
           - name: Fedora
             image: fedora:latest
-            prep: dnf install -y sudo git curl
+            prep: dnf install -y sudo git curl tar gzip
           - name: Fedora 43
             image: fedora:43
-            prep: dnf install -y sudo git curl
+            prep: dnf install -y sudo git curl tar gzip
           - name: Debian
             image: debian:stable
             prep: apt-get update && apt-get install -y sudo git curl ca-certificates
@@ -50,11 +46,15 @@ jobs:
     steps:
       - name: Install git and sudo
         run: ${{ matrix.prep }}
-      - uses: actions/checkout@v7
+      # Download the commit as an archive. A git clone by CI shows in the
+      # repository traffic as a clone by a person.
+      - name: Get the code
+        shell: bash
+        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
       - name: Install and test
         timeout-minutes: 45
         shell: bash
-        run: NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash .github/test.sh
+        run: NANANVIM_REPO="$GITHUB_WORKSPACE" bash .github/test.sh
 
   # These images cannot run GitHub actions (no glibc for node, or no node),
   # thus Docker runs them.
@@ -77,7 +77,11 @@ jobs:
             volumes: --volumes-from portage
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      # Download the commit as an archive. A git clone by CI shows in the
+      # repository traffic as a clone by a person.
+      - name: Get the code
+        shell: bash
+        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
       - name: Get the Gentoo package tree
         if: matrix.name == 'Gentoo'
         run: docker create -v /var/db/repos/gentoo --name portage gentoo/portage:latest /bin/true
@@ -87,7 +91,6 @@ jobs:
           docker run --rm ${{ matrix.volumes }} \
             -v "$GITHUB_WORKSPACE:/src" \
             -e NANANVIM_REPO=/src \
-            -e NANANVIM_REF="$GITHUB_SHA" \
             -e NANANVIM_OS="${{ matrix.os }}" \
             ${{ matrix.image }} sh -c '${{ matrix.prep }} && bash /src/.github/test.sh'
 
@@ -95,10 +98,14 @@ jobs:
     name: macOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v7
+      # Download the commit as an archive. A git clone by CI shows in the
+      # repository traffic as a clone by a person.
+      - name: Get the code
+        shell: bash
+        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
       - name: Install and test
         timeout-minutes: 45
-        run: NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash .github/test.sh
+        run: NANANVIM_REPO="$GITHUB_WORKSPACE" bash .github/test.sh
 
   # Neovim nightly on Arch. A failure is a warning. It does not fail the workflow.
   nightly:
@@ -110,19 +117,27 @@ jobs:
       NVIM_NIGHTLY: "1"
     steps:
       - name: Install git and sudo
-        run: pacman -Syu --noconfirm --needed sudo git curl
-      - uses: actions/checkout@v7
+        run: pacman -Syu --noconfirm --needed sudo git curl tar gzip
+      # Download the commit as an archive. A git clone by CI shows in the
+      # repository traffic as a clone by a person.
+      - name: Get the code
+        shell: bash
+        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
       - name: Install and test
         timeout-minutes: 45
         shell: bash
-        run: NANANVIM_REPO="$GITHUB_WORKSPACE" NANANVIM_REF="$GITHUB_SHA" bash .github/test.sh
+        run: NANANVIM_REPO="$GITHUB_WORKSPACE" bash .github/test.sh
 
   # A dry run must show the steps and change nothing.
   dry-run:
     name: Installer dry run
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      # Download the commit as an archive. A git clone by CI shows in the
+      # repository traffic as a clone by a person.
+      - name: Get the code
+        shell: bash
+        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
       - name: Dry run with an old config in place
         run: |
           mkdir -p ~/.config/nvim
@@ -135,7 +150,11 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      # Download the commit as an archive. A git clone by CI shows in the
+      # repository traffic as a clone by a person.
+      - name: Get the code
+        shell: bash
+        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
       - name: Check Lua format with StyLua
         uses: JohnnyMorganz/stylua-action@v5
         with:
