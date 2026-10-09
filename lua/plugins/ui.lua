@@ -160,6 +160,36 @@ return {
       vim.api.nvim_create_autocmd("User", { group = group, pattern = "SnacksDashboardOpened", callback = hide_cursor })
       vim.api.nvim_create_autocmd("BufEnter", { group = group, callback = hide_cursor })
       vim.api.nvim_create_autocmd("BufLeave", { group = group, callback = show_cursor })
+      -- A small arrow beside the key of the selected dashboard item. It is drawn
+      -- over the empty space after the key, thus the dashboard does not move.
+      -- Change its color with the NananvimDashboardArrow highlight group.
+      local arrow_ns = vim.api.nvim_create_namespace("nananvim_dashboard_arrow")
+      local function draw_arrow()
+        vim.schedule(function()
+          local buf = vim.api.nvim_get_current_buf()
+          if vim.bo[buf].filetype ~= "snacks_dashboard" then
+            return
+          end
+          vim.api.nvim_set_hl(0, "NananvimDashboardArrow", { link = "DiagnosticInfo", default = true })
+          vim.api.nvim_buf_clear_namespace(buf, arrow_ns, 0, -1)
+          local row = vim.api.nvim_win_get_cursor(0)[1] - 1
+          local line = vim.api.nvim_buf_get_lines(buf, row, row + 1, false)[1] or ""
+          -- The key is the last character on the line of an item.
+          local key = line:find("%S%s*$")
+          if not key then
+            return
+          end
+          vim.api.nvim_buf_set_extmark(buf, arrow_ns, row, 0, {
+            virt_text = { { "\u{f0d9}", "NananvimDashboardArrow" } },
+            virt_text_win_col = vim.fn.strdisplaywidth(line:sub(1, key)) + 1,
+          })
+        end)
+      end
+      vim.api.nvim_create_autocmd("CursorMoved", { group = group, callback = draw_arrow })
+      vim.api.nvim_create_autocmd(
+        "User",
+        { group = group, pattern = "SnacksDashboardUpdatePost", callback = draw_arrow }
+      )
       -- A colorscheme change removes the highlight group. Make it again.
       vim.api.nvim_create_autocmd("ColorScheme", {
         group = group,
