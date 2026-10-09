@@ -35,7 +35,7 @@ Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, mul
 
 Because why not. Nobody will use this, so it's like you'll be part of an exclusive club! But since you're here, here are some specs:
 
-- **Kinda fast**: ~35ms startup, everything else waits for its trigger
+- **Kinda fast**: -35ms startup on average, everything else waits for its trigger
 - **Built on Neovim 0.12, not around it**: native LSP, commenting, selection and borders, less plugin glue
 - **Custom plugins**: a [Browser │ Terminal │ TODO workspace](https://github.com/m4c4r0n1n/nanabrowser.nvim) and a [live theme switcher](https://github.com/m4c4r0n1n/theme-switcher.nvim)
 - **Batteries included, bloat optional**: completion UI, linting, debugging and tests each turn off with one `false`
