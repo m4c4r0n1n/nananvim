@@ -3,7 +3,7 @@
 # nananvim
 
 <img width="961" height="1044" alt="image" src="https://github.com/user-attachments/assets/8b1f5d50-569a-469b-9c46-8c17a7e76095" />
-
+If anyone has any ideas for logos or anything I'd be happy to pay for one! I'm out of ideas and just went with the laughing man log, as you can see.
 <p>
   <a href="https://github.com/m4c4r0n1n/nananvim/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/m4c4r0n1n/nananvim/ci.yml?branch=main&event=push&label=CI&logo=githubactions&logoColor=e0def4&color=9ccfd8&style=for-the-badge&labelColor=232136" /></a>
   <a href="https://github.com/neovim/neovim/releases"><img alt="Neovim 0.12+" src="https://img.shields.io/badge/Neovim-0.12%2B-c4a7e7?logo=neovim&logoColor=e0def4&style=for-the-badge&labelColor=232136" /></a>
