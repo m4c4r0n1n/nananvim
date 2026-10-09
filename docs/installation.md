@@ -16,7 +16,7 @@ The installer will:
 - Clone this config to `~/.config/nvim`
 - Backup your existing config if present
 
-**Note:** If you want to review the script first: [install.sh](install.sh)
+**Note:** If you want to review the script first: [install.sh](../install.sh)
 
 Want to see what it does before it touches anything? Add `--dry-run`. It prints every package, backup and delete, and changes nothing:
 

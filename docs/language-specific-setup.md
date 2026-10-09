@@ -297,7 +297,7 @@ For better SQL support, consider adding:
 
 ## Adding More Languages
 
-1. Find the LSP server name: https://github.com/mason-org/mason-lspconfig.nvim#available-lsp-servers
+1. Find the LSP server name: https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
 2. Add it to `servers` in `lua/plugins/lsp.lua`
 3. (Optional) Add settings with `vim.lsp.config("<name>", { ... })` in the same file
 4. (Optional) Add a formatter to `formatters_by_ft`
