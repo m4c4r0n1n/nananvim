@@ -136,6 +136,35 @@ return {
     config = function(_, opts)
       require("snacks").setup(opts)
 
+      -- Hide the cursor on the dashboard. It sits on the first letter of the
+      -- selected item and looks like a highlight. A cursor highlight with
+      -- blend=100 hides the cursor (see :help tui-cursor-shape).
+      local saved_cursor
+      local function hide_cursor()
+        if vim.bo.filetype ~= "snacks_dashboard" or saved_cursor then
+          return
+        end
+        vim.api.nvim_set_hl(0, "NananvimHiddenCursor", { blend = 100, nocombine = true })
+        saved_cursor = vim.o.guicursor
+        vim.o.guicursor = saved_cursor .. ",n:block-NananvimHiddenCursor"
+      end
+      local function show_cursor()
+        if saved_cursor then
+          vim.o.guicursor = saved_cursor
+          saved_cursor = nil
+        end
+      end
+      local group = vim.api.nvim_create_augroup("nananvim_dashboard_cursor", { clear = true })
+      vim.api.nvim_create_autocmd({ "FileType", "BufEnter" }, { group = group, callback = hide_cursor })
+      vim.api.nvim_create_autocmd({ "BufLeave", "VimLeavePre" }, { group = group, callback = show_cursor })
+      -- A colorscheme change removes the highlight group. Make it again.
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = group,
+        callback = function()
+          vim.api.nvim_set_hl(0, "NananvimHiddenCursor", { blend = 100, nocombine = true })
+        end,
+      })
+
       -- UI toggles under <leader>u. which-key shows the current state of each toggle.
       vim.api.nvim_create_autocmd("User", {
         pattern = "VeryLazy",
