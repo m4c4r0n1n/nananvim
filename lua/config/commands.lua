@@ -120,7 +120,7 @@ vim.api.nvim_create_user_command("FormatToggle", function(opts)
 end, { bang = true, desc = "Toggle format on save" })
 
 -- :NananvimUpdate
--- Get the newest nananvim with git, then install the tested plugin versions
+-- Get the newest nananvim with git (fetch, then reset to GitHub), then install the tested plugin versions
 -- from lazy-lock.json. Your lua/config/local.lua is not changed (git ignores it).
 vim.api.nvim_create_user_command("NananvimUpdate", function()
   local dir = vim.fn.stdpath("config")
@@ -158,14 +158,68 @@ vim.api.nvim_create_user_command("NananvimUpdate", function()
   end
   vim.system({ "git", "-C", dir, "checkout", "--", "lazy-lock.json" }):wait()
 
+  local function git(...)
+    local r = vim.system({ "git", "-C", dir, ... }, { text = true }):wait()
+    return r.code == 0, vim.trim(r.stdout or ""), vim.trim(r.stderr or "")
+  end
+  -- Where GitHub was before this update. Its commits are not yours (see below).
+  local _, before = git("rev-parse", "@{u}")
+
   say("Updating nananvim...")
-  vim.system({ "git", "-C", dir, "pull", "--ff-only" }, { text = true }, function(res)
+  vim.system({ "git", "-C", dir, "fetch", "--quiet" }, { text = true }, function(res)
     if res.code ~= 0 then
-      say("git pull failed:\n" .. vim.trim(res.stderr or ""), vim.log.levels.ERROR)
+      say("git fetch failed:\n" .. vim.trim(res.stderr or ""), vim.log.levels.ERROR)
       return
     end
-    say(vim.trim(res.stdout))
     vim.schedule(function()
+      -- Commits that you made in this clone are not on GitHub. Do not remove them.
+      -- A commit that GitHub had before (also before a history change) is not
+      -- yours. The reflog of the remote branch has each commit that it pointed to.
+      local seen = { "@{u}", before }
+      local _, ref = git("rev-parse", "--symbolic-full-name", "@{u}")
+      local _, log = git("rev-parse", "--git-path", "logs/" .. ref)
+      if log ~= "" and not log:find("^/") then
+        log = dir .. "/" .. log
+      end
+      if vim.uv.fs_stat(log) then
+        for line in io.lines(log) do
+          local old_sha, new_sha = line:match("^(%x+) (%x+)")
+          if old_sha then
+            table.insert(seen, old_sha)
+            table.insert(seen, new_sha)
+          end
+        end
+      end
+      -- Keep only commits that this clone has. rev-list stops on an unknown one.
+      seen = vim.tbl_filter(function(c)
+        return c ~= "" and not c:match("^0+$") and (git("cat-file", "-e", c .. "^{commit}"))
+      end, seen)
+      local ok, ahead, err = git("rev-list", "--count", "HEAD", "--not", unpack(seen))
+      if not ok then
+        say("Could not compare with GitHub:\n" .. err, vim.log.levels.ERROR)
+        return
+      end
+      if tonumber(ahead) > 0 then
+        say(
+          "This clone has " .. ahead .. " commit(s) that are not on GitHub, thus the update stopped.",
+          vim.log.levels.WARN
+        )
+        return
+      end
+      -- reset --hard also works when the history on GitHub changed. It is safe here:
+      -- changed files stopped the update above, and git ignores local.lua.
+      local _, old = git("rev-parse", "--short", "HEAD")
+      local reset_ok, _, reset_err = git("reset", "--hard", "--quiet", "@{u}")
+      if not reset_ok then
+        say("git reset failed:\n" .. reset_err, vim.log.levels.ERROR)
+        return
+      end
+      local _, new = git("rev-parse", "--short", "HEAD")
+      vim.notify(
+        old == new and "nananvim is already up to date" or ("nananvim updated: " .. old .. " to " .. new),
+        vim.log.levels.INFO,
+        { title = "nananvim" }
+      )
       require("lazy").restore({ show = true })
       vim.notify("Done. Run :restart to load the new config.", vim.log.levels.INFO, { title = "nananvim" })
     end)

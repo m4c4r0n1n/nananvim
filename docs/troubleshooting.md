@@ -71,6 +71,14 @@ fc-cache -f
 
 Open a new terminal. Over SSH, the font goes on the computer you type on, not the server. `:checkhealth nananvim` says if a Nerd Font is installed.
 
+**kitty still shows the wrong symbols:** older kitty versions (Debian 12 ships 0.26) do not pick up the symbols font by themselves. Add this line to `~/.config/kitty/kitty.conf`, then restart kitty:
+
+```
+symbol_map U+e000-U+e00a,U+ea60-U+ebeb,U+e0a0-U+e0c8,U+e0ca,U+e0cc-U+e0d7,U+e200-U+e2a9,U+e300-U+e3e3,U+e5fa-U+e6b7,U+e700-U+e8ef,U+ed00-U+efc1,U+f000-U+f2ff,U+f300-U+f381,U+f400-U+f533,U+f0001-U+f1af0 Symbols Nerd Font Mono
+```
+
+kitty 0.36 and newer have the symbols built in.
+
 ## Image Previews Not Working
 
 **Problem:** Can't see images in Snacks picker
