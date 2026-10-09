@@ -733,6 +733,47 @@ install_dependencies_macos() {
     print_done "Dependencies installed"
 }
 
+# The icons need Nerd Font glyphs. Install the "Symbols Nerd Font" and its
+# official fontconfig file. Then the terminal shows the icons with the font
+# that you already use. A failure does not stop the install.
+install_nerd_symbols() {
+    if [ "$OS" = "macos" ]; then
+        brew list --cask font-symbols-only-nerd-font >/dev/null 2>&1 \
+            || run brew install --cask font-symbols-only-nerd-font || true
+        return 0
+    fi
+    # No fontconfig: a server without a desktop. The terminal on the other computer shows the icons.
+    if ! check_command "fc-list"; then
+        return 0
+    fi
+    if fc-list 2>/dev/null | grep -qi "Nerd Font"; then
+        print_success "Nerd Font found"
+        return 0
+    fi
+
+    local fonts="${XDG_DATA_HOME:-$HOME/.local/share}/fonts/NerdFontsSymbolsOnly"
+    local confd="${XDG_CONFIG_HOME:-$HOME/.config}/fontconfig/conf.d"
+    print_info "Installing the Nerd Font symbols (icons) in $fonts..."
+    if [ "$DRY_RUN" = 1 ]; then
+        print_dry "download NerdFontsSymbolsOnly.zip, copy the fonts to $fonts and 10-nerd-font-symbols.conf to $confd"
+        return 0
+    fi
+    local tmp
+    tmp=$(mktemp -d)
+    if curl -fsSL -o "$tmp/symbols.zip" "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/NerdFontsSymbolsOnly.zip" \
+        && unzip -oq "$tmp/symbols.zip" -d "$tmp/symbols"; then
+        mkdir -p "$fonts" "$confd"
+        cp "$tmp"/symbols/*.ttf "$fonts"/
+        cp "$tmp/symbols/10-nerd-font-symbols.conf" "$confd"/
+        fc-cache -f "$fonts" >/dev/null 2>&1 || true
+        print_success "Nerd Font symbols installed. Open a new terminal to see the icons"
+    else
+        print_warning "Could not download the Nerd Font symbols. Icons can show as boxes"
+    fi
+    rm -rf "$tmp"
+    return 0
+}
+
 install_optional_browser() {
     # w3m is the text browser in the nanabrowser panel. It is optional:
     # nanabrowser uses the external browser if w3m is not installed. Thus a
@@ -973,9 +1014,10 @@ main() {
     ensure_tree_sitter || exit 1
     ensure_node
 
-    # Optional text browser and clipboard tools. A failure does not stop the install.
+    # Optional text browser, clipboard tools and icon font. A failure does not stop the install.
     install_optional_browser
     install_optional_clipboard
+    install_nerd_symbols
 
     # A dry run does not install Neovim, thus it does not check the version.
     if [ "$DRY_RUN" = 0 ]; then

@@ -55,6 +55,22 @@ programs.nix-ld.enable = true;
 
 `:checkhealth nananvim` tells you whether nix-ld is on. The installer puts the other dependencies in your user profile with `nix profile`; move them to `configuration.nix` or home-manager if you prefer.
 
+## Icons Show as Boxes or Wrong Symbols
+
+**Problem:** The dashboard, file tree or status line shows boxes, letters or odd symbols where the icons go
+
+Your terminal font has no Nerd Font icons. The installer adds the Nerd Font symbols, so run it again (it asks before it replaces your config, say no to keep it), or do it by hand:
+
+```bash
+mkdir -p ~/.local/share/fonts ~/.config/fontconfig/conf.d /tmp/nf
+curl -fLo /tmp/nf/s.zip https://github.com/ryanoasis/nerd-fonts/releases/latest/download/NerdFontsSymbolsOnly.zip
+unzip -o /tmp/nf/s.zip -d /tmp/nf
+cp /tmp/nf/*.ttf ~/.local/share/fonts/ && cp /tmp/nf/10-nerd-font-symbols.conf ~/.config/fontconfig/conf.d/
+fc-cache -f
+```
+
+Open a new terminal. Over SSH, the font goes on the computer you type on, not the server. `:checkhealth nananvim` says if a Nerd Font is installed.
+
 ## Image Previews Not Working
 
 **Problem:** Can't see images in Snacks picker

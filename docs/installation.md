@@ -125,7 +125,7 @@ Honestly using WSL2 is your best option.
 - **Git, curl, unzip**: For lazy.nvim, Mason and parser downloads
 - **A C compiler**: For treesitter parsers (`build-essential` / `base-devel` / Xcode tools)
 - **Ripgrep & fd**: Makes file searching pretty fast
-- **A Nerd Font**: For icons to display properly
+- **A Nerd Font**: For the icons. The installer adds the Nerd Font symbols, so the font you already use shows them
 
 **For the full experience:**
 

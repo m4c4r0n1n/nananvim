@@ -111,7 +111,21 @@ function M.check()
   else
     health.warn("ImageMagick missing: inline image previews need it")
   end
-  health.info("If icons show as boxes, set a Nerd Font in your terminal: https://www.nerdfonts.com")
+  -- Icons need Nerd Font glyphs. fc-list shows the fonts on this computer (not on the
+  -- computer of an SSH client).
+  if has("fc-list") then
+    local fonts = vim.fn.system({ "fc-list" })
+    if fonts:lower():find("nerd font", 1, true) then
+      health.ok("a Nerd Font is installed: icons can show")
+    else
+      health.warn(
+        "no Nerd Font found: icons show as boxes or wrong symbols. "
+          .. "Run install.sh again (it installs the Nerd Font symbols), or get one from https://www.nerdfonts.com"
+      )
+    end
+  else
+    health.info("If icons show as boxes, set a Nerd Font in your terminal: https://www.nerdfonts.com")
+  end
 
   health.start("nananvim: nanabrowser")
 

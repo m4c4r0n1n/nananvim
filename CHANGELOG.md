@@ -2,6 +2,10 @@
 
 Notable changes, newest first. If you use this config and something breaks after an update, open an issue and I **WILL** fix it.
 
+## 2026-10-09, icons everywhere
+
+Icons showed up as boxes or random symbols on systems without a Nerd Font (a fresh Debian VM, for example). The installer now adds the Nerd Font symbols, so the font you already use shows them, and `:checkhealth nananvim` tells you if they are missing.
+
 ## 2026-10-06, safer installer
 
 `install.sh --dry-run` shows everything the installer would do (packages, backups, what it deletes) without changing anything. CI runs it too.
