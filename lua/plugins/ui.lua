@@ -139,6 +139,8 @@ return {
       -- Hide the cursor on the dashboard. It sits on the first letter of the
       -- selected item and looks like a highlight. A cursor highlight with
       -- blend=100 hides the cursor (see :help tui-cursor-shape).
+      -- snacks sets the dashboard filetype with all events off. Thus use its
+      -- own SnacksDashboardOpened event, and BufEnter when you come back to it.
       local saved_cursor
       local function hide_cursor()
         if vim.bo.filetype ~= "snacks_dashboard" or saved_cursor then
@@ -148,15 +150,16 @@ return {
         saved_cursor = vim.o.guicursor
         vim.o.guicursor = saved_cursor .. ",n:block-NananvimHiddenCursor"
       end
-      local function show_cursor()
-        if saved_cursor then
+      local function show_cursor(args)
+        if saved_cursor and vim.bo[args.buf].filetype == "snacks_dashboard" then
           vim.o.guicursor = saved_cursor
           saved_cursor = nil
         end
       end
       local group = vim.api.nvim_create_augroup("nananvim_dashboard_cursor", { clear = true })
-      vim.api.nvim_create_autocmd({ "FileType", "BufEnter" }, { group = group, callback = hide_cursor })
-      vim.api.nvim_create_autocmd({ "BufLeave", "VimLeavePre" }, { group = group, callback = show_cursor })
+      vim.api.nvim_create_autocmd("User", { group = group, pattern = "SnacksDashboardOpened", callback = hide_cursor })
+      vim.api.nvim_create_autocmd("BufEnter", { group = group, callback = hide_cursor })
+      vim.api.nvim_create_autocmd("BufLeave", { group = group, callback = show_cursor })
       -- A colorscheme change removes the highlight group. Make it again.
       vim.api.nvim_create_autocmd("ColorScheme", {
         group = group,
