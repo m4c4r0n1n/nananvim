@@ -73,7 +73,7 @@ jobs:
             prep: xbps-install -Syu xbps && xbps-install -Sy bash sudo git curl
           - name: Gentoo
             image: gentoo/stage3:latest
-            prep: emerge --getbinpkg --noreplace --ask=n app-admin/sudo dev-vcs/git
+            prep: FEATURES=-parallel-fetch emerge --getbinpkg --noreplace --ask=n app-admin/sudo dev-vcs/git
             volumes: --volumes-from portage
     runs-on: ubuntu-latest
     steps:

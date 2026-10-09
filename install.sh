@@ -628,9 +628,11 @@ install_dependencies_gentoo() {
         packages+=(x11-terms/kitty)
     fi
 
+    # FEATURES=-parallel-fetch: the background download in portage can crash
+    # ("Event loop is closed") and stop the install.
     # --getbinpkg uses the official Gentoo binary packages, thus most
     # packages do not compile. --noreplace keeps the packages you have.
-    run sudo emerge --getbinpkg --noreplace --ask=n "${packages[@]}" || {
+    run sudo env FEATURES=-parallel-fetch emerge --getbinpkg --noreplace --ask=n "${packages[@]}" || {
         print_error "Failed to install packages"
         return 1
     }
@@ -791,7 +793,7 @@ install_optional_browser() {
         macos)                       run brew install w3m ;;
         nixos)                       run nix --extra-experimental-features "nix-command flakes" profile install nixpkgs#w3m ;;
         void)                        run sudo xbps-install -Sy w3m ;;
-        gentoo)                      run sudo emerge --getbinpkg --noreplace --ask=n www-client/w3m ;;
+        gentoo)                      run sudo env FEATURES=-parallel-fetch emerge --getbinpkg --noreplace --ask=n www-client/w3m ;;
         *)                           false ;;
     esac || true
     if [ "$DRY_RUN" = 1 ]; then
@@ -825,7 +827,7 @@ install_optional_clipboard() {
         fedora)                      run sudo dnf install -y wl-clipboard xclip ;;
         nixos)                       run nix --extra-experimental-features "nix-command flakes" profile install nixpkgs#wl-clipboard nixpkgs#xclip ;;
         void)                        run sudo xbps-install -Sy wl-clipboard xclip ;;
-        gentoo)                      run sudo emerge --getbinpkg --noreplace --ask=n gui-apps/wl-clipboard x11-misc/xclip ;;
+        gentoo)                      run sudo env FEATURES=-parallel-fetch emerge --getbinpkg --noreplace --ask=n gui-apps/wl-clipboard x11-misc/xclip ;;
         *)                           false ;;
     esac || true
     if [ "$DRY_RUN" = 1 ]; then
