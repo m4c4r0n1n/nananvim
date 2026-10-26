@@ -70,7 +70,7 @@ jobs:
             os: nixos
           - name: Void
             image: ghcr.io/void-linux/void-glibc-full:latest
-            prep: mkdir -p /etc/xbps.d && printf 'repository=https://repo-fastly.voidlinux.org/current\n' > /etc/xbps.d/00-repository-main.conf && xbps-install -Syu xbps && xbps-install -Sy bash sudo git curl
+            prep: mkdir -p /etc/xbps.d && echo 'repository=https://repo-fastly.voidlinux.org/current' > /etc/xbps.d/00-repository-main.conf && xbps-install -Syu xbps && xbps-install -Sy bash sudo git curl
           - name: Gentoo
             image: gentoo/stage3:latest
             prep: FEATURES=-parallel-fetch emerge --getbinpkg --noreplace --ask=n app-admin/sudo dev-vcs/git
