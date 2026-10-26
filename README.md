@@ -15,7 +15,7 @@ If anyone has any ideas for logos or anything I'd be happy to pay for one! I'm o
   <a href="https://ko-fi.com/koifist"><img alt="Ko-fi" src="https://img.shields.io/badge/Ko--fi-support-eb6f92?logo=kofi&logoColor=e0def4&style=for-the-badge&labelColor=232136" /></a>
 </p>
 
-TIRED OF LAZYVIM? WANT SOMETHING LESS BLOATED? TRY NANANVIM! In all seriousness, I didn't build this for stars, I didn't build it to compete with anyone or anything like that. I built it for me, with just the things I find useful in day to day life and kept adding more as work demanded it. I figure *maybe* someone else might stumble upon this and want something a bit lighter and easier to customize and learn but is also ready to use out of the box. Or maybe someone just looking for something new and bored with everything else. So I documented it.
+TIRED OF LAZYVIM? WANT SOMETHING LESS BLOATED? TRY NANANVIM! In all seriousness, I didn't build this for stars, I didn't build it to compete with anyone or anything like that. I built it for me, with just the things I find useful in day to day life and kept adding more as work demanded it. I figure *maybe* someone else might stumble upon this and want something a bit lighter and easier to customize and learn; but is also ready to use out of the box. Or maybe someone just looking for something new and bored with everything else. So I documented it.
 
 Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, multiple cursors, a test runner, diffview, NananvimUpdate command, rendered markdown and more), and your own settings now live in one file that updates never touch. Web dev is in too: Vue, Svelte, Astro, MDX and working Emmet. Full rundown in the [CHANGELOG](CHANGELOG.md).
 
@@ -44,7 +44,7 @@ Because why not. Nobody will use this, so it's like you'll be part of an exclusi
 - **Tested, not vibes**: every push installs on Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo and macOS
 
 ## Screenshots
-
+These are a bit old, I'll update them soon, but download it and check the tools for yourself!
 <p align="center">
   <img width="49%" alt="Picker with inline image preview" src="https://github.com/user-attachments/assets/a36b2720-f89e-4226-93c6-452d5127a9f6" />
   <img width="49%" alt="Editing with LSP and Treesitter" src="https://github.com/user-attachments/assets/c3855bf3-304a-4bdd-80bd-640c596a1046" />
