@@ -44,7 +44,7 @@ Because why not. Nobody will use this, so it's like you'll be part of an exclusi
 - **Tested, not vibes**: every push installs on Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo and macOS
 
 ## Screenshots
-These are a bit old, I'll update them soon, but download it and check the tools for yourself!
+These are a bit old, I'll update them soon. But clone it and check the tools for yourself!
 <p align="center">
   <img width="49%" alt="Picker with inline image preview" src="https://github.com/user-attachments/assets/a36b2720-f89e-4226-93c6-452d5127a9f6" />
   <img width="49%" alt="Editing with LSP and Treesitter" src="https://github.com/user-attachments/assets/c3855bf3-304a-4bdd-80bd-640c596a1046" />
