@@ -6,14 +6,9 @@ on:
     branches: [main]
   workflow_dispatch:
   schedule:
-    # Run each week to find breaking changes in plugins and Neovim.
     - cron: "0 0 * * 0"
-
 permissions:
   contents: read
-
-# Each job installs nananvim with install.sh, as a user does, then runs
-# .github/test.sh: plugins, parsers and the smoke test.
 jobs:
   linux:
     name: ${{ matrix.name }}
@@ -46,8 +41,6 @@ jobs:
     steps:
       - name: Install git and sudo
         run: ${{ matrix.prep }}
-      # Download the commit as an archive. A git clone by CI shows in the
-      # repository traffic as a clone by a person.
       - name: Get the code
         shell: bash
         run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
@@ -55,9 +48,6 @@ jobs:
         timeout-minutes: 45
         shell: bash
         run: NANANVIM_REPO="$GITHUB_WORKSPACE" bash .github/test.sh
-
-  # These images cannot run GitHub actions (no glibc for node, or no node),
-  # thus Docker runs them.
   docker:
     name: ${{ matrix.name }}
     strategy:
@@ -77,8 +67,6 @@ jobs:
             volumes: --volumes-from portage
     runs-on: ubuntu-latest
     steps:
-      # Download the commit as an archive. A git clone by CI shows in the
-      # repository traffic as a clone by a person.
       - name: Get the code
         shell: bash
         run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
@@ -98,8 +86,6 @@ jobs:
     name: macOS
     runs-on: macos-latest
     steps:
-      # Download the commit as an archive. A git clone by CI shows in the
-      # repository traffic as a clone by a person.
       - name: Get the code
         shell: bash
         run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
@@ -107,7 +93,6 @@ jobs:
         timeout-minutes: 45
         run: NANANVIM_REPO="$GITHUB_WORKSPACE" bash .github/test.sh
 
-  # Neovim nightly on Arch. A failure is a warning. It does not fail the workflow.
   nightly:
     name: Arch (Neovim nightly)
     runs-on: ubuntu-latest
@@ -118,8 +103,6 @@ jobs:
     steps:
       - name: Install git and sudo
         run: pacman -Syu --noconfirm --needed sudo git curl tar gzip
-      # Download the commit as an archive. A git clone by CI shows in the
-      # repository traffic as a clone by a person.
       - name: Get the code
         shell: bash
         run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
@@ -128,13 +111,10 @@ jobs:
         shell: bash
         run: NANANVIM_REPO="$GITHUB_WORKSPACE" bash .github/test.sh
 
-  # A dry run must show the steps and change nothing.
   dry-run:
     name: Installer dry run
     runs-on: ubuntu-latest
     steps:
-      # Download the commit as an archive. A git clone by CI shows in the
-      # repository traffic as a clone by a person.
       - name: Get the code
         shell: bash
         run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
@@ -150,8 +130,6 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      # Download the commit as an archive. A git clone by CI shows in the
-      # repository traffic as a clone by a person.
       - name: Get the code
         shell: bash
         run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
