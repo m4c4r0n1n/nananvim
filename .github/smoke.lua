@@ -1,8 +1,3 @@
--- CI smoke test. Run it with:
---   nvim --headless -c "luafile .github/smoke.lua"
--- The test loads all plugins, opens files and collects errors.
--- It exits with code 1 if it finds an error.
-
 local errors = {}
 
 local function add(msg)
