@@ -2,7 +2,7 @@
 
 # nananvim
 
-<img width="1220" height="1116" alt="image" src="https://github.com/user-attachments/assets/d147075d-e39c-47ac-83c7-d2e945a0a23e" />
+<img width="984" height="1005" alt="image" src="https://github.com/user-attachments/assets/2bb2f534-6d0f-46af-956b-909e74b66dac" />
 
 <p>
   <a href="https://github.com/m4c4r0n1n/nananvim/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/m4c4r0n1n/nananvim/ci.yml?branch=main&event=push&label=CI&logo=githubactions&logoColor=e0def4&color=9ccfd8&style=for-the-badge&labelColor=232136" /></a>
