@@ -949,6 +949,32 @@ usage() {
     echo "  -h, --help  Show this help."
 }
 
+add_terminal_setting() {
+    local file=$1 key=$2 line=$3
+    if [ -f "$file" ] && grep -Eq "^[[:space:]]*$key([[:space:]]|=)" "$file"; then
+        return 0
+    fi
+    if [ "$DRY_RUN" = 1 ]; then
+        print_dry "Add to $file: $line"
+        return 0
+    fi
+    mkdir -p "$(dirname "$file")"
+    printf '%s\n' "$line" >> "$file"
+    print_info "Added to $file: $line"
+}
+
+setup_terminal_background() {
+    local config=${XDG_CONFIG_HOME:-$HOME/.config}
+    if check_command "ghostty"; then
+        add_terminal_setting "$config/ghostty/config" "background-opacity" "background-opacity = 0.85"
+        add_terminal_setting "$config/ghostty/config" "background-blur" "background-blur = true"
+    fi
+    if check_command "kitty"; then
+        add_terminal_setting "$config/kitty/kitty.conf" "background_opacity" "background_opacity 0.85"
+        add_terminal_setting "$config/kitty/kitty.conf" "background_blur" "background_blur 32"
+    fi
+}
+
 main() {
     while [ $# -gt 0 ]; do
         case "$1" in
@@ -1029,6 +1055,8 @@ main() {
     backup_existing_config
 
     install_nananvim || exit 1
+
+    setup_terminal_background
 
     if [ "$DRY_RUN" = 1 ]; then
         echo

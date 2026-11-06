@@ -33,8 +33,11 @@ function M.find()
   return found
 end
 
-function M.status(path)
-  local result = vim.system({ "git", "-C", path, "status", "--porcelain=v2", "--branch" }, { text = true }):wait()
+function M.status_cmd(path)
+  return { "git", "-C", path, "status", "--porcelain=v2", "--branch" }
+end
+
+function M.parse(path, result)
   local row =
     { path = path, name = vim.fs.basename(path), branch = "?", ahead = 0, behind = 0, changed = 0, upstream = false }
   if result.code ~= 0 then
@@ -57,7 +60,11 @@ function M.status(path)
   return row
 end
 
-local function describe(row)
+function M.status(path)
+  return M.parse(path, vim.system(M.status_cmd(path), { text = true }):wait())
+end
+
+function M.describe(row)
   if row.broken then
     return "unreadable"
   end
@@ -87,7 +94,7 @@ function M.lines(rows)
   for _, row in ipairs(rows) do
     local name = row.name .. string.rep(" ", name_w - vim.fn.strdisplaywidth(row.name))
     local branch = row.branch .. string.rep(" ", branch_w - vim.fn.strdisplaywidth(row.branch))
-    table.insert(out, string.format(" %s   %s   %s", name, branch, describe(row)))
+    table.insert(out, string.format(" %s   %s   %s", name, branch, M.describe(row)))
   end
   return out
 end
@@ -126,6 +133,7 @@ local function run(row, args, label)
         vim.notify(result.stderr, vim.log.levels.ERROR, { title = label .. " failed: " .. row.name })
       end
       draw()
+      vim.api.nvim_exec_autocmds("User", { pattern = "NananvimProjectsChanged", modeline = false })
     end)
   )
 end
@@ -160,6 +168,8 @@ local actions = {
     run(row, { "pull", "--ff-only" }, "Pull")
   end,
 }
+
+M.actions = actions
 
 function M.open()
   M.ns = M.ns or vim.api.nvim_create_namespace("nananvim_projects")

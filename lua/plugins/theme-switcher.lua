@@ -8,7 +8,18 @@ return {
         width = 50,
         height = 25,
         border = "rounded",
-        default_bg = "blackout", -- Start in blackout mode (theme text on a black background)
+        default_bg = "glass",
+        exclude = {
+          "rose-pine",
+          "rose-pine-main",
+          "ron",
+          "koehler",
+          "pablo",
+          "evening",
+          "shine",
+          "zellner",
+          "quiet",
+        },
       })
     end,
     keys = {
@@ -22,9 +33,9 @@ return {
       {
         "<leader>tb",
         function()
-          require("theme-switcher").toggle_background()
+          require("theme-switcher").background_menu()
         end,
-        desc = "Toggle blackout / theme background",
+        desc = "Background menu",
       },
     },
   },
