@@ -42,7 +42,7 @@ Because why not. Nobody will use this, so it's like you'll be part of an exclusi
 - **Tested, not vibes**: every push installs on Arch, Fedora, Debian, Ubuntu, NixOS, Void, Gentoo and macOS
 
 ## Screenshots
-These are a bit old, I'll update them soon. But clone it and check the tools for yourself!
+Some of these are a bit old, I'll update them soon. But clone it and check the tools for yourself!
 <p align="center">
   <img width="1704" height="1386" alt="image" src="https://github.com/user-attachments/assets/d763e97c-db16-4d16-90b1-c3ce8450011a" />
   <img width="49%" alt="Picker with inline image preview" src="https://github.com/user-attachments/assets/a36b2720-f89e-4226-93c6-452d5127a9f6" />
