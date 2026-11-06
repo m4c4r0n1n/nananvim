@@ -110,6 +110,13 @@ return {
         desc = "Lazygit log (file)",
       },
       {
+        "<leader>gp",
+        function()
+          require("nananvim.projects").open()
+        end,
+        desc = "Projects",
+      },
+      {
         "<leader>gs",
         function()
           Snacks.picker.git_status()
