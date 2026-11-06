@@ -941,7 +941,7 @@ local function open_file(row, target)
 end
 
 local function clone(row)
-  local target = vim.fn.expand("~/") .. row.repo.name
+  local target = vim.fn.expand("~/Projects/") .. row.repo.name
   if vim.uv.fs_stat(target) then
     return vim.notify(target .. " already exists", vim.log.levels.WARN)
   end
