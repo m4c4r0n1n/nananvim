@@ -208,12 +208,14 @@ Move the cursor on a project or a file and the previews update. The file does no
 | `n` / `N` | Next / previous change | All panes | Move between changes in the previews |
 | `J` / `K` | Scroll previews | All panes | Scroll Before and After together |
 | `<C-d>` / `<C-u>` | Scroll previews | Projects, Files | Half page down / up |
-| `<CR>` | Open | All panes | Open the project, the file, or the line under the cursor. Clone the project if it is not cloned |
+| `<CR>` | Open | All panes | Open the project, the file, or the line under the cursor |
+| `c` | Clone | Projects | Clone a project that is not cloned |
 | `a` | Changed only | Projects, Files | Switch between every file and only changed files |
 | `d` | Diff view | Projects | Open the project in Diffview |
 | `G` | Lazygit | Projects | Open the project in Lazygit |
 | `p` | Push | Projects | Push the project |
-| `u` | Pull | Projects | Pull the project |
+| `u` | Pull | Projects | Pull the project (fast-forward only) |
+| `r` | Rebase | Projects | Pull the project and rebase your commits on top |
 | `F` | Fetch | Projects | Fetch the project |
 | `o` | Open in browser | Projects | Open the project on GitHub |
 | `R` | Refresh | Projects | Load the data again from GitHub |
@@ -231,6 +233,10 @@ Files shows every file in the project, with changed files at the top. The title 
 | `↑ not pushed` | Committed in your local copy, not on GitHub. Before shows GitHub and After shows your copy |
 | `↓ on GitHub` | Changed on GitHub, not in your local copy. Before shows your copy and After shows GitHub |
 | No mark | No changes |
+
+You do not have to clone a project to work on it. For a project that is not cloned, Files lists its files from GitHub and After previews them. Press `<CR>` on a file to edit it, then `:w` and type a commit message to push the file straight to GitHub.
+
+For interactive rebase, press `G` to open Lazygit.
 
 ## Completion & Snippets (blink.cmp)
 

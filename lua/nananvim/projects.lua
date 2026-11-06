@@ -170,6 +170,7 @@ local actions = {
 }
 
 M.actions = actions
+M.run = run
 
 function M.open()
   M.ns = M.ns or vim.api.nvim_create_namespace("nananvim_projects")

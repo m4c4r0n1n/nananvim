@@ -22,7 +22,7 @@ local DAYS = { [2] = "Mon", [4] = "Wed", [6] = "Fri" }
 local QUERY = "{viewer{login contributionsCollection{contributionCalendar{totalContributions "
   .. "weeks{contributionDays{date weekday contributionLevel}}}}}}"
 local FIELDS = "name,nameWithOwner,description,url,isPrivate,isFork,pushedAt"
-local ACTION_HINTS = " enter open  a changed only  d diff  G git  p push  u pull  F fetch "
+local ACTION_HINTS = " enter open  c clone  a changed only  d diff  G git  p push  u pull  r rebase  F fetch "
 local MOVE_HINTS = " tab panes  1 2 3 jump  n N change  J K scroll  q close "
 
 local state = {
@@ -38,6 +38,8 @@ local state = {
   fetched = 0,
   rows = {},
   clones = {},
+  trees = {},
+  blobs = {},
   first = 0,
   token = 0,
 }
@@ -400,6 +402,9 @@ local function files_title()
   if not project then
     return " Files "
   end
+  if project.remote then
+    return " Files  on GitHub "
+  end
   local status, parts = project.status, {}
   if status.changed > 0 then
     table.insert(parts, status.changed .. " changed")
@@ -429,7 +434,8 @@ local function show_entries(keep)
     table.insert(out, line)
   end
   if #out == 0 then
-    table.insert(out, { { state.project and "No changes" or "Not cloned", "Comment" } })
+    local empty = not state.project and "Not cloned" or state.project.remote and "No files" or "No changes"
+    table.insert(out, { { empty, "Comment" } })
   end
   render(state.files_buf, out)
   if vim.api.nvim_win_is_valid(state.files_win) then
@@ -454,6 +460,10 @@ local function current_entry()
 end
 
 local function summary_lines(project)
+  if project.remote then
+    local description = type(project.repo.description) == "string" and project.repo.description or ""
+    return { project.repo.name, description, project.repo.url }
+  end
   local out = {}
   local against = project.upstream ~= "" and (project.status.branch .. " against " .. project.upstream)
     or "no upstream branch"
@@ -519,8 +529,46 @@ local function read_rev(project, rev, file, done)
   )
 end
 
+local function read_blob(repo, entry, done)
+  if entry.size > MAX_FILE_SIZE then
+    return done(nil)
+  end
+  if state.blobs[entry.sha] ~= nil then
+    return done(state.blobs[entry.sha] or nil)
+  end
+  vim.system(
+    { "gh", "api", "repos/" .. repo .. "/git/blobs/" .. entry.sha, "-H", "Accept: application/vnd.github.raw+json" },
+    {},
+    vim.schedule_wrap(function(result)
+      local lines = result.code == 0 and text_lines(result.stdout) or nil
+      state.blobs[entry.sha] = lines or false
+      done(lines)
+    end)
+  )
+end
+
+local function show_remote(project, entry, token, syntax)
+  vim.defer_fn(function()
+    if token ~= state.file_token then
+      return
+    end
+    read_blob(project.repo.nameWithOwner, entry, function(lines)
+      if token ~= state.file_token then
+        return
+      end
+      if not lines then
+        return show({ "No preview for this file" }, {})
+      end
+      show({ "On GitHub, not cloned", "", "Press enter to edit this file." }, lines, { syntax = syntax })
+    end)
+  end, 120)
+end
+
 local function show_pair(project, entry, token)
   local syntax = vim.filetype.match({ filename = entry.file }) or ""
+  if entry.sha then
+    return show_remote(project, entry, token, syntax)
+  end
   local function finish(before, after)
     if token ~= state.file_token then
       return
@@ -674,6 +722,40 @@ local function compare(row, token)
   )
 end
 
+local function list_remote(row, token)
+  local repo = row.repo.nameWithOwner
+  local function finish()
+    if token ~= state.token then
+      return
+    end
+    local status = { changed = 0, ahead = 0, behind = 0 }
+    state.project = { repo = row.repo, remote = true, status = status, upstream = "" }
+    state.entries = state.trees[repo] or {}
+    show_entries()
+    preview_file()
+  end
+  if state.trees[repo] then
+    return finish()
+  end
+  vim.system(
+    { "gh", "api", "repos/" .. repo .. "/git/trees/HEAD?recursive=1" },
+    { text = true },
+    vim.schedule_wrap(function(result)
+      local ok, data = pcall(vim.json.decode, result.stdout or "")
+      if result.code == 0 and ok then
+        local entries = {}
+        for _, item in ipairs(data.tree) do
+          if item.type == "blob" then
+            table.insert(entries, { kind = " ", file = item.path, sha = item.sha, size = item.size })
+          end
+        end
+        state.trees[repo] = entries
+      end
+      finish()
+    end)
+  )
+end
+
 local function preview()
   state.token = state.token + 1
   local token = state.token
@@ -688,17 +770,25 @@ local function preview()
     if row.path then
       compare(row, token)
     else
-      state.project = nil
-      state.entries = {}
-      show_entries()
-      local description = type(row.repo.description) == "string" and row.repo.description or ""
-      show({ row.repo.name, description, row.repo.url, "", "Press enter to clone this project." }, {})
+      list_remote(row, token)
     end
   end, 120)
 end
 
-local function scan(done)
+local function clone_paths()
   local paths = projects.find()
+  local plugins = vim.fn.stdpath("data") .. "/lazy/"
+  for _, repo in ipairs(state.repos) do
+    local path = plugins .. repo.name
+    if vim.uv.fs_stat(path .. "/.git") then
+      table.insert(paths, path)
+    end
+  end
+  return paths
+end
+
+local function scan(done)
+  local paths = clone_paths()
   local clones, pending = {}, #paths
   if pending == 0 then
     state.clones = clones
@@ -911,9 +1001,79 @@ local function wheel(step)
   end
 end
 
+local function api_path(file)
+  local parts = {}
+  for _, part in ipairs(vim.split(file, "/", { plain = true })) do
+    table.insert(parts, vim.uri_encode(part, "rfc2396"))
+  end
+  return table.concat(parts, "/")
+end
+
+local function save_remote(buf, repo, entry)
+  local name = vim.fs.basename(entry.file)
+  vim.ui.input({ prompt = "Commit message: ", default = "Update " .. name }, function(message)
+    if not message or message == "" then
+      return
+    end
+    local text = table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n") .. "\n"
+    vim.system(
+      { "gh", "api", "-X", "PUT", "repos/" .. repo .. "/contents/" .. api_path(entry.file), "--input", "-" },
+      {
+        stdin = vim.json.encode({ message = message, content = vim.base64.encode(text), sha = entry.sha }),
+        text = true,
+      },
+      vim.schedule_wrap(function(result)
+        local ok, data = pcall(vim.json.decode, result.stdout or "")
+        if result.code ~= 0 or not ok then
+          return vim.notify(result.stderr, vim.log.levels.ERROR, { title = "Push failed: " .. name })
+        end
+        entry.sha = data.content.sha
+        state.trees[repo] = nil
+        if vim.api.nvim_buf_is_valid(buf) then
+          vim.bo[buf].modified = false
+        end
+        vim.notify("Pushed " .. name .. " to " .. repo)
+      end)
+    )
+  end)
+end
+
+local function open_remote(row, entry, lnum)
+  local repo = row.repo.nameWithOwner
+  local name = "github://" .. repo .. "/" .. entry.file
+  read_blob(repo, entry, function(lines)
+    if not lines then
+      return vim.notify(entry.file .. " cannot be edited here", vim.log.levels.WARN)
+    end
+    close()
+    local buf = vim.fn.bufnr(name)
+    if buf == -1 then
+      buf = vim.api.nvim_create_buf(true, false)
+      vim.api.nvim_buf_set_name(buf, name)
+      vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+      vim.bo[buf].buftype = "acwrite"
+      vim.bo[buf].filetype = vim.filetype.match({ filename = entry.file }) or ""
+      vim.bo[buf].modified = false
+      vim.api.nvim_create_autocmd("BufWriteCmd", {
+        buffer = buf,
+        callback = function()
+          vim.schedule(function()
+            save_remote(buf, repo, entry)
+          end)
+        end,
+      })
+    end
+    vim.api.nvim_set_current_buf(buf)
+    pcall(vim.api.nvim_win_set_cursor, 0, { lnum or 1, 0 })
+  end)
+end
+
 local function open_entry(lnum)
   local row = selected()
   local entry = current_entry()
+  if row and not row.path and entry and entry.sha then
+    return open_remote(row, entry, lnum)
+  end
   if row and row.path and entry and entry.kind ~= "D" and not (entry.right and entry.kind == "A") then
     open_file(row, { file = entry.file, lnum = lnum or state.first_change or 1 })
   end
@@ -1004,9 +1164,26 @@ local function set_keys()
     if row and row.path then
       open_project(row)
     elseif row then
+      vim.api.nvim_set_current_win(state.files_win)
+    end
+  end, page)
+  vim.keymap.set("n", "c", function()
+    local row = selected()
+    if row and not row.path then
       clone(row)
     end
   end, page)
+  vim.keymap.set(
+    "n",
+    "r",
+    with_clone(function(row)
+      local branch = row.status.branch
+      if vim.fn.confirm("Rebase " .. branch .. " on its upstream?", "&Yes\n&No", 2) == 1 then
+        projects.run(row.status, { "pull", "--rebase" }, "Rebase")
+      end
+    end),
+    page
+  )
   vim.keymap.set(
     "n",
     "d",
@@ -1061,6 +1238,7 @@ local function set_keys()
   end, page)
   vim.keymap.set("n", "R", function()
     state.fetched = 0
+    state.trees = {}
     load()
   end, page)
   vim.keymap.set("n", "<c-d>", scroll("<c-d>"), page)
