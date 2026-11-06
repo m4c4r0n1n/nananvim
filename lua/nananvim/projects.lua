@@ -33,12 +33,10 @@ function M.find()
   return found
 end
 
-function M.status_cmd(path)
-  return { "git", "-C", path, "status", "--porcelain=v2", "--branch" }
-end
-
-function M.parse(path, result)
-  local row = { path = path, name = vim.fs.basename(path), branch = "?", ahead = 0, behind = 0, changed = 0, upstream = false }
+function M.status(path)
+  local result = vim.system({ "git", "-C", path, "status", "--porcelain=v2", "--branch" }, { text = true }):wait()
+  local row =
+    { path = path, name = vim.fs.basename(path), branch = "?", ahead = 0, behind = 0, changed = 0, upstream = false }
   if result.code ~= 0 then
     row.broken = true
     return row
@@ -59,11 +57,7 @@ function M.parse(path, result)
   return row
 end
 
-function M.status(path)
-  return M.parse(path, vim.system(M.status_cmd(path), { text = true }):wait())
-end
-
-function M.describe(row)
+local function describe(row)
   if row.broken then
     return "unreadable"
   end
@@ -93,7 +87,7 @@ function M.lines(rows)
   for _, row in ipairs(rows) do
     local name = row.name .. string.rep(" ", name_w - vim.fn.strdisplaywidth(row.name))
     local branch = row.branch .. string.rep(" ", branch_w - vim.fn.strdisplaywidth(row.branch))
-    table.insert(out, string.format(" %s   %s   %s", name, branch, M.describe(row)))
+    table.insert(out, string.format(" %s   %s   %s", name, branch, describe(row)))
   end
   return out
 end
@@ -122,15 +116,18 @@ end
 
 local function run(row, args, label)
   vim.notify(label .. " " .. row.name)
-  vim.system(vim.list_extend({ "git", "-C", row.path }, args), { text = true }, vim.schedule_wrap(function(result)
-    if result.code == 0 then
-      vim.notify(label .. " done: " .. row.name)
-    else
-      vim.notify(result.stderr, vim.log.levels.ERROR, { title = label .. " failed: " .. row.name })
-    end
-    draw()
-    vim.api.nvim_exec_autocmds("User", { pattern = "NananvimProjectsChanged", modeline = false })
-  end))
+  vim.system(
+    vim.list_extend({ "git", "-C", row.path }, args),
+    { text = true },
+    vim.schedule_wrap(function(result)
+      if result.code == 0 then
+        vim.notify(label .. " done: " .. row.name)
+      else
+        vim.notify(result.stderr, vim.log.levels.ERROR, { title = label .. " failed: " .. row.name })
+      end
+      draw()
+    end)
+  )
 end
 
 local function close()
@@ -163,8 +160,6 @@ local actions = {
     run(row, { "pull", "--ff-only" }, "Pull")
   end,
 }
-
-M.actions = actions
 
 function M.open()
   M.ns = M.ns or vim.api.nvim_create_namespace("nananvim_projects")
