@@ -293,6 +293,7 @@ local function draw_graph()
   if not vim.api.nvim_win_is_valid(state.graph_win) then
     return
   end
+  vim.api.nvim_win_set_config(state.graph_win, { title = " GitHub " .. state.login .. " " })
   local width = vim.api.nvim_win_get_width(state.graph_win)
   local lines = graph_lines(width - 2)
   local shift = math.max(0, math.floor((width - (LABEL_WIDTH + 53 * cell_width())) / 2))
