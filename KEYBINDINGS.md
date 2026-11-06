@@ -193,6 +193,45 @@ Neovim's built-in LSP keys also work: `grn` rename, `gra` code action, `grr` ref
 | `<leader>gh` | File history | Normal | Every commit that changed this file |
 | `<leader>gH` | Branch history | Normal | Commit history of the branch |
 
+### GitHub Page
+
+Press `G` on the home screen to open it. It shows your commit graph, projects, changed files, and Before and After previews.
+
+Move the cursor on a project or a file and the previews update. The file does not open until you press `<CR>`.
+
+| Key | Action | Where | Description |
+|-----|--------|-------|-------------|
+| `j` / `k` | Move | Projects, Files | Select a project or a file and preview it |
+| `<Tab>` / `<S-Tab>` | Next / previous pane | All panes | Projects, Files, After |
+| `1` `2` `3` | Jump to pane | All panes | Projects, Files, After |
+| `h` / `l` | Left / right pane | All panes | Move one pane to the left or right |
+| `n` / `N` | Next / previous change | All panes | Move between changes in the previews |
+| `J` / `K` | Scroll previews | All panes | Scroll Before and After together |
+| `<C-d>` / `<C-u>` | Scroll previews | Projects, Files | Half page down / up |
+| `<CR>` | Open | All panes | Open the project, the file, or the line under the cursor. Clone the project if it is not cloned |
+| `a` | Changed only | Projects, Files | Switch between every file and only changed files |
+| `d` | Diff view | Projects | Open the project in Diffview |
+| `G` | Lazygit | Projects | Open the project in Lazygit |
+| `p` | Push | Projects | Push the project |
+| `u` | Pull | Projects | Pull the project |
+| `F` | Fetch | Projects | Fetch the project |
+| `o` | Open in browser | Projects | Open the project on GitHub |
+| `R` | Refresh | Projects | Load the data again from GitHub |
+| `q` / `<Esc>` | Close | All panes | Close the page |
+| Mouse wheel | Move or scroll | All panes | Move the selection in Projects and Files, scroll in Before and After |
+| Left click | Open | Files, After | Open the file |
+
+Files shows every file in the project, with changed files at the top. The title shows the project status: changed files, `↑` commits to push, `↓` commits to pull.
+
+| Mark | Meaning |
+|------|---------|
+| `M` `A` `D` `R` | Modified, added, deleted, renamed |
+| `?` | New file that git does not track |
+| `not committed` | Changed in your local copy, not committed |
+| `↑ not pushed` | Committed in your local copy, not on GitHub. Before shows GitHub and After shows your copy |
+| `↓ on GitHub` | Changed on GitHub, not in your local copy. Before shows your copy and After shows GitHub |
+| No mark | No changes |
+
 ## Completion & Snippets (blink.cmp)
 
 | Key | Action | Mode | Description |
@@ -333,7 +372,7 @@ which-key shows the current state of each toggle.
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
 | `<leader>th` | Theme switcher | Normal | Open theme picker with all installed colorschemes |
-| `<leader>tb` | Toggle background | Normal | Toggle blackout ⇄ the theme's own background (blacked out by default) |
+| `<leader>tb` | Background menu | Normal | Choose Light, Dark, Theme or Default (glass) |
 
 ### Inside Theme Picker
 | Key | Action | Description |

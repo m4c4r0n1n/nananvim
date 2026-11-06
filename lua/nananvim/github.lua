@@ -22,7 +22,7 @@ local DAYS = { [2] = "Mon", [4] = "Wed", [6] = "Fri" }
 local QUERY = "{viewer{login contributionsCollection{contributionCalendar{totalContributions "
   .. "weeks{contributionDays{date weekday contributionLevel}}}}}}"
 local FIELDS = "name,nameWithOwner,description,url,isPrivate,isFork,pushedAt"
-local ACTION_HINTS = " enter open  a all files  d diff  G git  p push  u pull  F fetch "
+local ACTION_HINTS = " enter open  a changed only  d diff  G git  p push  u pull  F fetch "
 local MOVE_HINTS = " tab panes  1 2 3 jump  n N change  J K scroll  q close "
 
 local state = {
@@ -368,12 +368,15 @@ local function show(before, after, options)
   fill(state.before_buf, before)
   fill(state.diff_buf, after)
   local syntax = options.syntax or ""
-  for _, buf in ipairs({ state.before_buf, state.diff_buf }) do
-    if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].syntax ~= syntax then
-      vim.bo[buf].syntax = syntax
+  local syntaxes = { [state.before_buf] = options.diff and syntax or "", [state.diff_buf] = syntax }
+  for buf, value in pairs(syntaxes) do
+    if vim.api.nvim_buf_is_valid(buf) and vim.bo[buf].syntax ~= value then
+      vim.bo[buf].syntax = value
     end
   end
   if options.diff then
+    vim.api.nvim_win_set_cursor(state.before_win, { 1, 0 })
+    vim.api.nvim_win_set_cursor(state.diff_win, { 1, 0 })
     diff_mode(true)
     vim.api.nvim_win_call(state.diff_win, function()
       vim.cmd.diffupdate()
@@ -392,16 +395,46 @@ local function split_lines(text)
   return vim.split(vim.trim(text or ""), "\n", { plain = true, trimempty = true })
 end
 
+local function files_title()
+  local project = state.project
+  if not project then
+    return " Files "
+  end
+  local status, parts = project.status, {}
+  if status.changed > 0 then
+    table.insert(parts, status.changed .. " changed")
+  end
+  if status.ahead > 0 then
+    table.insert(parts, "↑" .. status.ahead)
+  end
+  if status.behind > 0 then
+    table.insert(parts, "↓" .. status.behind)
+  end
+  if project.upstream == "" then
+    table.insert(parts, "no upstream")
+  elseif #parts == 0 then
+    table.insert(parts, "no changes")
+  end
+  return " Files  " .. table.concat(parts, "  ") .. " "
+end
+
 local function show_entries(keep)
   local out = {}
   local kinds = { M = "DiagnosticWarn", A = "DiagnosticOk", D = "DiagnosticError", R = "DiagnosticWarn" }
   for _, entry in ipairs(state.entries) do
-    table.insert(out, { { entry.kind .. " ", kinds[entry.kind] or "Comment" }, { entry.file } })
+    local line = { { entry.kind .. " ", kinds[entry.kind] or "Comment" }, { entry.file } }
+    if entry.note then
+      table.insert(line, { "  " .. entry.note, "Comment" })
+    end
+    table.insert(out, line)
   end
   if #out == 0 then
     table.insert(out, { { state.project and "No changes" or "Not cloned", "Comment" } })
   end
   render(state.files_buf, out)
+  if vim.api.nvim_win_is_valid(state.files_win) then
+    vim.api.nvim_win_set_config(state.files_win, { title = files_title(), title_pos = "center" })
+  end
   local line = 1
   for index, entry in ipairs(state.entries) do
     if entry.file == keep then
@@ -420,7 +453,7 @@ local function current_entry()
   return state.entries[vim.api.nvim_win_get_cursor(state.files_win)[1]]
 end
 
-local function show_summary(project)
+local function summary_lines(project)
   local out = {}
   local against = project.upstream ~= "" and (project.status.branch .. " against " .. project.upstream)
     or "no upstream branch"
@@ -434,10 +467,26 @@ local function show_summary(project)
     table.insert(out, "Commits only in the branch")
     vim.list_extend(out, project.branch_only)
   end
-  if #project.local_only + #project.branch_only == 0 then
+  local same = #project.local_only + #project.branch_only + project.status.changed == 0
+  if project.upstream ~= "" and same then
     table.insert(out, "Local matches the branch")
   end
-  show(out, {})
+  return out
+end
+
+local function show_summary(project)
+  show(summary_lines(project), {})
+end
+
+local function text_lines(text)
+  if #text > MAX_FILE_SIZE or text:find("%z") then
+    return nil
+  end
+  local lines = vim.split(text, "\n", { plain = true })
+  if lines[#lines] == "" then
+    table.remove(lines)
+  end
+  return lines
 end
 
 local function read_local(path)
@@ -448,17 +497,31 @@ local function read_local(path)
   if stat.type ~= "file" or stat.size > MAX_FILE_SIZE then
     return nil
   end
-  local lines = vim.fn.readfile(path)
-  if table.concat(lines, ""):find("%z") then
+  local file = io.open(path, "rb")
+  if not file then
     return nil
   end
-  return lines
+  local text = file:read("*a")
+  file:close()
+  return text_lines(text)
+end
+
+local function read_rev(project, rev, file, done)
+  vim.system(
+    { "git", "-C", project.path, "show", rev .. ":" .. file },
+    {},
+    vim.schedule_wrap(function(result)
+      if result.code ~= 0 then
+        return done({})
+      end
+      done(text_lines(result.stdout))
+    end)
+  )
 end
 
 local function show_pair(project, entry, token)
   local syntax = vim.filetype.match({ filename = entry.file }) or ""
-  local after = read_local(project.path .. "/" .. entry.file)
-  local function finish(before)
+  local function finish(before, after)
     if token ~= state.file_token then
       return
     end
@@ -467,32 +530,26 @@ local function show_pair(project, entry, token)
     end
     show(before, after, { diff = true, syntax = syntax })
   end
-  if entry.kind == " " then
-    if after then
-      return show({ "No changes in this file" }, after, { syntax = syntax })
+  local function load_after(before)
+    if entry.right then
+      return read_rev(project, entry.right, entry.file, function(after)
+        finish(before, after)
+      end)
     end
-    return finish(nil)
+    finish(before, read_local(project.path .. "/" .. entry.file))
+  end
+  if entry.kind == " " then
+    local after = read_local(project.path .. "/" .. entry.file)
+    if after then
+      local before = vim.list_extend({ "No changes in this file", "" }, summary_lines(project))
+      return show(before, after, { syntax = syntax })
+    end
+    return finish(nil, nil)
   end
   if entry.kind == "?" or entry.kind == "A" then
-    return finish({})
+    return load_after({})
   end
-  vim.system(
-    { "git", "-C", project.path, "show", project.base .. ":" .. (entry.old or entry.file) },
-    { text = true },
-    vim.schedule_wrap(function(result)
-      if result.code ~= 0 then
-        return finish({})
-      end
-      if #result.stdout > MAX_FILE_SIZE or result.stdout:find("%z") then
-        return finish(nil)
-      end
-      local before = vim.split(result.stdout, "\n", { plain = true })
-      if before[#before] == "" then
-        table.remove(before)
-      end
-      finish(before)
-    end)
-  )
+  read_rev(project, project.base, entry.old or entry.file, load_after)
 end
 
 local function preview_file()
@@ -509,20 +566,50 @@ local function preview_file()
   show_pair(project, entry, token)
 end
 
-local function build_entries(names, untracked, tracked)
+local function build_entries(results)
   local entries, seen = {}, {}
-  for _, line in ipairs(names) do
-    local fields = vim.split(line, "\t", { plain = true })
-    local file = fields[#fields]
-    seen[file] = true
-    table.insert(entries, { kind = fields[1]:sub(1, 1), file = file, old = #fields > 2 and fields[2] or nil })
+  local unpushed, uncommitted = {}, {}
+  for _, file in ipairs(split_lines(results.unpushed)) do
+    unpushed[file] = true
   end
-  for _, file in ipairs(untracked) do
-    seen[file] = true
-    table.insert(entries, { kind = "?", file = file })
+  for _, file in ipairs(split_lines(results.uncommitted)) do
+    uncommitted[file] = true
   end
-  if state.all_files then
-    for _, file in ipairs(tracked) do
+  local function note(file)
+    local parts = {}
+    if unpushed[file] then
+      table.insert(parts, "↑ not pushed")
+    end
+    if uncommitted[file] then
+      table.insert(parts, "not committed")
+    end
+    return #parts > 0 and table.concat(parts, ", ") or nil
+  end
+  local function add(lines, right)
+    for _, line in ipairs(lines) do
+      local fields = vim.split(line, "\t", { plain = true })
+      local file, old = fields[#fields], #fields > 2 and fields[2] or nil
+      seen[file] = true
+      if old then
+        seen[old] = true
+      end
+      table.insert(entries, {
+        kind = fields[1]:sub(1, 1),
+        file = file,
+        old = old,
+        right = right,
+        note = right and "↓ on GitHub" or note(file),
+      })
+    end
+  end
+  add(split_lines(results.names))
+  for _, file in ipairs(split_lines(results.untracked)) do
+    seen[file] = true
+    table.insert(entries, { kind = "?", file = file, note = "not committed" })
+  end
+  add(split_lines(results.incoming), "@{u}")
+  if not state.changed_only then
+    for _, file in ipairs(split_lines(results.tracked)) do
       if not seen[file] then
         table.insert(entries, { kind = " ", file = file })
       end
@@ -531,9 +618,8 @@ local function build_entries(names, untracked, tracked)
   return entries
 end
 
-local function compare(row, token)
+local function compare_from(row, token, base)
   local status = row.status
-  local base = status.upstream and "@{u}" or "HEAD"
   local commands = {
     upstream = { "rev-parse", "--abbrev-ref", "@{u}" },
     local_only = { "log", "--oneline", "@{u}.." },
@@ -541,6 +627,9 @@ local function compare(row, token)
     untracked = { "ls-files", "--others", "--exclude-standard" },
     tracked = { "ls-files" },
     names = { "diff", "--name-status", base },
+    incoming = { "diff", "--name-status", base, "@{u}" },
+    unpushed = { "diff", "--name-only", base, "HEAD" },
+    uncommitted = { "diff", "--name-only", "HEAD" },
   }
   local results, pending = {}, vim.tbl_count(commands)
   for key, args in pairs(commands) do
@@ -563,13 +652,26 @@ local function compare(row, token)
           local_only = split_lines(results.local_only),
           branch_only = split_lines(results.branch_only),
         }
-        state.entries =
-          build_entries(split_lines(results.names), split_lines(results.untracked), split_lines(results.tracked))
+        state.entries = build_entries(results)
         show_entries(keep)
         preview_file()
       end)
     )
   end
+end
+
+local function compare(row, token)
+  vim.system(
+    { "git", "-C", row.path, "merge-base", "HEAD", "@{u}" },
+    { text = true },
+    vim.schedule_wrap(function(result)
+      if token ~= state.token then
+        return
+      end
+      local fallback = row.status.upstream and "@{u}" or "HEAD"
+      compare_from(row, token, result.code == 0 and vim.trim(result.stdout) or fallback)
+    end)
+  )
 end
 
 local function preview()
@@ -812,7 +914,7 @@ end
 local function open_entry(lnum)
   local row = selected()
   local entry = current_entry()
-  if row and row.path and entry and entry.kind ~= "D" then
+  if row and row.path and entry and entry.kind ~= "D" and not (entry.right and entry.kind == "A") then
     open_file(row, { file = entry.file, lnum = lnum or state.first_change or 1 })
   end
 end
@@ -874,7 +976,7 @@ local function set_keys()
   end
   for _, options in ipairs({ page, files }) do
     vim.keymap.set("n", "a", function()
-      state.all_files = not state.all_files
+      state.changed_only = not state.changed_only
       preview()
     end, options)
   end
@@ -910,7 +1012,12 @@ local function set_keys()
     "d",
     with_clone(function(row)
       close()
-      vim.cmd("DiffviewOpen" .. (row.status.upstream and " @{u}" or "") .. " -C" .. vim.fn.fnameescape(row.path))
+      local status, range = row.status, ""
+      if status.upstream then
+        local incoming_only = status.behind > 0 and status.ahead == 0 and status.changed == 0
+        range = incoming_only and " HEAD...@{u}" or " @{u} --merge-base"
+      end
+      vim.cmd("DiffviewOpen" .. range .. " -C" .. vim.fn.fnameescape(row.path))
     end),
     page
   )
