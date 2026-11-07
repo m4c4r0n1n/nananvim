@@ -257,7 +257,16 @@ local function project_line(row, name_width)
   end
   local dirty = status.broken or status.changed > 0 or status.ahead > 0 or status.behind > 0 or not status.upstream
   table.insert(line, { pad(status.branch, 10), "Function" })
-  table.insert(line, { projects.describe(status), dirty and "DiagnosticWarn" or "DiagnosticOk" })
+  local text = projects.describe(status)
+  for _, repo in ipairs(row.sites) do
+    local state = site_state(row, repo)
+    if state ~= "in sync" then
+      dirty = true
+      text = text == "clean" and "" or text .. "  "
+      text = text .. repo.host .. " " .. state
+    end
+  end
+  table.insert(line, { text, dirty and "DiagnosticWarn" or "DiagnosticOk" })
   return line
 end
 
@@ -1047,17 +1056,89 @@ local function send(row)
   push_next(1)
 end
 
+local function git_step(path, args, done)
+  vim.system(
+    vim.list_extend({ "git", "-C", path }, args),
+    { text = true },
+    vim.schedule_wrap(function(result)
+      done(result.code == 0, vim.trim(result.stdout or ""), result.stderr or "")
+    end)
+  )
+end
+
+local function site_heads(row, targets, done)
+  local status, index = row.status, 0
+  local function next_head()
+    index = index + 1
+    local target = targets[index]
+    if not target then
+      table.sort(targets, function(a, b)
+        return a.time < b.time
+      end)
+      return done()
+    end
+    git_step(status.path, { "log", "-1", "--format=%ct %H", target.remote .. "/" .. status.branch }, function(ok, text)
+      local time, head = text:match("^(%d+) (%x+)$")
+      target.time, target.head = ok and tonumber(time) or 0, head
+      next_head()
+    end)
+  end
+  next_head()
+end
+
+local function take_sites(row, targets, done)
+  local status, index = row.status, 0
+  local function next_site()
+    index = index + 1
+    local target = targets[index]
+    if not target then
+      return done()
+    end
+    local branch = target.remote .. "/" .. status.branch
+    git_step(status.path, { "merge", "--no-edit", "-X", "theirs", branch }, function(ok, _, err)
+      if ok then
+        return next_site()
+      end
+      projects.show_failure(status, "Could not sync with " .. target.host .. ": " .. status.name .. "\n\n" .. err)
+    end)
+  end
+  next_site()
+end
+
+local function sync(row)
+  local status, targets = row.status, push_targets(row)
+  git_step(status.path, { "fetch", "--all", "--quiet" }, function(ok, _, err)
+    if not ok then
+      return projects.show_failure(status, "Fetch failed: " .. status.name .. "\n\n" .. err)
+    end
+    site_heads(row, targets, function()
+      git_step(status.path, { "rev-parse", "HEAD" }, function(_, head)
+        local same = #targets > 0
+        for _, target in ipairs(targets) do
+          same = same and target.head == head
+        end
+        if same then
+          return vim.notify(status.name .. " is in sync")
+        end
+        take_sites(row, targets, function()
+          send(row)
+        end)
+      end)
+    end)
+  end)
+end
+
 local function commit_all(row, message)
   local status = row.status
-  projects.run(status, { "add", "-A" }, "Stage", function(failure)
-    if failure then
-      return projects.show_failure(status, failure)
+  git_step(status.path, { "add", "-A" }, function(added, _, add_err)
+    if not added then
+      return projects.show_failure(status, "Stage failed: " .. status.name .. "\n\n" .. add_err)
     end
-    projects.run(status, { "commit", "-m", message }, "Commit", function(commit_failure)
-      if commit_failure then
-        return projects.show_failure(status, commit_failure)
+    git_step(status.path, { "commit", "-m", message }, function(committed, _, commit_err)
+      if not committed then
+        return projects.show_failure(status, "Commit failed: " .. status.name .. "\n\n" .. commit_err)
       end
-      send(row)
+      sync(row)
     end)
   end)
 end
@@ -1065,23 +1146,14 @@ end
 function M.push(row)
   local status = row.status
   if status.changed > 0 then
-    local prompt = "Commit " .. status.changed .. " changed and push: "
+    local prompt = "Commit " .. status.changed .. " changed and sync: "
     return vim.ui.input({ prompt = prompt }, function(message)
       if message and message ~= "" then
         commit_all(row, message)
       end
     end)
   end
-  local waiting = status.ahead > 0
-  for _, link in pairs(status.sites or {}) do
-    waiting = waiting or link.ahead > 0
-  end
-  if not waiting then
-    return vim.notify("Nothing to push in " .. status.name)
-  end
-  if vim.fn.confirm("Push " .. status.name .. " (" .. status.branch .. ")?", "&Yes\n&No", 2) == 1 then
-    send(row)
-  end
+  sync(row)
 end
 
 local function close()

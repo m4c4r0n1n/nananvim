@@ -213,7 +213,7 @@ Move the cursor on a project or a file and the previews update. The file does no
 | `a` | Changed only | Projects, Files | Switch between every file and only changed files |
 | `d` | Diff view | Projects | Open the project in Diffview |
 | `G` | Lazygit | Projects | Open the project in Lazygit |
-| `p` | Push | Projects | Commit your changes if there are any, then push. If the project is on two sites, it pushes to both |
+| `p` | Sync | Projects | Commit your changes if there are any, then sync every site. If the sites differ, the last changed site wins |
 | `u` | Pull | Projects | Pull the project (fast-forward only) |
 | `r` | Rebase | Projects | Pull the project and rebase your commits on top |
 | `F` | Fetch | Projects | Fetch the project |
