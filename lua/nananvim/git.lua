@@ -1,4 +1,5 @@
 local hosts = require("nananvim.hosts")
+local mirrors = require("nananvim.mirrors")
 local projects = require("nananvim.projects")
 
 local M = {}
@@ -886,6 +887,7 @@ local function read_sites(path, clone, done)
 end
 
 local function scan(done)
+  mirrors.sync()
   local paths = clone_paths()
   local clones, pending = {}, #paths
   if pending == 0 then
@@ -1515,6 +1517,7 @@ local function set_keys()
   vim.keymap.set("n", "R", function()
     state.fetched = 0
     state.trees = {}
+    mirrors.reset()
     load()
   end, page)
   vim.keymap.set("n", "<c-d>", scroll("<c-d>"), page)

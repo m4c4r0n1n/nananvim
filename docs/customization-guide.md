@@ -589,6 +589,21 @@ git fetch gitlab
 
 Then press `R` on the Git page.
 
+### See live files in a repo
+
+Do you keep copies of your dotfiles in a repo? The Git page can see changes to the real files too. Add this to `lua/config/local.lua`:
+
+```lua
+vim.g.nananvim_git_mirrors = {
+  { repo = "~/dotfiles", folder = "home", live = "~" },
+  { repo = "~/my-theme", files = { ["theme.css"] = "~/.config/app/theme.css" } },
+}
+```
+
+If you make `local.lua` only for this, end it with `return { ai = false }`, because AI turns on when that file exists.
+
+`folder` matches every tracked file in that repo folder against `live`. `files` lists single files. While the Git page is open, it copies a live file into the repo if the live file is newer, then the row shows it as changed. Press `p` to send it.
+
 ### Add a different host
 
 Using something else? Make `lua/config/git_hosts.lua`. It returns a list of hosts:
