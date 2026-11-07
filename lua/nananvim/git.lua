@@ -7,6 +7,8 @@ local CELL = "■"
 local GRAPH_MAX_AGE = 3600
 local LABEL_WIDTH = 4
 local SITES_WIDTH = 5
+local REFRESH_MS = 3000
+local FETCH_TICKS = 20
 local WIDE_CELLS = 170
 local GRAPH_HEIGHT = 9
 local PROJECTS_HEIGHT = 12
@@ -23,7 +25,7 @@ local MONTHS = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", 
 local DAYS = { [2] = "Mon", [4] = "Wed", [6] = "Fri" }
 local QUERY = "{viewer{login contributionsCollection{contributionCalendar{totalContributions "
   .. "weeks{contributionDays{date weekday contributionLevel}}}}}}"
-local ACTION_HINTS = " enter open  c clone  a changed only  d diff  G git  p push  u pull  r rebase  F fetch "
+local ACTION_HINTS = " enter open  c clone  a changed only  d diff  G git  p sync  u pull  r rebase  F fetch "
 local MOVE_HINTS = " tab panes  1 2 3 jump  n N change  J K scroll  q close "
 
 local state = {
@@ -1156,7 +1158,51 @@ function M.push(row)
   sync(row)
 end
 
+local function signature()
+  local parts = {}
+  for key, clone in pairs(state.clones) do
+    table.insert(parts, key .. vim.inspect({ clone.branch, clone.changed, clone.ahead, clone.behind, clone.sites }))
+  end
+  table.sort(parts)
+  return table.concat(parts)
+end
+
+local function refresh()
+  if state.refreshing or not valid() then
+    return
+  end
+  state.refreshing = true
+  state.ticks = (state.ticks or 0) + 1
+  local before = signature()
+  scan(function()
+    state.refreshing = false
+    if valid() and signature() ~= before then
+      merge()
+      draw()
+      preview()
+    end
+    if valid() and state.ticks % FETCH_TICKS == 0 then
+      fetch_clones()
+    end
+  end)
+end
+
+local function stop_timer()
+  if state.timer then
+    state.timer:stop()
+    state.timer:close()
+    state.timer = nil
+  end
+end
+
+local function start_timer()
+  stop_timer()
+  state.timer = vim.uv.new_timer()
+  state.timer:start(REFRESH_MS, REFRESH_MS, vim.schedule_wrap(refresh))
+end
+
 local function close()
+  stop_timer()
   state.token = state.token + 1
   for _, win in ipairs({ state.graph_win, state.win, state.files_win, state.before_win, state.diff_win, state.back_win }) do
     if vim.api.nvim_win_is_valid(win) then
@@ -1582,6 +1628,7 @@ function M.open()
   load_cache()
   set_highlights()
   merge()
+  state.origin = vim.api.nvim_get_current_win()
   state.first = 0
   state.shown = nil
   state.entries = {}
@@ -1617,6 +1664,18 @@ function M.open()
     pattern = { tostring(state.win), tostring(state.files_win), tostring(state.before_win), tostring(state.diff_win) },
     callback = vim.schedule_wrap(close),
   })
+  vim.api.nvim_create_autocmd("WinEnter", {
+    group = group,
+    callback = function()
+      if valid() and vim.api.nvim_get_current_win() == state.origin then
+        vim.schedule(function()
+          if valid() then
+            vim.api.nvim_set_current_win(state.win)
+          end
+        end)
+      end
+    end,
+  })
   vim.api.nvim_create_autocmd("VimResized", {
     group = group,
     callback = function()
@@ -1637,6 +1696,7 @@ function M.open()
   })
   draw()
   load()
+  start_timer()
 end
 
 return M
