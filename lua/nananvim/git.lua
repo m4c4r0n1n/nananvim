@@ -463,6 +463,14 @@ local function show_entries(keep)
     table.insert(out, { { empty, "Comment" } })
   end
   render(state.files_buf, out)
+  for index, entry in ipairs(state.entries) do
+    if entry.logos then
+      vim.api.nvim_buf_set_extmark(state.files_buf, state.ns, index - 1, 0, {
+        virt_text = { { entry.logos, "DiagnosticWarn" } },
+        virt_text_pos = "right_align",
+      })
+    end
+  end
   if vim.api.nvim_win_is_valid(state.files_win) then
     vim.api.nvim_win_set_config(state.files_win, { title = files_title(), title_pos = "center" })
   end
@@ -692,6 +700,27 @@ local function build_entries(results)
   return entries
 end
 
+local function mark_sites(entries, results, sites)
+  local untracked = {}
+  for _, file in ipairs(split_lines(results.untracked)) do
+    untracked[file] = true
+  end
+  for _, repo in ipairs(sites) do
+    local changed = {}
+    for _, file in ipairs(split_lines(results["site " .. repo.host])) do
+      changed[file] = true
+    end
+    if results["site " .. repo.host] then
+      for _, entry in ipairs(entries) do
+        if changed[entry.file] or untracked[entry.file] then
+          local logo = hosts.find(repo.host).icon
+          entry.logos = entry.logos and entry.logos .. " " .. logo or logo
+        end
+      end
+    end
+  end
+end
+
 local function compare_from(row, token, base)
   local status = row.status
   local commands = {
@@ -705,6 +734,9 @@ local function compare_from(row, token, base)
     unpushed = { "diff", "--name-only", base, "HEAD" },
     uncommitted = { "diff", "--name-only", "HEAD" },
   }
+  for host, link in pairs(status.sites or {}) do
+    commands["site " .. host] = { "diff", "--name-only", link.remote .. "/" .. status.branch }
+  end
   local results, pending = {}, vim.tbl_count(commands)
   for key, args in pairs(commands) do
     vim.system(
@@ -728,6 +760,7 @@ local function compare_from(row, token, base)
           branch_only = split_lines(results.branch_only),
         }
         state.entries = build_entries(results)
+        mark_sites(state.entries, results, row.sites)
         show_entries(keep)
         preview_file()
       end)
@@ -828,7 +861,7 @@ local function read_sites(path, clone, done)
           vim.schedule_wrap(function(count)
             local ahead, behind = (count.stdout or ""):match("^(%d+)%s+(%d+)")
             if ahead then
-              clone.sites[host] = { ahead = tonumber(ahead), behind = tonumber(behind) }
+              clone.sites[host] = { ahead = tonumber(ahead), behind = tonumber(behind), remote = remote.name }
             end
             pending = pending - 1
             if pending == 0 then
