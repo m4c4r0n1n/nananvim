@@ -55,7 +55,7 @@ Some of these are a bit old, I'll update them soon. But clone it and check the t
 
 ## License
 
-MIT. Do whatever you want with this config. No attribution needed but appreciated if you fork it or build something cool with it!
+Apache. Do whatever you want with this config. No attribution needed but appreciated if you fork it or build something cool with it!
 
 ---
 
