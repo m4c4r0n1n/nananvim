@@ -13,6 +13,7 @@ Everything in the box.
 - **Motion and search**: flash.nvim jumps (`s`), grug-far project-wide search and replace with live preview (`<leader>sr`), harpoon for your 5 most-used files, multiple cursors (`<C-n>`)
 - **Files**: neo-tree, plus oil.nvim (`-`) to rename/move/delete files by editing them like text
 - **Git**: gitsigns (stage lines, blame, hunk text object), lazygit (`<leader>gg`), diffview for side-by-side diffs, file history and merge conflicts, git pickers, open on GitHub
+- **Git page**: press `G` on the home screen to see your GitHub and GitLab repos in one list, and if they are in sync. Works with other hosts too ([how](customization-guide.md#add-a-git-host))
 - **Sessions**: every folder remembers its open files and splits; restore from the dashboard (`s`)
 - **Markdown**: rendered right in the buffer (headings, tables, checkboxes); the raw text shows on the cursor line
 - **Rose Pine Moon**: Default theme, blacked out by default

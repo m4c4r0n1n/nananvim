@@ -565,6 +565,66 @@ vim.g.codeium_enabled = false
 
 nananvim turns on `exrc`, so Neovim reads this file. The first time, Neovim asks you to trust it (you can also run `:trust` on the file).
 
+## Add a Git host
+
+Press `G` on the home screen to open the Git page. It lists your repos from GitHub and GitLab. The logo shows the site you're connected to. If you're connected to both, you get the Git logo.
+
+### Connect GitHub or GitLab
+
+Install the command for your site, then log in:
+
+| Site | Command | Log in |
+|---|---|---|
+| GitHub | `gh` | `gh auth login` |
+| GitLab | `glab` | `glab auth login` |
+
+That's it, press `G` and your repos show up. You only see sites that have the command installed.
+
+Same repo on both sites? It gets one row with both logos. To see if both sites are in sync, add the second site as a remote in your clone:
+
+```bash
+git remote add gitlab git@gitlab.com:USER/REPO.git
+git fetch gitlab
+```
+
+Then press `R` on the Git page.
+
+### Add a different host
+
+Using something else? Make `lua/config/git_hosts.lua`. It returns a list of hosts:
+
+```lua
+local function run(cmd, done)
+  vim.system(cmd, { text = true }, vim.schedule_wrap(done))
+end
+
+return {
+  {
+    name = "Example",
+    cli = "example",
+    domain = "git.example.com",
+    icon = "E",
+    login = "example auth login",
+    repos = function(done)
+      run({ "example", "repo", "list", "--json" }, function(result)
+        done(result.code == 0 and vim.json.decode(result.stdout) or nil)
+      end)
+    end,
+    tree = function(repo, done)
+      done({})
+    end,
+    blob = function(repo, entry, done)
+      done(nil)
+    end,
+    clone = function(repo, target)
+      return { "git", "clone", repo.url, target }
+    end,
+  },
+}
+```
+
+Each repo from `repos` needs `name`, `nameWithOwner`, `url`, `isPrivate`, and `pushedAt`. Add a `save` function if you want to edit files from repos you didn't clone.
+
 ## Need More Help?
 
 - Check `:h <plugin-name>` for plugin help

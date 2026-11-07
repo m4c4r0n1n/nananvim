@@ -193,9 +193,9 @@ Neovim's built-in LSP keys also work: `grn` rename, `gra` code action, `grr` ref
 | `<leader>gh` | File history | Normal | Every commit that changed this file |
 | `<leader>gH` | Branch history | Normal | Commit history of the branch |
 
-### GitHub Page
+### Git Page
 
-Press `G` on the home screen to open it. It shows your commit graph, projects, changed files, and Before and After previews.
+Press `G` on the home screen to open it. It shows your commit graph, projects from GitHub and GitLab, changed files, and Before and After previews.
 
 Move the cursor on a project or a file and the previews update. The file does not open until you press `<CR>`.
 
@@ -217,8 +217,8 @@ Move the cursor on a project or a file and the previews update. The file does no
 | `u` | Pull | Projects | Pull the project (fast-forward only) |
 | `r` | Rebase | Projects | Pull the project and rebase your commits on top |
 | `F` | Fetch | Projects | Fetch the project |
-| `o` | Open in browser | Projects | Open the project on GitHub |
-| `R` | Refresh | Projects | Load the data again from GitHub |
+| `o` | Open in browser | Projects | Open the project on its site |
+| `R` | Refresh | Projects | Load the data again from each site |
 | `q` / `<Esc>` | Close | All panes | Close the page |
 | Mouse wheel | Move or scroll | All panes | Move the selection in Projects and Files, scroll in Before and After |
 | Left click | Open | Files, After | Open the file |
@@ -230,8 +230,8 @@ Files shows every file in the project, with changed files at the top. The title 
 | `M` `A` `D` `R` | Modified, added, deleted, renamed |
 | `?` | New file that git does not track |
 | `not committed` | Changed in your local copy, not committed |
-| `↑ not pushed` | Committed in your local copy, not on GitHub. Before shows GitHub and After shows your copy |
-| `↓ on GitHub` | Changed on GitHub, not in your local copy. Before shows your copy and After shows GitHub |
+| `↑ not pushed` | Committed in your local copy, not on the remote. Before shows the remote and After shows your copy |
+| `↓ on remote` | Changed on the remote, not in your local copy. Before shows your copy and After shows the remote |
 | No mark | No changes |
 
 You do not have to clone a project to work on it. For a project that is not cloned, Files lists its files from GitHub and After previews them. Press `<CR>` on a file to edit it, then `:w` and type a commit message to push the file straight to GitHub.

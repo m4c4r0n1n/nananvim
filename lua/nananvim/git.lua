@@ -1,3 +1,4 @@
+local hosts = require("nananvim.hosts")
 local projects = require("nananvim.projects")
 
 local M = {}
@@ -5,6 +6,7 @@ local M = {}
 local CELL = "■"
 local GRAPH_MAX_AGE = 3600
 local LABEL_WIDTH = 4
+local SITES_WIDTH = 5
 local WIDE_CELLS = 170
 local GRAPH_HEIGHT = 9
 local PROJECTS_HEIGHT = 12
@@ -21,7 +23,6 @@ local MONTHS = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", 
 local DAYS = { [2] = "Mon", [4] = "Wed", [6] = "Fri" }
 local QUERY = "{viewer{login contributionsCollection{contributionCalendar{totalContributions "
   .. "weeks{contributionDays{date weekday contributionLevel}}}}}}"
-local FIELDS = "name,nameWithOwner,description,url,isPrivate,isFork,pushedAt"
 local ACTION_HINTS = " enter open  c clone  a changed only  d diff  G git  p push  u pull  r rebase  F fetch "
 local MOVE_HINTS = " tab panes  1 2 3 jump  n N change  J K scroll  q close "
 
@@ -45,7 +46,7 @@ local state = {
 }
 
 local function cache_path()
-  return vim.fn.stdpath("cache") .. "/nananvim_github.json"
+  return vim.fn.stdpath("cache") .. "/nananvim_git.json"
 end
 
 local function load_cache()
@@ -154,16 +155,22 @@ local function valid()
   return state.buf and vim.api.nvim_buf_is_valid(state.buf) and state.win and vim.api.nvim_win_is_valid(state.win)
 end
 
-local function slug(url)
-  local path = url and url:match("github%.com[:/](.+)$")
-  return path and path:gsub("%.git$", ""):gsub("/$", ""):lower()
-end
-
 local function merge()
   state.rows = {}
+  local named = {}
   for _, repo in ipairs(state.repos) do
-    local clone = state.clones[repo.nameWithOwner:lower()]
-    table.insert(state.rows, { repo = repo, path = clone and clone.path, status = clone })
+    local name = repo.name:lower()
+    local row = named[name]
+    if not row then
+      row = { repo = repo, sites = {} }
+      named[name] = row
+      table.insert(state.rows, row)
+    end
+    table.insert(row.sites, repo)
+    local clone = state.clones[hosts.repo_key(repo)]
+    if clone and not row.path then
+      row.path, row.status = clone.path, clone
+    end
   end
 end
 
@@ -222,9 +229,27 @@ local function graph_lines(width)
   return lines
 end
 
+local function site_state(row, repo)
+  local link = row.status and row.status.sites and row.status.sites[repo.host]
+  if not link then
+    return row.status and "not linked" or "not cloned"
+  end
+  if link.ahead == 0 and link.behind == 0 then
+    return "in sync"
+  end
+  return "↑" .. link.ahead .. " ↓" .. link.behind
+end
+
 local function project_line(row, name_width)
   local line = { { pad(row.repo.name, name_width + 2), "Title" } }
   table.insert(line, { pad(row.repo.isPrivate and "private" or "public", 9), "Comment" })
+  local used = 0
+  for _, repo in ipairs(row.sites) do
+    local synced = site_state(row, repo) == "in sync" or not row.status
+    table.insert(line, { hosts.find(repo.host).icon .. " ", synced and "Comment" or "DiagnosticWarn" })
+    used = used + 2
+  end
+  table.insert(line, { string.rep(" ", SITES_WIDTH - used) })
   local status = row.status
   if not status then
     table.insert(line, { "not cloned", "Comment" })
@@ -251,7 +276,7 @@ local function render(buf, out)
   vim.bo[buf].modifiable = true
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
   vim.bo[buf].modifiable = false
-  state.ns = state.ns or vim.api.nvim_create_namespace("nananvim_github")
+  state.ns = state.ns or vim.api.nvim_create_namespace("nananvim_git")
   vim.api.nvim_buf_clear_namespace(buf, state.ns, 0, -1)
   for _, mark in ipairs(marks) do
     vim.api.nvim_buf_set_extmark(buf, state.ns, mark[1], mark[2], { end_col = mark[3], hl_group = mark[4] })
@@ -295,7 +320,7 @@ local function draw_graph()
   if not vim.api.nvim_win_is_valid(state.graph_win) then
     return
   end
-  vim.api.nvim_win_set_config(state.graph_win, { title = " GitHub " .. state.login .. " " })
+  vim.api.nvim_win_set_config(state.graph_win, { title = " " .. hosts.icon() .. " " .. state.login .. " " })
   local width = vim.api.nvim_win_get_width(state.graph_win)
   local lines = graph_lines(width - 2)
   local shift = math.max(0, math.floor((width - (LABEL_WIDTH + 53 * cell_width())) / 2))
@@ -403,7 +428,7 @@ local function files_title()
     return " Files "
   end
   if project.remote then
-    return " Files  on GitHub "
+    return " Files  on " .. project.repo.host .. " "
   end
   local status, parts = project.status, {}
   if status.changed > 0 then
@@ -468,6 +493,9 @@ local function summary_lines(project)
   local against = project.upstream ~= "" and (project.status.branch .. " against " .. project.upstream)
     or "no upstream branch"
   table.insert(out, against)
+  for _, repo in ipairs(project.sites or {}) do
+    table.insert(out, repo.host .. "  " .. site_state({ status = project.status }, repo))
+  end
   table.insert(out, "")
   if #project.local_only > 0 then
     table.insert(out, "Commits only in local")
@@ -536,15 +564,11 @@ local function read_blob(repo, entry, done)
   if state.blobs[entry.sha] ~= nil then
     return done(state.blobs[entry.sha] or nil)
   end
-  vim.system(
-    { "gh", "api", "repos/" .. repo .. "/git/blobs/" .. entry.sha, "-H", "Accept: application/vnd.github.raw+json" },
-    {},
-    vim.schedule_wrap(function(result)
-      local lines = result.code == 0 and text_lines(result.stdout) or nil
-      state.blobs[entry.sha] = lines or false
-      done(lines)
-    end)
-  )
+  hosts.find(repo.host).blob(repo, entry, function(text)
+    local lines = text and text_lines(text) or nil
+    state.blobs[entry.sha] = lines or false
+    done(lines)
+  end)
 end
 
 local function show_remote(project, entry, token, syntax)
@@ -552,14 +576,16 @@ local function show_remote(project, entry, token, syntax)
     if token ~= state.file_token then
       return
     end
-    read_blob(project.repo.nameWithOwner, entry, function(lines)
+    read_blob(project.repo, entry, function(lines)
       if token ~= state.file_token then
         return
       end
       if not lines then
         return show({ "No preview for this file" }, {})
       end
-      show({ "On GitHub, not cloned", "", "Press enter to edit this file." }, lines, { syntax = syntax })
+      local host = hosts.find(project.repo.host)
+      local hint = host.save and "Press enter to edit this file." or "Press enter to read this file."
+      show({ "On " .. host.name .. ", not cloned", "", hint }, lines, { syntax = syntax })
     end)
   end, 120)
 end
@@ -646,7 +672,7 @@ local function build_entries(results)
         file = file,
         old = old,
         right = right,
-        note = right and "↓ on GitHub" or note(file),
+        note = right and "↓ on remote" or note(file),
       })
     end
   end
@@ -696,6 +722,7 @@ local function compare_from(row, token, base)
           path = row.path,
           base = base,
           status = status,
+          sites = row.sites,
           upstream = vim.trim(results.upstream),
           local_only = split_lines(results.local_only),
           branch_only = split_lines(results.branch_only),
@@ -723,37 +750,25 @@ local function compare(row, token)
 end
 
 local function list_remote(row, token)
-  local repo = row.repo.nameWithOwner
+  local repo = row.repo
+  local key = hosts.repo_key(repo)
   local function finish()
     if token ~= state.token then
       return
     end
     local status = { changed = 0, ahead = 0, behind = 0 }
-    state.project = { repo = row.repo, remote = true, status = status, upstream = "" }
-    state.entries = state.trees[repo] or {}
+    state.project = { repo = repo, remote = true, status = status, upstream = "" }
+    state.entries = state.trees[key] or {}
     show_entries()
     preview_file()
   end
-  if state.trees[repo] then
+  if state.trees[key] then
     return finish()
   end
-  vim.system(
-    { "gh", "api", "repos/" .. repo .. "/git/trees/HEAD?recursive=1" },
-    { text = true },
-    vim.schedule_wrap(function(result)
-      local ok, data = pcall(vim.json.decode, result.stdout or "")
-      if result.code == 0 and ok then
-        local entries = {}
-        for _, item in ipairs(data.tree) do
-          if item.type == "blob" then
-            table.insert(entries, { kind = " ", file = item.path, sha = item.sha, size = item.size })
-          end
-        end
-        state.trees[repo] = entries
-      end
-      finish()
-    end)
-  )
+  hosts.find(repo.host).tree(repo, function(entries)
+    state.trees[key] = entries
+    finish()
+  end)
 end
 
 local function preview()
@@ -787,6 +802,45 @@ local function clone_paths()
   return paths
 end
 
+local function read_sites(path, clone, done)
+  local remotes = {}
+  vim.system(
+    { "git", "-C", path, "remote", "-v" },
+    { text = true },
+    vim.schedule_wrap(function(result)
+      for line in vim.gsplit(result.stdout or "", "\n", { trimempty = true }) do
+        local name, url = line:match("^(%S+)%s+(%S+)%s+%(fetch%)$")
+        local key, host = hosts.key(url or "")
+        if key then
+          remotes[host.name] = { name = name, key = key }
+        end
+      end
+      clone.sites, clone.keys = {}, {}
+      local pending = vim.tbl_count(remotes)
+      if pending == 0 then
+        return done()
+      end
+      for host, remote in pairs(remotes) do
+        table.insert(clone.keys, remote.key)
+        vim.system(
+          { "git", "-C", path, "rev-list", "--left-right", "--count", "HEAD..." .. remote.name .. "/" .. clone.branch },
+          { text = true },
+          vim.schedule_wrap(function(count)
+            local ahead, behind = (count.stdout or ""):match("^(%d+)%s+(%d+)")
+            if ahead then
+              clone.sites[host] = { ahead = tonumber(ahead), behind = tonumber(behind) }
+            end
+            pending = pending - 1
+            if pending == 0 then
+              done()
+            end
+          end)
+        )
+      end
+    end)
+  )
+end
+
 local function scan(done)
   local paths = clone_paths()
   local clones, pending = {}, #paths
@@ -796,24 +850,20 @@ local function scan(done)
   end
   for _, path in ipairs(paths) do
     vim.system(
-      { "git", "-C", path, "config", "--get", "remote.origin.url" },
+      projects.status_cmd(path),
       { text = true },
-      vim.schedule_wrap(function(remote)
-        vim.system(
-          projects.status_cmd(path),
-          { text = true },
-          vim.schedule_wrap(function(result)
-            local key = slug(vim.trim(remote.stdout or ""))
-            if key then
-              clones[key] = projects.parse(path, result)
-            end
-            pending = pending - 1
-            if pending == 0 then
-              state.clones = clones
-              done()
-            end
-          end)
-        )
+      vim.schedule_wrap(function(result)
+        local clone = projects.parse(path, result)
+        read_sites(path, clone, function()
+          for _, key in ipairs(clone.keys) do
+            clones[key] = clone
+          end
+          pending = pending - 1
+          if pending == 0 then
+            state.clones = clones
+            done()
+          end
+        end)
       end)
     )
   end
@@ -828,10 +878,14 @@ local function update()
 end
 
 local function fetch_clones()
-  local pending = vim.tbl_count(state.clones)
+  local unique = {}
   for _, clone in pairs(state.clones) do
+    unique[clone.path] = clone
+  end
+  local pending = vim.tbl_count(unique)
+  for _, clone in pairs(unique) do
     vim.system(
-      { "git", "-C", clone.path, "fetch", "--quiet" },
+      { "git", "-C", clone.path, "fetch", "--all", "--quiet" },
       { text = true, env = { GIT_TERMINAL_PROMPT = "0" } },
       vim.schedule_wrap(function()
         pending = pending - 1
@@ -844,29 +898,41 @@ local function fetch_clones()
 end
 
 local function fetch_repos(done)
-  vim.system(
-    { "gh", "repo", "list", "--limit", "200", "--no-archived", "--source", "--json", FIELDS },
-    { text = true },
-    vim.schedule_wrap(function(result)
-      local ok, repos = pcall(vim.json.decode, result.stdout or "", { luanil = { object = true, array = true } })
-      if result.code == 0 and ok then
-        table.sort(repos, function(a, b)
-          return a.pushedAt > b.pushedAt
-        end)
-        state.repos = repos
-        state.stale = false
+  local available = hosts.available()
+  local pending, repos, failed = #available, {}, {}
+  for _, host in ipairs(available) do
+    host.repos(function(listed)
+      if listed then
+        for _, repo in ipairs(listed) do
+          repo.host = host.name
+          table.insert(repos, repo)
+        end
       else
-        state.stale = true
-        state.message = "gh failed. Run gh auth login."
+        table.insert(failed, host.name .. " failed. Run " .. host.login .. ".")
+        for _, repo in ipairs(state.repos) do
+          if repo.host == host.name then
+            table.insert(repos, repo)
+          end
+        end
       end
+      pending = pending - 1
+      if pending > 0 then
+        return
+      end
+      table.sort(repos, function(a, b)
+        return a.pushedAt > b.pushedAt
+      end)
+      state.repos = repos
+      state.stale = #failed > 0
+      state.message = #failed > 0 and table.concat(failed, " ") or nil
       save_cache()
       done()
     end)
-  )
+  end
 end
 
 local function fetch_graph(done)
-  if os.time() - state.fetched < GRAPH_MAX_AGE then
+  if vim.fn.executable("gh") == 0 or os.time() - state.fetched < GRAPH_MAX_AGE then
     return done()
   end
   vim.system(
@@ -898,8 +964,8 @@ local function fetch_graph(done)
 end
 
 local function load()
-  if vim.fn.executable("gh") == 0 then
-    state.message = "Install gh to use this page."
+  if #hosts.available() == 0 then
+    state.message = "Install gh or glab to use this page."
     return update()
   end
   fetch_graph(function()
@@ -949,7 +1015,7 @@ local function clone(row)
     return
   end
   vim.system(
-    { "gh", "repo", "clone", row.repo.nameWithOwner, target },
+    hosts.find(row.repo.host).clone(row.repo, target),
     { text = true },
     vim.schedule_wrap(function(result)
       if result.code ~= 0 then
@@ -1001,14 +1067,6 @@ local function wheel(step)
   end
 end
 
-local function api_path(file)
-  local parts = {}
-  for _, part in ipairs(vim.split(file, "/", { plain = true })) do
-    table.insert(parts, vim.uri_encode(part, "rfc2396"))
-  end
-  return table.concat(parts, "/")
-end
-
 local function save_remote(buf, repo, entry)
   local name = vim.fs.basename(entry.file)
   vim.ui.input({ prompt = "Commit message: ", default = "Update " .. name }, function(message)
@@ -1016,31 +1074,24 @@ local function save_remote(buf, repo, entry)
       return
     end
     local text = table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n") .. "\n"
-    vim.system(
-      { "gh", "api", "-X", "PUT", "repos/" .. repo .. "/contents/" .. api_path(entry.file), "--input", "-" },
-      {
-        stdin = vim.json.encode({ message = message, content = vim.base64.encode(text), sha = entry.sha }),
-        text = true,
-      },
-      vim.schedule_wrap(function(result)
-        local ok, data = pcall(vim.json.decode, result.stdout or "")
-        if result.code ~= 0 or not ok then
-          return vim.notify(result.stderr, vim.log.levels.ERROR, { title = "Push failed: " .. name })
-        end
-        entry.sha = data.content.sha
-        state.trees[repo] = nil
-        if vim.api.nvim_buf_is_valid(buf) then
-          vim.bo[buf].modified = false
-        end
-        vim.notify("Pushed " .. name .. " to " .. repo)
-      end)
-    )
+    hosts.find(repo.host).save(repo, entry, text, message, function(sha, err)
+      if not sha then
+        return vim.notify(err, vim.log.levels.ERROR, { title = "Push failed: " .. name })
+      end
+      entry.sha = sha
+      state.trees[hosts.repo_key(repo)] = nil
+      if vim.api.nvim_buf_is_valid(buf) then
+        vim.bo[buf].modified = false
+      end
+      vim.notify("Pushed " .. name .. " to " .. repo.nameWithOwner)
+    end)
   end)
 end
 
 local function open_remote(row, entry, lnum)
-  local repo = row.repo.nameWithOwner
-  local name = "github://" .. repo .. "/" .. entry.file
+  local repo = row.repo
+  local host = hosts.find(repo.host)
+  local name = host.name:lower() .. "://" .. repo.nameWithOwner .. "/" .. entry.file
   read_blob(repo, entry, function(lines)
     if not lines then
       return vim.notify(entry.file .. " cannot be edited here", vim.log.levels.WARN)
@@ -1051,17 +1102,20 @@ local function open_remote(row, entry, lnum)
       buf = vim.api.nvim_create_buf(true, false)
       vim.api.nvim_buf_set_name(buf, name)
       vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
-      vim.bo[buf].buftype = "acwrite"
+      vim.bo[buf].buftype = host.save and "acwrite" or "nofile"
       vim.bo[buf].filetype = vim.filetype.match({ filename = entry.file }) or ""
       vim.bo[buf].modified = false
-      vim.api.nvim_create_autocmd("BufWriteCmd", {
-        buffer = buf,
-        callback = function()
-          vim.schedule(function()
-            save_remote(buf, repo, entry)
-          end)
-        end,
-      })
+      vim.bo[buf].modifiable = host.save ~= nil
+      if host.save then
+        vim.api.nvim_create_autocmd("BufWriteCmd", {
+          buffer = buf,
+          callback = function()
+            vim.schedule(function()
+              save_remote(buf, repo, entry)
+            end)
+          end,
+        })
+      end
     end
     vim.api.nvim_set_current_buf(buf)
     pcall(vim.api.nvim_win_set_cursor, 0, { lnum or 1, 0 })
@@ -1312,9 +1366,9 @@ local function layout()
   })
   vim.wo[state.back_win][0].winhighlight = "NormalFloat:Normal"
   state.graph_win = -1
-  if vim.o.lines >= MIN_GRAPH_LINES then
+  if vim.o.lines >= MIN_GRAPH_LINES and vim.fn.executable("gh") == 1 then
     state.graph_win = float(state.graph_buf, false, {
-      title = " GitHub " .. state.login .. " ",
+      title = " " .. hosts.icon() .. " " .. state.login .. " ",
       focusable = false,
       zindex = 45,
     })
@@ -1356,14 +1410,14 @@ function M.open()
   state.shown = nil
   state.entries = {}
   state.project = nil
-  state.buf = scratch("nananvim://github", "nananvim_github")
-  state.files_buf = scratch("nananvim://github-files", "nananvim_github")
-  state.graph_buf = scratch("nananvim://github-graph", "nananvim_github")
-  state.before_buf = scratch("nananvim://github-before", "text")
-  state.diff_buf = scratch("nananvim://github-after", "text")
+  state.buf = scratch("nananvim://git", "nananvim_git")
+  state.files_buf = scratch("nananvim://git-files", "nananvim_git")
+  state.graph_buf = scratch("nananvim://git-graph", "nananvim_git")
+  state.before_buf = scratch("nananvim://git-before", "text")
+  state.diff_buf = scratch("nananvim://git-after", "text")
   layout()
   set_keys()
-  local group = vim.api.nvim_create_augroup("nananvim_github", { clear = true })
+  local group = vim.api.nvim_create_augroup("nananvim_git", { clear = true })
   vim.api.nvim_create_autocmd("CursorMoved", {
     group = group,
     buffer = state.buf,

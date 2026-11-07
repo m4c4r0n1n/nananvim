@@ -2,7 +2,7 @@
 
 # nananvim
 
-<img width="1704" height="1386" alt="image" src="https://github.com/user-attachments/assets/9d91a210-066f-4bfa-9f35-a82de296b398" />
+<img width="1704" height="1386" alt="nananvim home screen" src="docs/images/home.png" />
 
 <p>
   <a href="https://github.com/m4c4r0n1n/nananvim/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/m4c4r0n1n/nananvim/ci.yml?branch=main&event=push&label=CI&logo=githubactions&logoColor=e0def4&color=9ccfd8&style=for-the-badge&labelColor=232136" /></a>
@@ -45,7 +45,7 @@ Because why not. Nobody will use this, so it's like you'll be part of an exclusi
 Some of these are a bit old, I'll update them soon. But clone it and check the tools for yourself!
 <p align="center">
   <img width="1704" height="1386" alt="image" src="https://github.com/user-attachments/assets/45f06d96-948d-4911-93d9-dbff9bdae63d" />
-  <img width="1704" height="1386" alt="image" src="https://github.com/user-attachments/assets/f63e889b-b53b-4ebb-8441-cddccdb97454" />
+  <img width="1704" height="1386" alt="Git page with GitHub and GitLab logos" src="docs/images/git-page.png" />
   <img width="49%" alt="Picker with inline image preview" src="https://github.com/user-attachments/assets/a36b2720-f89e-4226-93c6-452d5127a9f6" />
   <img width="49%" alt="Editing with LSP and Treesitter" src="https://github.com/user-attachments/assets/c3855bf3-304a-4bdd-80bd-640c596a1046" />
   <img width="49%" alt="Theme picker" src="https://github.com/user-attachments/assets/d93ea09b-8973-4884-af19-5ab23d7dc9fc" />

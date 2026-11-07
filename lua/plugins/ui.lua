@@ -111,7 +111,12 @@ return {
                 desc = "Config",
                 action = ":lua Snacks.dashboard.pick('files', {cwd = vim.fn.stdpath('config')})",
               },
-              { icon = " ", key = "G", desc = "GitHub", action = ":lua require('nananvim.github').open()" },
+              {
+                icon = require("nananvim.hosts").icon() .. " ",
+                key = "G",
+                desc = "Git",
+                action = ":lua require('nananvim.git').open()",
+              },
               { icon = "󰒲 ", key = "l", desc = "Lazy", action = ":Lazy" },
               { icon = " ", key = "m", desc = "Mason", action = ":Mason" },
               { icon = " ", key = "s", desc = "Restore session", section = "session" },

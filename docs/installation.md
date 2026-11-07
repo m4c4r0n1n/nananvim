@@ -133,6 +133,7 @@ Honestly using WSL2 is your best option.
 - **A kitty-graphics terminal**: Kitty, Ghostty, or WezTerm, anything that speaks the kitty graphics protocol (needed for inline image previews)
 - **w3m** (or lynx/elinks): The in-editor text browser for the panel workspace, auto-detected, falls back to your external browser if absent
 - **lazygit**: The git UI on `<leader>gg`
+- **gh or glab**: For the Git page on the home screen ([setup](customization-guide.md#add-a-git-host))
 - **wl-clipboard or xclip**: Yank and paste with the system clipboard (the installer adds both)
 
 **For language servers and formatters:**
