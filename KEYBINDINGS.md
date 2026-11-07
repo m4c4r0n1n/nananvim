@@ -365,11 +365,11 @@ which-key shows the current state of each toggle.
 | `<C-\>` | Toggle terminal | Normal/Terminal | Toggle floating terminal (Ctrl+Backslash) |
 | `<Esc><Esc>` | Exit terminal mode | Terminal | Return to normal mode (one `<Esc>` goes to the program) |
 
-### Nanabrowser Terminal Panel
+### Nana-panels Terminal Panel
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
-| `<leader>tt` | Open terminal | Normal | Open terminal in nanabrowser panel |
-| `<leader>p` | Toggle panels | Normal | Toggle all nanabrowser panels |
+| `<leader>tt` | Open terminal | Normal | Open terminal in nana-panels panel |
+| `<leader>p` | Toggle panels | Normal | Toggle all nana-panels panels |
 
 **Note:** `<C-\>` is Control+Backslash, NOT `<leader>C\` (Space+C+Backslash)
 
@@ -400,7 +400,7 @@ which-key shows the current state of each toggle.
 - **Normal**: The theme's own background (`<leader>tb` toggles back to this)
 - **Terminal**: Transparent background (available via `:lua require("theme-switcher").set_background("terminal")`)
 
-## Nanabrowser (Web Browser + Terminal + TODO Panels)
+## Nana-panels (Web Browser + Terminal + TODO Panels)
 
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|

@@ -127,7 +127,7 @@ function M.check()
     health.info("If icons show as boxes, set a Nerd Font in your terminal: https://www.nerdfonts.com")
   end
 
-  health.start("nananvim: nanabrowser")
+  health.start("nananvim: nana-panels")
 
   local text_browser
   for _, b in ipairs({ "w3m", "lynx", "elinks" }) do

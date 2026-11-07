@@ -777,8 +777,8 @@ install_nerd_symbols() {
 }
 
 install_optional_browser() {
-    # w3m is the text browser in the nanabrowser panel. It is optional:
-    # nanabrowser uses the external browser if w3m is not installed. Thus a
+    # w3m is the text browser in the nana-panels panel. It is optional:
+    # nana-panels uses the external browser if w3m is not installed. Thus a
     # failure here must not stop the install.
     if check_command "w3m"; then
         print_success "w3m already installed"

@@ -89,7 +89,7 @@ If you want to understand how this is organized or modify it:
 │   └── plugins/
 │       ├── colorscheme.lua    # Rose Pine Moon theme
 │       ├── theme-switcher.lua # Live theme preview + blackout toggle
-│       ├── nanabrowser.lua    # Browser │ Terminal │ TODO workspace
+│       ├── nana-panels.lua    # Browser │ Terminal │ TODO workspace
 │       ├── ui.lua             # Snacks (dashboard/picker/terminal/toggles), bufferline, lualine
 │       ├── editor.lua         # neo-tree, oil, which-key, flash, grug-far, harpoon, multicursor, sessions
 │       ├── coding.lua         # blink.cmp, autopairs, autotag, ts-comments, surround, Windsurf, Avante

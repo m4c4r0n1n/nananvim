@@ -447,7 +447,7 @@ persistence.nvim saves the open files, splits and cursor positions for each fold
 Two terminals are built in:
 
 - `<C-\>`: quick floating terminal (snacks.terminal), toggles from normal or terminal mode
-- `<leader>tt`: the nanabrowser panel terminal (lives in the Browser │ Terminal │ TODO workspace, `<leader>p`)
+- `<leader>tt`: the nana-panels panel terminal (lives in the Browser │ Terminal │ TODO workspace, `<leader>p`)
 
 Press `<Esc><Esc>` to leave terminal mode. One `<Esc>` still goes to the program (useful for shells in vi mode).
 

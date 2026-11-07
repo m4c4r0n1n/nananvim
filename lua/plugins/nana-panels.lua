@@ -1,10 +1,10 @@
 -- Browser, terminal and TODO panels (float layout or split layout)
 return {
   {
-    "m4c4r0n1n/nanabrowser.nvim",
+    "m4c4r0n1n/nana-panels.nvim",
     lazy = false,
     config = function()
-      require("nanabrowser").setup({
+      require("nana-panels").setup({
         -- nil finds the browser automatically. If no text browser is installed,
         -- the external browser opens.
         text_browser = nil, -- w3m > lynx > elinks
@@ -20,35 +20,35 @@ return {
       {
         "<leader>p",
         function()
-          require("nanabrowser").toggle_panels()
+          require("nana-panels").toggle_panels()
         end,
         desc = "Toggle panels",
       },
       {
         "<leader>z",
         function()
-          require("nanabrowser").toggle_zoom()
+          require("nana-panels").toggle_zoom()
         end,
         desc = "Zoom panel (focus one / show all)",
       },
       {
         "<leader>wb",
         function()
-          require("nanabrowser").open_browser_prompt()
+          require("nana-panels").open_browser_prompt()
         end,
         desc = "Browse URL (in-editor)",
       },
       {
         "<leader>wo",
         function()
-          require("nanabrowser").open_external_prompt()
+          require("nana-panels").open_external_prompt()
         end,
         desc = "Open URL (external)",
       },
       {
         "gx",
         function()
-          require("nanabrowser").open_external_cursor()
+          require("nana-panels").open_external_cursor()
         end,
         desc = "Open URL in browser",
         mode = { "n", "v" },
@@ -56,14 +56,14 @@ return {
       {
         "<leader>tt",
         function()
-          require("nanabrowser").open_terminal()
+          require("nana-panels").open_terminal()
         end,
         desc = "Toggle terminal",
       },
       {
         "<leader>td",
         function()
-          require("nanabrowser").focus_todo()
+          require("nana-panels").focus_todo()
         end,
         desc = "Focus TODO",
       },

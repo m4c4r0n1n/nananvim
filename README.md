@@ -35,7 +35,7 @@ Because why not. Nobody will use this, so it's like you'll be part of an exclusi
 
 - **Kinda fast**: ~35ms startup on average, everything else waits for its trigger
 - **Built on Neovim 0.12, not around it**: native LSP, commenting, selection and borders, less plugin glue
-- **Custom plugins**: a [Browser │ Terminal │ TODO workspace](https://github.com/m4c4r0n1n/nanabrowser.nvim) and a [live theme switcher](https://github.com/m4c4r0n1n/theme-switcher.nvim)
+- **Custom plugins**: a [Browser │ Terminal │ TODO workspace](https://github.com/m4c4r0n1n/nana-panels.nvim) and a [live theme switcher](https://github.com/m4c4r0n1n/theme-switcher.nvim)
 - **Batteries included, bloat optional**: completion UI, linting, debugging and tests each turn off with one `false`
 - **Updates don't eat your settings**: your stuff lives in one gitignored file, `lua/config/local.lua`
 - **AI is opt-in**: nothing loads until you make that file
