@@ -44,7 +44,7 @@ Because why not. Nobody will use this, so it's like you'll be part of an exclusi
 ## Screenshots
 Some of these are a bit old, I'll update them soon. But clone it and check the tools for yourself!
 <p align="center">
-  <img width="1704" height="1386" alt="image" src="https://github.com/user-attachments/assets/45f06d96-948d-4911-93d9-dbff9bdae63d" />
+  <img width="1704" height="1386" alt="image" src="https://github.com/user-attachments/assets/f71adfeb-ff97-4acc-aa54-a391ea6d38ab" />
   <img width="1704" height="1386" alt="Git page with GitHub and GitLab logos" src="docs/images/git-page.png" />
   <img width="49%" alt="Picker with inline image preview" src="https://github.com/user-attachments/assets/a36b2720-f89e-4226-93c6-452d5127a9f6" />
   <img width="49%" alt="Editing with LSP and Treesitter" src="https://github.com/user-attachments/assets/c3855bf3-304a-4bdd-80bd-640c596a1046" />
