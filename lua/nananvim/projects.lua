@@ -121,16 +121,31 @@ local function current()
   return state.rows[vim.api.nvim_win_get_cursor(state.win)[1]]
 end
 
-local function run(row, args, label)
+function M.show_failure(row, text)
+  local file = vim.fn.tempname()
+  vim.fn.writefile(vim.split(text, "\n", { plain = true }), file)
+  local script = 'cat "$1"; rm -f "$1"; exec "$2"'
+  Snacks.terminal({ "sh", "-c", script, "sh", file, vim.o.shell }, {
+    cwd = row.path,
+    interactive = true,
+    win = { position = "float", zindex = 60 },
+  })
+end
+
+local function run(row, args, label, done)
   vim.notify(label .. " " .. row.name)
   vim.system(
     vim.list_extend({ "git", "-C", row.path }, args),
     { text = true },
     vim.schedule_wrap(function(result)
-      if result.code == 0 then
+      local failure = result.code ~= 0 and (label .. " failed: " .. row.name .. "\n\n" .. result.stderr) or nil
+      if not failure then
         vim.notify(label .. " done: " .. row.name)
-      else
-        vim.notify(result.stderr, vim.log.levels.ERROR, { title = label .. " failed: " .. row.name })
+      end
+      if done then
+        done(failure)
+      elseif failure then
+        M.show_failure(row, failure)
       end
       draw()
       vim.api.nvim_exec_autocmds("User", { pattern = "NananvimProjectsChanged", modeline = false })

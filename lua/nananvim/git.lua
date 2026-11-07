@@ -1013,6 +1013,77 @@ local function load()
   end)
 end
 
+local function push_targets(row)
+  local targets = {}
+  for _, repo in ipairs(row.sites) do
+    local link = row.status.sites and row.status.sites[repo.host]
+    if link then
+      table.insert(targets, { host = repo.host, remote = link.remote })
+    end
+  end
+  return targets
+end
+
+local function send(row)
+  local status, targets = row.status, push_targets(row)
+  if #targets < 2 then
+    local args = status.upstream and { "push" } or { "push", "-u", "origin", "HEAD" }
+    return projects.run(status, args, "Push")
+  end
+  local failures = {}
+  local function push_next(index)
+    local target = targets[index]
+    if not target then
+      if #failures > 0 then
+        projects.show_failure(status, table.concat(failures, "\n"))
+      end
+      return
+    end
+    projects.run(status, { "push", target.remote, status.branch }, "Push to " .. target.host, function(failure)
+      table.insert(failures, failure)
+      push_next(index + 1)
+    end)
+  end
+  push_next(1)
+end
+
+local function commit_all(row, message)
+  local status = row.status
+  projects.run(status, { "add", "-A" }, "Stage", function(failure)
+    if failure then
+      return projects.show_failure(status, failure)
+    end
+    projects.run(status, { "commit", "-m", message }, "Commit", function(commit_failure)
+      if commit_failure then
+        return projects.show_failure(status, commit_failure)
+      end
+      send(row)
+    end)
+  end)
+end
+
+function M.push(row)
+  local status = row.status
+  if status.changed > 0 then
+    local prompt = "Commit " .. status.changed .. " changed and push: "
+    return vim.ui.input({ prompt = prompt }, function(message)
+      if message and message ~= "" then
+        commit_all(row, message)
+      end
+    end)
+  end
+  local waiting = status.ahead > 0
+  for _, link in pairs(status.sites or {}) do
+    waiting = waiting or link.ahead > 0
+  end
+  if not waiting then
+    return vim.notify("Nothing to push in " .. status.name)
+  end
+  if vim.fn.confirm("Push " .. status.name .. " (" .. status.branch .. ")?", "&Yes\n&No", 2) == 1 then
+    send(row)
+  end
+end
+
 local function close()
   state.token = state.token + 1
   for _, win in ipairs({ state.graph_win, state.win, state.files_win, state.before_win, state.diff_win, state.back_win }) do
@@ -1297,7 +1368,7 @@ local function set_keys()
     "n",
     "p",
     with_clone(function(row)
-      projects.actions.p(row.status)
+      M.push(row)
     end),
     page
   )
