@@ -22,6 +22,9 @@ function M.setup()
 end
 
 function M.back()
+  if vim.api.nvim_win_get_config(0).relative ~= "" then
+    return vim.api.nvim_feedkeys("q", "m", false)
+  end
   local current = vim.api.nvim_get_current_buf()
   local top = stack[#stack]
   if top and top.buf == current then
