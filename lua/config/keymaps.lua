@@ -101,3 +101,5 @@ keymap("n", "<leader>m", "<cmd>Mason<cr>", { desc = "Mason (tools)" })
 -- Leave terminal mode with two presses of <Esc>.
 -- One press of <Esc> stays in the terminal program (for example, in a shell vi mode).
 keymap("t", "<Esc><Esc>", [[<C-\><C-n>]], { desc = "Leave terminal mode" })
+
+require("nananvim.back").setup()

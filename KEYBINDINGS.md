@@ -43,6 +43,7 @@ Leader key is `<Space>`. Press it and wait: which-key shows every group. `<leade
 | Key | Action | Mode | Description |
 |-----|--------|------|-------------|
 | `s` | Restore session | Dashboard | Reopen this folder's files and splits |
+| `<BS>` | Go back | Normal | Back to the Git page if you opened the file from it, else the last file, else the home screen |
 | `<leader>Ss` | Restore session | Normal | This folder's last session |
 | `<leader>Sl` | Restore last | Normal | The last session, any folder |
 | `<leader>SS` | Select session | Normal | Pick from all saved sessions |

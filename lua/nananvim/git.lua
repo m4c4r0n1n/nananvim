@@ -1216,6 +1216,7 @@ end
 
 local function open_project(row)
   close()
+  require("nananvim.back").mark(M.open)
   vim.cmd.tcd(vim.fn.fnameescape(row.path))
   Snacks.dashboard.pick("files", { cwd = row.path })
 end
@@ -1226,6 +1227,7 @@ local function open_file(row, target)
     return vim.notify(target.file .. " is not in the local copy", vim.log.levels.WARN)
   end
   close()
+  require("nananvim.back").mark(M.open)
   vim.cmd.tcd(vim.fn.fnameescape(row.path))
   vim.cmd("edit +" .. target.lnum .. " " .. vim.fn.fnameescape(path))
 end
