@@ -31,7 +31,7 @@ Latest: I've added a bunch of quality of life stuff (sessions, oil, harpoon, mul
 
 ## Why nananvim?
 
-Because why not. Nobody will use this, so it's like you'll be part of an exclusive club! But since you're here, here are some specs:
+Because why not. I don't do promoting, so it's like you'll be part of an exclusive club! One of neovim's best kept secrets, if you will. But while you're here, here are some specs:
 
 - **Kinda fast**: ~35ms startup on average, everything else waits for its trigger
 - **Built on Neovim 0.12, not around it**: native LSP, commenting, selection and borders, less plugin glue
