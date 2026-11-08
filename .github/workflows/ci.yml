@@ -43,11 +43,23 @@ jobs:
         run: ${{ matrix.prep }}
       - name: Get the code
         shell: bash
-        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --retry 3 --retry-delay 5 \
+              "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" \
+              | tar -xz --strip-components=1; then
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in $((i * 5))s..."
+            sleep $((i * 5))
+          done
+          echo "All attempts failed"
+          exit 1
       - name: Install and test
         timeout-minutes: 45
         shell: bash
         run: NANANVIM_REPO="$GITHUB_WORKSPACE" bash .github/test.sh
+
   docker:
     name: ${{ matrix.name }}
     strategy:
@@ -69,7 +81,18 @@ jobs:
     steps:
       - name: Get the code
         shell: bash
-        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --retry 3 --retry-delay 5 \
+              "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" \
+              | tar -xz --strip-components=1; then
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in $((i * 5))s..."
+            sleep $((i * 5))
+          done
+          echo "All attempts failed"
+          exit 1
       - name: Get the Gentoo package tree
         if: matrix.name == 'Gentoo'
         run: docker create -v /var/db/repos/gentoo --name portage gentoo/portage:latest /bin/true
@@ -88,7 +111,18 @@ jobs:
     steps:
       - name: Get the code
         shell: bash
-        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --retry 3 --retry-delay 5 \
+              "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" \
+              | tar -xz --strip-components=1; then
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in $((i * 5))s..."
+            sleep $((i * 5))
+          done
+          echo "All attempts failed"
+          exit 1
       - name: Install and test
         timeout-minutes: 45
         run: NANANVIM_REPO="$GITHUB_WORKSPACE" bash .github/test.sh
@@ -105,7 +139,18 @@ jobs:
         run: pacman -Syu --noconfirm --needed sudo git curl tar gzip
       - name: Get the code
         shell: bash
-        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --retry 3 --retry-delay 5 \
+              "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" \
+              | tar -xz --strip-components=1; then
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in $((i * 5))s..."
+            sleep $((i * 5))
+          done
+          echo "All attempts failed"
+          exit 1
       - name: Install and test
         timeout-minutes: 45
         shell: bash
@@ -117,7 +162,18 @@ jobs:
     steps:
       - name: Get the code
         shell: bash
-        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --retry 3 --retry-delay 5 \
+              "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" \
+              | tar -xz --strip-components=1; then
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in $((i * 5))s..."
+            sleep $((i * 5))
+          done
+          echo "All attempts failed"
+          exit 1
       - name: Dry run with an old config in place
         run: |
           mkdir -p ~/.config/nvim
@@ -132,7 +188,18 @@ jobs:
     steps:
       - name: Get the code
         shell: bash
-        run: curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" | tar -xz --strip-components=1
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsSL --retry 3 --retry-delay 5 \
+              "https://github.com/$GITHUB_REPOSITORY/archive/$GITHUB_SHA.tar.gz" \
+              | tar -xz --strip-components=1; then
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in $((i * 5))s..."
+            sleep $((i * 5))
+          done
+          echo "All attempts failed"
+          exit 1
       - name: Check Lua format with StyLua
         uses: JohnnyMorganz/stylua-action@v5
         with:
