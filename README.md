@@ -61,7 +61,7 @@ Some of these are a bit old, I'll update them soon. But clone it and check the t
 
 ## License
 
-Apache-2.0.
+Apache-2.0
 
 ---
 
