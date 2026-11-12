@@ -10,7 +10,6 @@ local LABEL_WIDTH = 4
 local SITES_WIDTH = 5
 local REFRESH_MS = 3000
 local FETCH_TICKS = 20
-local WIDE_CELLS = 170
 local GRAPH_HEIGHT = 9
 local PROJECTS_HEIGHT = 12
 local PREVIEW_HEIGHT = 34
@@ -189,7 +188,7 @@ local function pad(text, width)
 end
 
 local function cell_width()
-  return vim.o.columns >= WIDE_CELLS and 2 or 1
+  return 2
 end
 
 local function month_line(weeks, cell)
