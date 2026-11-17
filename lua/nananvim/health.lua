@@ -142,6 +142,43 @@ function M.check()
     health.warn("no text browser (w3m, lynx or elinks). The browser panel uses your external browser")
   end
 
+  health.start("nananvim: Git page")
+
+  local git_hosts = require("nananvim.hosts").available()
+  if #git_hosts == 0 then
+    health.info("no gh or glab found. The Git page needs one of them")
+  end
+  for _, host in ipairs(git_hosts) do
+    if host.status then
+      local done, result = pcall(function()
+        return vim.system(host.status, { text = true }):wait(15000)
+      end)
+      if done and result.code == 0 then
+        health.ok(host.name .. ": logged in")
+      else
+        health.warn(host.name .. ": not logged in. Run " .. host.login)
+      end
+    end
+  end
+  local helpers = vim.fn.systemlist({ "git", "config", "--get-regexp", "^credential\\..*helper$" })
+  local missing = {}
+  for _, line in ipairs(vim.v.shell_error == 0 and helpers or {}) do
+    local path = line:match("^%S+%s+!?(/%S+)")
+    if path and vim.fn.executable(path) == 0 then
+      missing[path] = true
+    end
+  end
+  for path in pairs(missing) do
+    health.error(
+      "git login helper does not exist: "
+        .. path
+        .. ". A push over HTTPS fails. Change the helper lines in ~/.gitconfig to: helper = !gh auth git-credential"
+    )
+  end
+  if has("git") and next(missing) == nil then
+    health.ok("git login helpers: all programs exist")
+  end
+
   health.start("nananvim: extras (lua/config/extras.lua)")
 
   local ok_extras, extras = pcall(require, "config.extras")

@@ -136,7 +136,7 @@ local function run(row, args, label, done)
   vim.notify(label .. " " .. row.name)
   vim.system(
     vim.list_extend({ "git", "-C", row.path }, args),
-    { text = true },
+    { text = true, env = { GIT_TERMINAL_PROMPT = "0" } },
     vim.schedule_wrap(function(result)
       local failure = result.code ~= 0 and (label .. " failed: " .. row.name .. "\n\n" .. result.stderr) or nil
       if not failure then

@@ -24,6 +24,7 @@ local github = {
   domain = "github.com",
   icon = vim.fn.nr2char(0xf09b),
   login = "gh auth login",
+  status = { "gh", "auth", "status" },
 }
 
 function github.repos(done)
@@ -98,30 +99,40 @@ local gitlab = {
   domain = "gitlab.com",
   icon = vim.fn.nr2char(0xf296),
   login = "glab auth login",
+  status = { "glab", "auth", "status" },
 }
 
 function gitlab.repos(done)
-  local path = "projects?owned=true&archived=false&order_by=last_activity_at&per_page=" .. PAGE_SIZE
-  run({ "glab", "api", path }, { text = true }, function(result)
-    local data = json(result)
-    if not data then
-      return done(nil)
-    end
-    local repos = {}
-    for _, item in ipairs(data) do
-      table.insert(repos, {
-        id = item.id,
-        name = item.path,
-        nameWithOwner = item.path_with_namespace,
-        description = item.description,
-        url = item.web_url,
-        isPrivate = item.visibility ~= "public",
-        isFork = item.forked_from_project ~= nil,
-        pushedAt = item.last_activity_at,
-      })
-    end
-    done(repos)
-  end)
+  local repos = {}
+  local function page(number)
+    local path = "projects?owned=true&archived=false&order_by=last_activity_at&per_page="
+      .. PAGE_SIZE
+      .. "&page="
+      .. number
+    run({ "glab", "api", path }, { text = true }, function(result)
+      local data = json(result)
+      if not data then
+        return done(nil)
+      end
+      for _, item in ipairs(data) do
+        table.insert(repos, {
+          id = item.id,
+          name = item.path,
+          nameWithOwner = item.path_with_namespace,
+          description = item.description,
+          url = item.web_url,
+          isPrivate = item.visibility ~= "public",
+          isFork = item.forked_from_project ~= nil,
+          pushedAt = item.last_activity_at,
+        })
+      end
+      if #data == PAGE_SIZE then
+        return page(number + 1)
+      end
+      done(repos)
+    end)
+  end
+  page(1)
 end
 
 function gitlab.tree(repo, done)

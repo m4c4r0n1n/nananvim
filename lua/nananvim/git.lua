@@ -965,7 +965,7 @@ local function fetch_repos(done)
         return
       end
       table.sort(repos, function(a, b)
-        return a.pushedAt > b.pushedAt
+        return (a.pushedAt or "") > (b.pushedAt or "")
       end)
       state.repos = repos
       state.stale = #failed > 0
@@ -1062,7 +1062,7 @@ end
 local function git_step(path, args, done)
   vim.system(
     vim.list_extend({ "git", "-C", path }, args),
-    { text = true },
+    { text = true, env = { GIT_TERMINAL_PROMPT = "0" } },
     vim.schedule_wrap(function(result)
       done(result.code == 0, vim.trim(result.stdout or ""), result.stderr or "")
     end)
