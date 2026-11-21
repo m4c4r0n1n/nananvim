@@ -5,7 +5,9 @@ local projects = require("nananvim.projects")
 local M = {}
 
 local CELL = "■"
-local GRAPH_MAX_AGE = 3600
+local GRAPH_MAX_AGE = 900
+local GRAPH_RETRIES = { 0, 30, 120 }
+local GRAPH_RETRY_FAILED = 60
 local LABEL_WIDTH = 4
 local SITES_WIDTH = 5
 local REFRESH_MS = 3000
@@ -39,6 +41,9 @@ local state = {
   repos = {},
   graph = nil,
   fetched = 0,
+  pushed = {},
+  retries = {},
+  backoff = 0,
   rows = {},
   clones = {},
   trees = {},
@@ -64,6 +69,7 @@ local function load_cache()
     state.repos = data.repos or {}
     state.graph = data.graph
     state.fetched = data.fetched or 0
+    state.pushed = type(data.pushed) == "table" and data.pushed or {}
   end
 end
 
@@ -75,6 +81,7 @@ local function save_cache()
       repos = state.repos,
       graph = state.graph,
       fetched = state.fetched,
+      pushed = state.pushed,
     }))
     file:close()
   end
@@ -976,36 +983,136 @@ local function fetch_repos(done)
   end
 end
 
-local function fetch_graph(done)
-  if vim.fn.executable("gh") == 0 or os.time() - state.fetched < GRAPH_MAX_AGE then
-    return done()
-  end
-  vim.system(
-    { "gh", "api", "graphql", "-f", "query=" .. QUERY },
-    { text = true },
-    vim.schedule_wrap(function(result)
-      local ok, data = pcall(vim.json.decode, result.stdout or "")
-      local viewer = result.code == 0 and ok and vim.tbl_get(data, "data", "viewer")
-      if viewer then
-        local calendar = viewer.contributionsCollection.contributionCalendar
-        local weeks = {}
-        for _, entry in ipairs(calendar.weeks) do
-          local days = {}
-          for day = 1, 7 do
-            days[day] = " "
-          end
-          for _, day in ipairs(entry.contributionDays) do
-            days[day.weekday + 1] = LEVELS[day.contributionLevel] or 0
-          end
-          table.insert(weeks, { month = entry.contributionDays[1].date:sub(1, 7), days = table.concat(days) })
-        end
-        state.login = viewer.login
-        state.graph = { total = calendar.totalContributions, weeks = weeks }
-        state.fetched = os.time()
-      end
-      done()
+local function run_cmd(cmd, done)
+  local ok = pcall(vim.system, cmd, { text = true }, vim.schedule_wrap(done))
+  if not ok then
+    vim.schedule(function()
+      done({ code = -1, stdout = "", stderr = "" })
     end)
-  )
+  end
+end
+
+local function remote_heads(done)
+  local paths, heads = clone_paths(), {}
+  local pending = #paths
+  if pending == 0 then
+    return done(heads)
+  end
+  for _, path in ipairs(paths) do
+    run_cmd({ "git", "-C", path, "for-each-ref", "--format=%(refname) %(objectname)", "refs/remotes" }, function(result)
+      if result.code == 0 then
+        heads[path] = vim.fn.sha256(result.stdout or "")
+      end
+      pending = pending - 1
+      if pending == 0 then
+        done(heads)
+      end
+    end)
+  end
+end
+
+local function moved(heads)
+  for path, value in pairs(heads) do
+    if state.pushed[path] and state.pushed[path] ~= value then
+      return true
+    end
+  end
+  return false
+end
+
+local function read_graph(stdout)
+  local ok, data = pcall(vim.json.decode, stdout or "")
+  local viewer = ok and type(data) == "table" and vim.tbl_get(data, "data", "viewer")
+  local calendar = viewer and vim.tbl_get(viewer, "contributionsCollection", "contributionCalendar")
+  if not calendar or type(calendar.weeks) ~= "table" then
+    return nil
+  end
+  local weeks = {}
+  for _, entry in ipairs(calendar.weeks) do
+    local days = {}
+    for day = 1, 7 do
+      days[day] = " "
+    end
+    for _, day in ipairs(entry.contributionDays or {}) do
+      if day.weekday then
+        days[day.weekday + 1] = LEVELS[day.contributionLevel] or 0
+      end
+    end
+    local first = entry.contributionDays and entry.contributionDays[1]
+    if first and first.date then
+      table.insert(weeks, { month = first.date:sub(1, 7), days = table.concat(days) })
+    end
+  end
+  if #weeks == 0 then
+    return nil
+  end
+  return viewer.login, { total = calendar.totalContributions or 0, weeks = weeks }
+end
+
+local function fetch_graph(done)
+  run_cmd({ "gh", "api", "graphql", "-f", "query=" .. QUERY }, function(result)
+    local login, graph
+    if result.code == 0 then
+      login, graph = read_graph(result.stdout)
+    end
+    if not graph then
+      state.backoff = os.time() + GRAPH_RETRY_FAILED
+      return done(false)
+    end
+    state.login = login or state.login
+    state.graph = graph
+    state.fetched = os.time()
+    save_cache()
+    done(true)
+  end)
+end
+
+local function check_graph(done)
+  if vim.fn.executable("gh") == 0 or state.graph_busy then
+    return done(false)
+  end
+  state.graph_busy = true
+  local function finish(changed)
+    state.graph_busy = false
+    done(changed)
+  end
+  remote_heads(function(heads)
+    local now = os.time()
+    local pushed = moved(heads)
+    local dirty = false
+    for path, value in pairs(heads) do
+      if state.pushed[path] ~= value then
+        state.pushed[path] = value
+        dirty = true
+      end
+    end
+    if pushed then
+      state.retries = {}
+      for _, delay in ipairs(GRAPH_RETRIES) do
+        table.insert(state.retries, now + delay)
+      end
+      state.backoff = 0
+    end
+    if now >= (state.backoff or 0) then
+      local due = false
+      while state.retries[1] and now >= state.retries[1] do
+        table.remove(state.retries, 1)
+        due = true
+      end
+      if due or now - state.fetched >= GRAPH_MAX_AGE then
+        return fetch_graph(function(changed)
+          if dirty and not changed then
+            save_cache()
+          end
+          finish(changed)
+        end)
+      end
+    end
+    if dirty then
+      save_cache()
+    end
+    finish(false)
+  end)
 end
 
 local function load()
@@ -1013,7 +1120,7 @@ local function load()
     state.message = "Install gh or glab to use this page."
     return update()
   end
-  fetch_graph(function()
+  check_graph(function()
     fetch_repos(function()
       scan(function()
         merge()
@@ -1185,6 +1292,11 @@ local function refresh()
     if valid() and state.ticks % FETCH_TICKS == 0 then
       fetch_clones()
     end
+    check_graph(function(changed)
+      if changed and valid() then
+        draw()
+      end
+    end)
   end)
 end
 
@@ -1517,6 +1629,7 @@ local function set_keys()
   end, page)
   vim.keymap.set("n", "R", function()
     state.fetched = 0
+    state.backoff = 0
     state.trees = {}
     mirrors.reset()
     load()
